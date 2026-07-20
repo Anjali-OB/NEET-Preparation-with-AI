@@ -2081,920 +2081,1891 @@ const SettingsPage = ({profile, setProfile, onLogout}) => {
 
 
 // ── 3D DIAGRAMS PAGE (Real SVG Diagrams) ─────────────────────────
-const DiagramsPage = ({setPage, logActivity}) => {
+const DiagramsPage = ({logActivity}) => {
   const [activeSub, setActiveSub] = useState('bio')
   const [activeChapter, setActiveChapter] = useState(null)
   const [activeItem, setActiveItem] = useState(null)
 
-  // ─── SVG COMPONENTS ───────────────────────────────────────────
+  // ─── BIOLOGY DIAGRAMS ────────────────────────────────────────
 
-  const SVG_AnimalCell = () => (
-    <svg viewBox="0 0 400 360" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <defs>
-        <radialGradient id="cellGrad" cx="50%" cy="45%" r="55%">
-          <stop offset="0%" stopColor="#1a3a2a"/><stop offset="100%" stopColor="#0d1f17"/>
-        </radialGradient>
-      </defs>
-      <ellipse cx="200" cy="185" rx="185" ry="160" fill="url(#cellGrad)" stroke="#3fb950" strokeWidth="2.5"/>
-      <ellipse cx="200" cy="172" rx="62" ry="54" fill="#0d1520" stroke="#58a6ff" strokeWidth="2"/>
-      <ellipse cx="203" cy="168" rx="20" ry="14" fill="#0a2030" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="200" y="176" textAnchor="middle" fill="#58a6ff" fontSize="8" fontWeight="bold">Nucleus</text>
-      {[
-        [88,128,'Mitochondria','#f0883e'],
-        [308,128,'Golgi','#d29922'],
-        [78,255,'Ribosome','#bc8cff'],
-        [318,255,'ER','#3fb950'],
-        [188,312,'Lysosome','#f85149'],
-        [55,185,'Vacuole','#58a6ff'],
-      ].map(([x,y,name,col],i)=>(
-        <g key={i}><circle cx={x} cy={y} r="18" fill="rgba(0,0,0,.4)" stroke={col} strokeWidth="1.5"/>
-        <text x={x} y={y+4} textAnchor="middle" fill={col} fontSize="7" fontWeight="bold">{name}</text></g>
-      ))}
-      <text x="200" y="350" textAnchor="middle" fill="#8b949e" fontSize="9">Animal Cell — Eukaryotic; no cell wall or chloroplast</text>
-    </svg>
-  )
-
-  const SVG_PlantCell = () => (
-    <svg viewBox="0 0 400 360" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <rect x="18" y="18" width="364" height="324" rx="8" fill="#0a1a0a" stroke="#3fb950" strokeWidth="4"/>
-      <rect x="28" y="28" width="344" height="304" rx="6" fill="#0d2a0d" stroke="#2ea043" strokeWidth="2"/>
-      <rect x="75" y="38" width="250" height="55" rx="5" fill="rgba(63,185,80,.12)" stroke="#3fb950" strokeWidth="1.5"/>
-      <text x="200" y="62" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Central Vacuole (turgor pressure)</text>
-      <ellipse cx="200" cy="190" rx="55" ry="48" fill="#0d1520" stroke="#58a6ff" strokeWidth="2"/>
-      <text x="200" y="194" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Nucleus</text>
-      {[[88,185,'Chloroplast','#3fb950'],[312,185,'Mitochondria','#f0883e'],[310,275,'ER','#bc8cff'],[90,275,'Ribosome','#d29922']].map(([x,y,n,c],i)=>(
-        <g key={i}><ellipse cx={x} cy={y} rx="28" ry="15" fill="rgba(0,0,0,.4)" stroke={c} strokeWidth="1.5"/>
-        <text x={x} y={y+4} textAnchor="middle" fill={c} fontSize="7" fontWeight="bold">{n}</text></g>
-      ))}
-      <text x="200" y="352" textAnchor="middle" fill="#8b949e" fontSize="9">Plant Cell — has cell wall, chloroplast, large central vacuole</text>
-    </svg>
-  )
-
-  const SVG_Mitosis2 = () => (
-    <svg viewBox="0 0 460 300" style={{width:'100%',maxWidth:460,height:'auto'}}>
-      {[['Prophase',58,70,'#f0883e'],['Metaphase',168,70,'#d29922'],['Anaphase',278,70,'#3fb950'],['Telophase',388,70,'#58a6ff']].map(([ph,cx,cy,col],i)=>(
-        <g key={i}>
-          <ellipse cx={cx} cy={cy+70} rx="42" ry="58" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="2"/>
-          <text x={cx} y={cy+10} textAnchor="middle" fill={col} fontSize="11" fontWeight="bold">{ph}</text>
-          {i===0&&[[-10,-15],[8,-18],[-6,5],[10,10]].map(([dx,dy],j)=><rect key={j} x={cx+dx-5} y={cy+70+dy-3} width="12" height="6" rx="2" fill={col} opacity="0.8"/>)}
-          {i===1&&[-15,-8,0,8,15].map((dy,j)=><rect key={j} x={cx-12} y={cy+70+dy-2} width="24" height="5" rx="2" fill={col} opacity="0.8"/>)}
-          {i===2&&[-16,-9,0,9,16].map((dy,j)=>[<rect key={'t'+j} x={cx-10} y={cy+52+dy} width="20" height="5" rx="2" fill={col} opacity="0.8"/>,<rect key={'b'+j} x={cx-10} y={cy+95+dy} width="20" height="5" rx="2" fill={col} opacity="0.8"/>])}
-          {i===3&&[<ellipse key="a" cx={cx-16} cy={cy+70} rx="20" ry="38" fill="none" stroke={col} strokeWidth="1.5"/>,<ellipse key="b" cx={cx+16} cy={cy+70} rx="20" ry="38" fill="none" stroke={col} strokeWidth="1.5"/>]}
-        </g>
-      ))}
-      <text x="230" y="280" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">PMAT → 2 genetically identical diploid daughter cells</text>
-    </svg>
-  )
-
-  const SVG_Meiosis2 = () => (
-    <svg viewBox="0 0 460 320" style={{width:'100%',maxWidth:460,height:'auto'}}>
-      <text x="230" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Meiosis I and II — Produces 4 Haploid Cells</text>
-      {[['Prophase I',55,40,'#bc8cff'],['Metaphase I',155,40,'#f0883e'],['Anaphase I',255,40,'#d29922'],['Telophase I',355,40,'#3fb950']].map(([ph,cx,cy,col],i)=>(
-        <g key={i}>
-          <ellipse cx={cx} cy={cy+70} rx="38" ry="52" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
-          <text x={cx} y={cy+8} textAnchor="middle" fill={col} fontSize="9" fontWeight="bold">{ph}</text>
-        </g>
-      ))}
-      <text x="15" y="175" fill="#8b949e" fontSize="8">Meiosis I: Homologs separate. Crossing over in Pachytene (Prophase I)</text>
-      <line x1="10" y1="183" x2="450" y2="183" stroke="#30363d" strokeWidth="1" strokeDasharray="4,4"/>
-      {[['Prophase II',65,200,'#58a6ff'],['Metaphase II',185,200,'#f85149'],['Anaphase II',305,200,'#3fb950'],['Telophase II',405,200,'#d29922']].map(([ph,cx,cy,col],i)=>(
-        <g key={i}>
-          <ellipse cx={cx} cy={cy+50} rx="32" ry="44" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
-          <text x={cx} y={cy+6} textAnchor="middle" fill={col} fontSize="9" fontWeight="bold">{ph}</text>
-        </g>
-      ))}
-      <text x="15" y="306" fill="#8b949e" fontSize="8">Meiosis II: Sister chromatids separate → 4 haploid cells (gametes)</text>
-      <rect x="10" y="312" width="440" height="6" rx="3" fill="rgba(188,140,255,.3)"/>
-    </svg>
-  )
-
-  const SVG_PlantKingdom2 = () => (
-    <svg viewBox="0 0 440 340" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="18" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Plant Kingdom — Evolutionary Classification</text>
-      {[
-        {n:'Algae (Thallophyta)',y:38,c:'#2ea043',ex:'Chara, Spirogyra',note:'Aquatic; no true organs; no embryo'},
-        {n:'Bryophyta',y:95,c:'#3fb950',ex:'Funaria (moss), Marchantia',note:'Amphibians of plant kingdom; no vascular tissue'},
-        {n:'Pteridophyta',y:152,c:'#d29922',ex:'Fern (Dryopteris), Equisetum',note:'First vascular plants; seedless; sporophyte dominant'},
-        {n:'Gymnosperms',y:209,c:'#f0883e',ex:'Pinus, Cycas, Gnetum',note:'Naked seeds; cones; no fruit; heterosporous'},
-        {n:'Angiosperms',y:266,c:'#f85149',ex:'Mango, Rose, Wheat, Maize',note:'Seeds enclosed in fruit; dominant land plants; double fertilization'},
-      ].map(({n,y,c,ex,note})=>(
-        <g key={y}>
-          <rect x="15" y={y} width="410" height="48" rx="6" fill="rgba(0,0,0,.3)" stroke={c} strokeWidth="1.5"/>
-          <text x="25" y={y+17} fill={c} fontSize="11" fontWeight="bold">{n}</text>
-          <text x="25" y={y+31} fill="#d29922" fontSize="9">e.g. {ex}</text>
-          <text x="25" y={y+44} fill="#8b949e" fontSize="8">{note}</text>
-        </g>
-      ))}
-      <text x="220" y="330" textAnchor="middle" fill="#8b949e" fontSize="9">Evolution: Algae → Bryophyta → Pteridophyta → Gymnosperms → Angiosperms</text>
-    </svg>
-  )
-
-  const SVG_AnimalKingdom = () => (
-    <svg viewBox="0 0 440 360" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Animal Kingdom — Major Phyla</text>
-      {[
-        {p:'Porifera',y:30,c:'#58a6ff',ex:'Sycon, Spongilla',note:'Pore-bearing; canal system; no true tissues'},
-        {p:'Coelenterata',y:72,c:'#3fb950',ex:'Hydra, Obelia, Aurelia',note:'Nematocysts; radial symmetry; diploblastic'},
-        {p:'Platyhelminthes',y:114,c:'#d29922',ex:'Taenia (tapeworm), Fasciola',note:'Acoelomate; flat body; parasitic mostly'},
-        {p:'Aschelminthes',y:156,c:'#f0883e',ex:'Ascaris, Wuchereria',note:'Pseudocoelomate; round body; complete gut'},
-        {p:'Annelida',y:198,c:'#bc8cff',ex:'Earthworm, Nereis, Leech',note:'True coelom (schizocoel); metamerism; nephridia'},
-        {p:'Arthropoda',y:240,c:'#f85149',ex:'Prawn, Cockroach, Butterfly',note:'Largest phylum; jointed appendages; exoskeleton (chitin)'},
-        {p:'Echinodermata',y:282,c:'#58a6ff',ex:'Starfish, Sea urchin',note:'Spiny skin; water vascular system; radial symmetry (adult)'},
-        {p:'Chordata',y:324,c:'#3fb950',ex:'Fish, Amphibia, Reptilia, Birds, Mammals',note:'Notochord; dorsal hollow nerve cord; pharyngeal gill slits'},
-      ].map(({p,y,c,ex,note})=>(
-        <g key={y}>
-          <rect x="15" y={y} width="410" height="36" rx="5" fill="rgba(0,0,0,.3)" stroke={c} strokeWidth="1.5"/>
-          <text x="25" y={y+13} fill={c} fontSize="10" fontWeight="bold">{p}</text>
-          <text x="130" y={y+13} fill="#d29922" fontSize="8">e.g. {ex}</text>
-          <text x="25" y={y+28} fill="#8b949e" fontSize="7.5">{note}</text>
-        </g>
-      ))}
-    </svg>
-  )
-
-  const SVG_FloweringPlant2 = () => (
-    <svg viewBox="0 0 400 370" style={{width:'100%',maxWidth:400,height:'auto'}}>
-      <text x="200" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Morphology of Flowering Plant</text>
-      <rect x="193" y="170" width="14" height="145" rx="4" fill="#2ea043" stroke="#3fb950" strokeWidth="1.5"/>
-      <path d="M200,315 Q185,338 172,355 M200,315 Q215,338 228,355 M200,315 Q200,345 200,360 M200,328 Q168,348 158,364 M200,328 Q232,348 242,364" fill="none" stroke="#d29922" strokeWidth="2"/>
-      <ellipse cx="158" cy="240" rx="36" ry="14" fill="#1a3a1a" stroke="#3fb950" strokeWidth="1.5" transform="rotate(-32,158,240)"/>
-      <ellipse cx="242" cy="255" rx="36" ry="14" fill="#1a3a1a" stroke="#3fb950" strokeWidth="1.5" transform="rotate(32,242,255)"/>
-      {[0,60,120,180,240,300].map((angle,i)=>(
-        <ellipse key={i} cx={200+38*Math.cos(angle*Math.PI/180)} cy={148+26*Math.sin(angle*Math.PI/180)} rx="17" ry="11" fill="#f85149" stroke="#d29922" strokeWidth="1" transform={`rotate(${angle},${200+38*Math.cos(angle*Math.PI/180)},${148+26*Math.sin(angle*Math.PI/180)})`} opacity="0.85"/>
-      ))}
-      <circle cx="200" cy="148" r="19" fill="#d29922" stroke="#f0883e" strokeWidth="2"/>
-      <text x="200" y="152" textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Receptacle</text>
-      <line x1="200" y1="130" x2="200" y2="95" stroke="#f85149" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="200" y="90" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Flower (calyx, corolla, stamen, pistil)</text>
-      <line x1="152" y1="235" x2="75" y2="218" stroke="#3fb950" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="25" y="215" fill="#3fb950" fontSize="9">Leaf (lamina + petiole)</text>
-      <line x1="200" y1="245" x2="335" y2="218" stroke="#2ea043" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="338" y="216" fill="#2ea043" fontSize="9">Stem (node + internode)</text>
-      <line x1="200" y1="336" x2="335" y2="330" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="338" y="328" fill="#d29922" fontSize="9">Tap Root (dicot)</text>
-      <text x="200" y="362" textAnchor="middle" fill="#8b949e" fontSize="9">Dicot: tap root, reticulate venation, 4-5 floral parts, 2 cotyledons</text>
-    </svg>
-  )
-
-  const SVG_AnatomyStem2 = () => (
-    <svg viewBox="0 0 400 360" style={{width:'100%',maxWidth:400,height:'auto'}}>
-      <text x="200" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">T.S. of Dicot Stem</text>
-      <circle cx="200" cy="192" r="152" fill="#0d1a0d" stroke="#3fb950" strokeWidth="3"/>
-      <circle cx="200" cy="192" r="138" fill="#0a1a0a" stroke="#2ea043" strokeWidth="2"/>
-      <circle cx="200" cy="192" r="98" fill="#061206" stroke="#d29922" strokeWidth="1.5"/>
-      <circle cx="200" cy="192" r="48" fill="#080808" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="200" y="196" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Pith</text>
-      {[0,45,90,135,180,225,270,315].map((angle,i)=>(
-        <ellipse key={i} cx={200+73*Math.cos(angle*Math.PI/180)} cy={192+73*Math.sin(angle*Math.PI/180)} rx="11" ry="8" fill="#f0883e" stroke="#d29922" strokeWidth="1" transform={`rotate(${angle},${200+73*Math.cos(angle*Math.PI/180)},${192+73*Math.sin(angle*Math.PI/180)})`}/>
-      ))}
-      <line x1="200" y1="42" x2="200" y2="24" stroke="#3fb950" strokeWidth="1" strokeDasharray="2,2"/>
-      <text x="200" y="20" textAnchor="middle" fill="#3fb950" fontSize="9">Epidermis + Cuticle</text>
-      <line x1="278" y1="98" x2="318" y2="76" stroke="#2ea043" strokeWidth="1" strokeDasharray="2,2"/>
-      <text x="320" y="74" fill="#2ea043" fontSize="9">Cortex (parenchyma)</text>
-      <line x1="258" y1="150" x2="310" y2="138" stroke="#d29922" strokeWidth="1" strokeDasharray="2,2"/>
-      <text x="312" y="136" fill="#d29922" fontSize="9">Endodermis</text>
-      <line x1="262" y1="170" x2="320" y2="168" stroke="#f0883e" strokeWidth="1" strokeDasharray="2,2"/>
-      <text x="322" y="171" fill="#f0883e" fontSize="9">Vascular Bundle</text>
-      <text x="200" y="350" textAnchor="middle" fill="#8b949e" fontSize="9">Ring arrangement of VBs in dicot stem (scattered in monocot)</text>
-    </svg>
-  )
-
-  const SVG_Earthworm = () => (
-    <svg viewBox="0 0 440 280" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Earthworm — Pheretima posthuma</text>
-      <ellipse cx="220" cy="148" rx="192" ry="75" fill="#1a0d00" stroke="#d29922" strokeWidth="2.5"/>
-      {[60,88,116,144,172,200,228,256,284,312,340,368].map(x=>(
-        <line key={x} x1={x} y1="95" x2={x} y2="200" stroke="#d29922" strokeWidth="0.8" opacity="0.35"/>
-      ))}
-      <ellipse cx="48" cy="148" r="26" fill="#2d1a00" stroke="#f0883e" strokeWidth="2"/>
-      <text x="48" y="152" textAnchor="middle" fill="#f0883e" fontSize="8" fontWeight="bold">Mouth</text>
-      <rect x="78" y="134" width="38" height="26" rx="4" fill="#2d0a0a" stroke="#f85149" strokeWidth="1.5"/>
-      <text x="97" y="150" textAnchor="middle" fill="#f85149" fontSize="7">Pharynx</text>
-      <rect x="124" y="136" width="48" height="22" rx="4" fill="#1a1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="148" y="150" textAnchor="middle" fill="#58a6ff" fontSize="7">Oesophagus</text>
-      <rect x="180" y="133" width="34" height="28" rx="4" fill="#2d2d00" stroke="#d29922" strokeWidth="1.5"/>
-      <text x="197" y="150" textAnchor="middle" fill="#d29922" fontSize="7">Gizzard</text>
-      <rect x="222" y="133" width="128" height="28" rx="4" fill="#0d2d0d" stroke="#3fb950" strokeWidth="1.5"/>
-      <text x="286" y="150" textAnchor="middle" fill="#3fb950" fontSize="7">Intestine (Typhlosole inside)</text>
-      <ellipse cx="388" cy="148" rx="20" ry="17" fill="#1a0d00" stroke="#d29922" strokeWidth="1.5"/>
-      <text x="388" y="152" textAnchor="middle" fill="#d29922" fontSize="7">Anus</text>
-      <line x1="128" y1="105" x2="128" y2="78" stroke="#bc8cff" strokeWidth="1" strokeDasharray="2,2"/>
-      <text x="128" y="74" textAnchor="middle" fill="#bc8cff" fontSize="8">Clitellum (seg 14-16)</text>
-      <text x="220" y="268" textAnchor="middle" fill="#8b949e" fontSize="9">100-120 segments | Metamerically segmented | Nephridia = excretory organs</text>
-    </svg>
-  )
-
-  const SVG_Chloroplast2 = () => (
-    <svg viewBox="0 0 420 340" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <defs>
-        <radialGradient id="chlG" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#1a3a1a"/><stop offset="100%" stopColor="#0a1f0a"/>
-        </radialGradient>
-      </defs>
-      <ellipse cx="210" cy="170" rx="183" ry="125" fill="url(#chlG)" stroke="#3fb950" strokeWidth="3"/>
-      <ellipse cx="210" cy="170" rx="167" ry="110" fill="none" stroke="#3fb950" strokeWidth="2" strokeDasharray="6,3" opacity="0.7"/>
-      {[[128,165],[210,155],[295,170]].map(([cx,discs],_,arr)=>
-        [0,1,2,3,4,5].map(i=>(
-          <ellipse key={cx+i} cx={cx} cy={discs+i*16} rx="34" ry="6" fill="#0d2a0d" stroke="#2ea043" strokeWidth="1.5"/>
-        ))
-      )}
-      <path d="M162,172 Q185,167 210,163" fill="none" stroke="#2ea043" strokeWidth="1.5" strokeDasharray="4,3"/>
-      <path d="M244,172 Q268,170 263,176" fill="none" stroke="#2ea043" strokeWidth="1.5" strokeDasharray="4,3"/>
-      <ellipse cx="162" cy="210" rx="14" ry="10" fill="#2d3a1a" stroke="#8b949e" strokeWidth="1.5"/>
-      <ellipse cx="258" cy="205" rx="12" ry="9" fill="#2d3a1a" stroke="#8b949e" strokeWidth="1.5"/>
-      <ellipse cx="83" cy="148" rx="18" ry="12" fill="none" stroke="#f0883e" strokeWidth="1.5" strokeDasharray="3,2"/>
-      <text x="83" y="152" textAnchor="middle" fill="#f0883e" fontSize="7" fontWeight="bold">cpDNA</text>
-      {[[318,148],[328,155],[313,162],[323,169]].map(([x,y],i)=>(
-        <circle key={i} cx={x} cy={y} r="3" fill="#d29922" opacity="0.9"/>
-      ))}
-      <line x1="210" y1="47" x2="210" y2="30" stroke="#3fb950" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="168" y="26" fill="#3fb950" fontSize="9" fontWeight="bold">Outer Membrane</text>
-      <line x1="210" y1="172" x2="78" y2="268" stroke="#2ea043" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="5" y="268" fill="#2ea043" fontSize="9" fontWeight="bold">Granum (thylakoid stack)</text>
-      <line x1="83" y1="136" x2="38" y2="108" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="5" y="104" fill="#f0883e" fontSize="9" fontWeight="bold">cpDNA</text>
-      <line x1="322" y1="155" x2="370" y2="138" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="372" y="136" fill="#d29922" fontSize="9" fontWeight="bold">Ribosomes (70S)</text>
-      <text x="210" y="328" textAnchor="middle" fill="#8b949e" fontSize="9">Stroma = Calvin cycle | Thylakoid membrane = Light reactions</text>
-    </svg>
-  )
-
-  const SVG_Mitochondria2 = () => (
-    <svg viewBox="0 0 440 300" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <defs>
-        <radialGradient id="mitoG" cx="50%" cy="40%" r="65%">
-          <stop offset="0%" stopColor="#2a1a0a"/><stop offset="100%" stopColor="#150900"/>
-        </radialGradient>
-      </defs>
-      <ellipse cx="220" cy="150" rx="193" ry="115" fill="url(#mitoG)" stroke="#f0883e" strokeWidth="3"/>
-      <path d="M30,150 Q55,132 80,150 Q105,168 130,150 Q155,132 180,150 Q205,168 230,150 Q255,132 280,150 Q305,168 330,150 Q355,132 380,150 Q400,158 410,150"
-        fill="none" stroke="#d29922" strokeWidth="2" opacity="0.8"/>
-      {[0,1,2,3,4].map(i=>(
-        <path key={i} d={`M${82+i*64},98 Q${92+i*64},128 ${82+i*64},155 Q${72+i*64},182 ${82+i*64},210`}
-          fill="none" stroke="#d29922" strokeWidth="2.5" opacity="0.9"/>
-      ))}
-      <ellipse cx="220" cy="150" rx="172" ry="94" fill="rgba(30,18,5,0.45)" stroke="none"/>
-      {[58,115,172,228,285,342].map((x,i)=>(
-        <g key={i}>
-          <circle cx={x} cy={165} r="5" fill="#3fb950" opacity="0.9"/>
-          <line x1={x} y1="158" x2={x} y2="174" stroke="#3fb950" strokeWidth="2"/>
-          <circle cx={x} cy={152} r="4" fill="#2ea043" opacity="0.8"/>
-        </g>
-      ))}
-      {[[173,138],[198,148],[223,138],[248,148],[193,123],[233,123]].map(([x,y],i)=>(
-        <circle key={i} cx={x} cy={y} r="4" fill="#bc8cff" opacity="0.8"/>
-      ))}
-      <ellipse cx="143" cy="172" rx="21" ry="14" fill="none" stroke="#58a6ff" strokeWidth="1.5" strokeDasharray="4,3"/>
-      <text x="143" y="176" textAnchor="middle" fill="#58a6ff" fontSize="7" fontWeight="bold">mtDNA</text>
-      <line x1="220" y1="37" x2="220" y2="22" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="128" y="18" fill="#f0883e" fontSize="9" fontWeight="bold">Outer Membrane</text>
-      <line x1="198" y1="150" x2="96" y2="255" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="8" y="260" fill="#d29922" fontSize="9" fontWeight="bold">Cristae (ETC + ATP Synthase)</text>
-      <line x1="143" y1="158" x2="58" y2="138" stroke="#58a6ff" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="5" y="136" fill="#58a6ff" fontSize="9" fontWeight="bold">mtDNA (circular)</text>
-      <line x1="238" y1="152" x2="340" y2="108" stroke="#3fb950" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="342" y="106" fill="#3fb950" fontSize="9" fontWeight="bold">ATP Synthase (F0F1)</text>
-      <text x="220" y="290" textAnchor="middle" fill="#8b949e" fontSize="9">Matrix = Krebs cycle | Inner membrane = ETC + oxidative phosphorylation</text>
-    </svg>
-  )
-
-  const SVG_Nephron2 = () => (
-    <svg viewBox="0 0 420 390" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <circle cx="178" cy="58" r="29" fill="#1a0a0a" stroke="#f85149" strokeWidth="2.5"/>
-      {[0,60,120,180,240,300].map((angle,i)=>(
-        <ellipse key={i} cx={178+18*Math.cos(angle*Math.PI/180)} cy={58+18*Math.sin(angle*Math.PI/180)} rx="7" ry="5" fill="#3d1010" stroke="#f85149" strokeWidth="1" transform={`rotate(${angle},${178+18*Math.cos(angle*Math.PI/180)},${58+18*Math.sin(angle*Math.PI/180)})`}/>
-      ))}
-      <text x="178" y="62" textAnchor="middle" fill="#f85149" fontSize="7" fontWeight="bold">Glomerulus</text>
-      <circle cx="178" cy="58" r="46" fill="none" stroke="#f0883e" strokeWidth="2" strokeDasharray="5,3"/>
-      <path d="M78,40 Q118,34 150,52" fill="none" stroke="#f85149" strokeWidth="5" strokeLinecap="round"/>
-      <text x="48" y="36" fill="#f85149" fontSize="8">Afferent</text>
-      <path d="M206,52 Q232,38 268,48" fill="none" stroke="#58a6ff" strokeWidth="4" strokeLinecap="round"/>
-      <text x="270" y="46" fill="#58a6ff" fontSize="8">Efferent</text>
-      <path d="M178,104 Q218,118 228,142 Q238,168 208,178 Q178,188 173,208" fill="none" stroke="#3fb950" strokeWidth="4" strokeLinecap="round"/>
-      <path d="M173,208 Q163,248 168,286 Q173,322 183,337" fill="none" stroke="#d29922" strokeWidth="4" strokeLinecap="round"/>
-      <path d="M183,337 Q198,320 208,286 Q216,248 213,208" fill="none" stroke="#bc8cff" strokeWidth="4" strokeLinecap="round"/>
-      <path d="M213,208 Q238,193 248,168 Q253,143 233,128 Q213,116 198,123" fill="none" stroke="#f0883e" strokeWidth="4" strokeLinecap="round"/>
-      <path d="M213,208 Q278,228 308,268 Q328,292 323,337" fill="none" stroke="#58a6ff" strokeWidth="5" strokeLinecap="round"/>
-      <line x1="146" y1="58" x2="58" y2="78" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="5" y="76" fill="#f0883e" fontSize="9" fontWeight="bold">Bowman's Capsule</text>
-      <line x1="220" y1="152" x2="308" y2="142" stroke="#3fb950" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="310" y="140" fill="#3fb950" fontSize="9" fontWeight="bold">PCT</text>
-      <text x="310" y="152" fill="#8b949e" fontSize="7">Reabsorption</text>
-      <line x1="170" y1="266" x2="78" y2="266" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="5" y="264" fill="#d29922" fontSize="9" fontWeight="bold">Loop of Henle</text>
-      <text x="5" y="276" fill="#bc8cff" fontSize="7">Desc(H2O) / Asc(salt)</text>
-      <line x1="240" y1="152" x2="308" y2="168" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="310" y="166" fill="#f0883e" fontSize="9" fontWeight="bold">DCT</text>
-      <text x="310" y="178" fill="#8b949e" fontSize="7">ADH + Aldosterone</text>
-      <line x1="308" y1="295" x2="358" y2="295" stroke="#58a6ff" strokeWidth="1" strokeDasharray="3,2"/>
-      <text x="360" y="293" fill="#58a6ff" fontSize="9" fontWeight="bold">Collecting Duct</text>
-      <text x="200" y="382" textAnchor="middle" fill="#8b949e" fontSize="9">GFR = 125 mL/min | 180 L filtered → only 1.5 L urine (99% reabsorbed)</text>
-    </svg>
-  )
-
-  const SVG_HeartFull = () => (
-    <svg viewBox="0 0 420 390" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <defs>
-        <radialGradient id="hG" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#200a0a"/><stop offset="100%" stopColor="#100505"/>
-        </radialGradient>
-      </defs>
-      <path d="M210,335 Q108,275 78,205 Q48,145 78,107 Q108,68 143,78 Q173,86 210,118 Q247,86 277,78 Q312,68 342,107 Q372,145 342,205 Q312,275 210,335Z" fill="url(#hG)" stroke="#f85149" strokeWidth="3"/>
-      <line x1="210" y1="103" x2="210" y2="292" stroke="#f85149" strokeWidth="3"/>
-      <line x1="98" y1="192" x2="322" y2="192" stroke="#d29922" strokeWidth="2" strokeDasharray="5,3"/>
-      <text x="143" y="152" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">Right Atrium</text>
-      <text x="143" y="166" textAnchor="middle" fill="#8b949e" fontSize="8">deoxygenated blood</text>
-      <text x="278" y="152" textAnchor="middle" fill="#f85149" fontSize="11" fontWeight="bold">Left Atrium</text>
-      <text x="278" y="166" textAnchor="middle" fill="#8b949e" fontSize="8">oxygenated blood</text>
-      <text x="143" y="232" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">Right Ventricle</text>
-      <text x="278" y="232" textAnchor="middle" fill="#f85149" fontSize="11" fontWeight="bold">Left Ventricle</text>
-      <text x="278" y="248" textAnchor="middle" fill="#8b949e" fontSize="8">thick wall; aorta</text>
-      <text x="153" y="197" fill="#d29922" fontSize="8">Tricuspid</text>
-      <text x="218" y="197" fill="#d29922" fontSize="8">Mitral</text>
-      <path d="M128,90 Q88,58 73,33" fill="none" stroke="#58a6ff" strokeWidth="5" strokeLinecap="round"/>
-      <text x="28" y="30" fill="#58a6ff" fontSize="8">Pulmonary Artery</text>
-      <path d="M292,90 Q322,63 347,38" fill="none" stroke="#f85149" strokeWidth="4" strokeLinecap="round"/>
-      <text x="350" y="36" fill="#f85149" fontSize="8">Pulmonary Vein</text>
-      <path d="M252,93 Q272,53 302,28" fill="none" stroke="#f85149" strokeWidth="6" strokeLinecap="round"/>
-      <text x="304" y="26" fill="#f85149" fontSize="9" fontWeight="bold">Aorta</text>
-      <path d="M158,93 Q148,58 153,23" fill="none" stroke="#58a6ff" strokeWidth="5" strokeLinecap="round"/>
-      <text x="68" y="52" fill="#58a6ff" fontSize="8">Superior Vena Cava</text>
-      <circle cx="163" cy="112" r="8" fill="#3fb950" opacity="0.9"/>
-      <text x="100" y="100" fill="#3fb950" fontSize="8" fontWeight="bold">SA Node (pacemaker)</text>
-      <circle cx="208" cy="192" r="6" fill="#bc8cff" opacity="0.9"/>
-      <text x="210" y="210" textAnchor="middle" fill="#bc8cff" fontSize="8">AV Node</text>
-      <text x="210" y="378" textAnchor="middle" fill="#8b949e" fontSize="9">Cardiac output = 70mL × 72/min = 5L/min | BP = 120/80 mmHg</text>
-    </svg>
-  )
-
-  const SVG_BloodCells2 = () => (
-    <svg viewBox="0 0 440 320" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">Blood Components</text>
-      <ellipse cx="78" cy="95" rx="38" ry="26" fill="#2d0a0a" stroke="#f85149" strokeWidth="2"/>
-      <ellipse cx="78" cy="95" rx="18" ry="9" fill="#1a0505" stroke="#f85149" strokeWidth="1" opacity="0.6"/>
-      <text x="78" y="132" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">RBC</text>
-      <text x="78" y="145" textAnchor="middle" fill="#8b949e" fontSize="7">Biconcave; no nucleus</text>
-      <text x="78" y="157" textAnchor="middle" fill="#8b949e" fontSize="7">5 million/mm³; 120 days</text>
-      <text x="220" y="40" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">WBC (Leukocytes) — 6000-8000/mm³</text>
-      {[['Neutrophil',158,90,'#3fb950','Lobed nucleus; phagocytosis; 60-70%'],
-        ['Eosinophil',240,90,'#d29922','Bilobed; allergy/parasites; 2-4%'],
-        ['Basophil',322,90,'#bc8cff','S-shaped; histamine; 0.5-1%']].map(([name,cx,cy,col,info],i)=>(
-        <g key={i}>
-          <circle cx={cx} cy={cy} r="27" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
-          <text x={cx} y={cy+4} textAnchor="middle" fill={col} fontSize="7" fontWeight="bold">{name}</text>
-          <text x={cx} y={cy+132} textAnchor="middle" fill={col} fontSize="8" fontWeight="bold">{name}</text>
-          <text x={cx} y={cy+145} textAnchor="middle" fill="#8b949e" fontSize="7">{info}</text>
-        </g>
-      ))}
-      {[[353,80],[372,94],[356,108]].map(([x,y],i)=>(
-        <ellipse key={i} cx={x} cy={y} rx="9" ry="5" fill="#2d2d0a" stroke="#d29922" strokeWidth="1.5"/>
-      ))}
-      <text x="366" y="132" textAnchor="middle" fill="#d29922" fontSize="8" fontWeight="bold">Platelets</text>
-      <text x="366" y="145" textAnchor="middle" fill="#8b949e" fontSize="7">Clotting; 1.5-3.5 lakh</text>
-      <rect x="10" y="195" width="420" height="112" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d" strokeWidth="1"/>
-      <text x="220" y="213" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">ABO Blood Groups</text>
-      <text x="30" y="232" fill="#3fb950" fontSize="8">Group A: IA IA or IA i | Antigen A | Antibody anti-B</text>
-      <text x="30" y="248" fill="#d29922" fontSize="8">Group B: IB IB or IB i | Antigen B | Antibody anti-A</text>
-      <text x="30" y="264" fill="#f85149" fontSize="8">Group AB: IA IB | Both antigens | No antibody | Universal recipient</text>
-      <text x="30" y="280" fill="#58a6ff" fontSize="8">Group O: ii | No antigens | Both antibodies | Universal donor</text>
-      <text x="30" y="296" fill="#bc8cff" fontSize="8">Rh factor: 80% Indians Rh+ | Erythroblastosis foetalis: Rh- mother + Rh+ baby</text>
-    </svg>
-  )
-
-  const SVG_LocomotionFull = () => (
-    <svg viewBox="0 0 440 320" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Sliding Filament Theory of Muscle Contraction</text>
-      <rect x="20" y="55" width="400" height="95" rx="6" fill="#0d0d1a" stroke="#bc8cff" strokeWidth="2"/>
-      <text x="220" y="75" textAnchor="middle" fill="#bc8cff" fontSize="10" fontWeight="bold">Sarcomere (Z line to Z line)</text>
-      <line x1="20" y1="55" x2="20" y2="150" stroke="#58a6ff" strokeWidth="3"/>
-      <line x1="420" y1="55" x2="420" y2="150" stroke="#58a6ff" strokeWidth="3"/>
-      <text x="20" y="165" textAnchor="middle" fill="#58a6ff" fontSize="8">Z line</text>
-      <text x="420" y="165" textAnchor="middle" fill="#58a6ff" fontSize="8">Z line</text>
-      <rect x="100" y="93" width="220" height="8" rx="4" fill="#f85149"/>
-      <rect x="100" y="104" width="220" height="8" rx="4" fill="#f85149"/>
-      <text x="210" y="89" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Myosin thick filament (A band)</text>
-      <rect x="20" y="108" width="155" height="5" rx="3" fill="#3fb950"/>
-      <rect x="245" y="108" width="155" height="5" rx="3" fill="#3fb950"/>
-      <rect x="20" y="118" width="155" height="5" rx="3" fill="#3fb950"/>
-      <rect x="245" y="118" width="155" height="5" rx="3" fill="#3fb950"/>
-      <text x="90" y="142" textAnchor="middle" fill="#3fb950" fontSize="8">Actin thin filament (I band)</text>
-      <rect x="133" y="55" width="154" height="95" fill="rgba(248,81,73,.07)" stroke="#f85149" strokeWidth="1" strokeDasharray="3,3"/>
-      <text x="210" y="162" textAnchor="middle" fill="#f85149" fontSize="7">H zone (myosin only; disappears on contraction)</text>
-      {[['1. Nerve impulse arrives',28,205,'#3fb950'],
-        ['2. Ca2+ from sarcoplasmic reticulum',150,205,'#d29922'],
-        ['3. Ca2+ binds Troponin',295,205,'#f0883e'],
-        ['4. Tropomyosin shifts; actin exposed',28,245,'#f85149'],
-        ['5. Myosin head binds actin',185,245,'#bc8cff'],
-        ['6. Power stroke; ATP hydrolysis',318,245,'#58a6ff']].map(([text,x,y,col],i)=>(
-        <g key={i}>
-          <rect x={x} y={y-14} width="118" height="26" rx="4" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.2"/>
-          <text x={x+59} y={y+2} textAnchor="middle" fill={col} fontSize="7.5">{text}</text>
-        </g>
-      ))}
-      <text x="220" y="295" textAnchor="middle" fill="#8b949e" fontSize="9">I band shortens; A band stays constant; H zone disappears</text>
-      <text x="220" y="308" textAnchor="middle" fill="#8b949e" fontSize="9">Ca2+ from SR | ATP for power stroke and detachment</text>
-    </svg>
-  )
-
-  const SVG_Endocrine = () => (
-    <svg viewBox="0 0 440 370" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Endocrine Glands and Hormones</text>
-      {[
-        {n:'Hypothalamus',x:220,y:45,c:'#bc8cff',h:'TRH, CRH, GnRH; also ADH and Oxytocin (stored in pituitary)'},
-        {n:'Anterior Pituitary',x:220,y:88,c:'#f0883e',h:'GH, TSH, ACTH, FSH, LH, Prolactin'},
-        {n:'Posterior Pituitary',x:220,y:128,c:'#d29922',h:'ADH (vasopressin) → water reabsorption; Oxytocin → uterine contraction'},
-        {n:'Thyroid',x:120,y:170,c:'#3fb950',h:'T3, T4 (thyroxine → BMR); Calcitonin (lowers Ca2+)'},
-        {n:'Parathyroid',x:338,y:170,c:'#58a6ff',h:'PTH → raises blood Ca2+ (opposes calcitonin)'},
-        {n:'Adrenal Cortex',x:100,y:225,c:'#f85149',h:'Cortisol (stress); Aldosterone (Na+ reabsorption); Sex hormones'},
-        {n:'Adrenal Medulla',x:100,y:268,c:'#f0883e',h:'Adrenaline + Noradrenaline → fight or flight response'},
-        {n:'Pancreatic Islets',x:340,y:225,c:'#3fb950',h:'β cells → Insulin (lowers glucose); α cells → Glucagon (raises glucose)'},
-        {n:'Gonads (Testes/Ovary)',x:220,y:325,c:'#bc8cff',h:'Testosterone; Estrogen + Progesterone; control reproduction'},
-      ].map(({n,x,y,c,h})=>(
-        <g key={y+n}>
-          <rect x={x-80} y={y-14} width="160" height="28" rx="6" fill="rgba(0,0,0,.4)" stroke={c} strokeWidth="1.5"/>
-          <text x={x} y={y-1} textAnchor="middle" fill={c} fontSize="8.5" fontWeight="bold">{n}</text>
-          <text x={x} y={y+11} textAnchor="middle" fill="#8b949e" fontSize="6.5">{h}</text>
-        </g>
-      ))}
-      <line x1="220" y1="59" x2="220" y2="74" stroke="#bc8cff" strokeWidth="1" strokeDasharray="3,2"/>
-      <line x1="220" y1="102" x2="220" y2="114" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
-    </svg>
-  )
-
-  const SVG_DNAFull = () => (
-    <svg viewBox="0 0 380 390" style={{width:'100%',maxWidth:380,height:'auto'}}>
-      <defs>
-        <linearGradient id="str1" x1="0" x2="1"><stop offset="0%" stopColor="#58a6ff"/><stop offset="100%" stopColor="#1f6feb"/></linearGradient>
-        <linearGradient id="str2" x1="0" x2="1"><stop offset="0%" stopColor="#f85149"/><stop offset="100%" stopColor="#b91c1c"/></linearGradient>
-      </defs>
-      {Array.from({length:20},(_,i)=>{
-        const y=i*18+20, t=i/3.5
-        const x1=190+70*Math.sin(t), x2=190-70*Math.sin(t)
-        return <g key={i}>
-          <circle cx={x1} cy={y} r="5" fill="url(#str1)" opacity={0.85+0.15*Math.sin(t)}/>
-          <circle cx={x2} cy={y} r="5" fill="url(#str2)" opacity={0.85+0.15*Math.cos(t)}/>
-          {i>0&&<line x1={x1} y1={y} x2={190+70*Math.sin((i-1)/3.5)} y2={y-18} stroke="#58a6ff" strokeWidth="1.5" opacity="0.4"/>}
-          {i>0&&<line x1={x2} y1={y} x2={190-70*Math.sin((i-1)/3.5)} y2={y-18} stroke="#f85149" strokeWidth="1.5" opacity="0.4"/>}
-        </g>
-      })}
-      {Array.from({length:10},(_,i)=>{
-        const y=i*36+29, t=i/1.75
-        const x1=190+70*Math.sin(t), x2=190-70*Math.sin(t)
-        const pairs=[['A','T'],['T','A'],['G','C'],['C','G'],['A','T'],['G','C'],['T','A'],['C','G'],['A','T'],['G','C']]
-        const cols={'A':'#3fb950','T':'#f0883e','G':'#bc8cff','C':'#58a6ff'}
-        const [b1,b2]=pairs[i]; const mid=(x1+x2)/2
-        return <g key={i}>
-          <line x1={x1} y1={y} x2={mid-5} y2={y} stroke={cols[b1]} strokeWidth="2.5"/>
-          <line x1={x2} y1={y} x2={mid+5} y2={y} stroke={cols[b2]} strokeWidth="2.5"/>
-          <circle cx={mid-8} cy={y} r="7" fill={cols[b1]} opacity="0.9"/>
-          <circle cx={mid+8} cy={y} r="7" fill={cols[b2]} opacity="0.9"/>
-          <text x={mid-8} y={y+4} textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">{b1}</text>
-          <text x={mid+8} y={y+4} textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">{b2}</text>
-        </g>
-      })}
-      <rect x="10" y="330" width="360" height="52" rx="8" fill="rgba(30,40,30,0.6)" stroke="#30363d" strokeWidth="1"/>
-      {[['A','#3fb950','Adenine'],['T','#f0883e','Thymine'],['G','#bc8cff','Guanine'],['C','#58a6ff','Cytosine']].map(([b,c,name],i)=>(
-        <g key={b}>
-          <circle cx={30+i*88} cy={348} r="8" fill={c}/>
-          <text x={30+i*88} y={352} textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">{b}</text>
-          <text x={30+i*88} y={368} textAnchor="middle" fill={c} fontSize="8">{name}</text>
-          <text x={30+i*88} y={380} textAnchor="middle" fill="#8b949e" fontSize="7">{b==='A'?'pairs T (2H)':b==='T'?'pairs A (2H)':b==='G'?'pairs C (3H)':'pairs G (3H)'}</text>
-        </g>
-      ))}
-    </svg>
-  )
-
-  const SVG_MendelFull = () => (
-    <svg viewBox="0 0 420 390" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <text x="210" y="20" textAnchor="middle" fill="#3fb950" fontSize="13" fontWeight="bold">Monohybrid Cross (Mendel)</text>
-      <text x="210" y="46" textAnchor="middle" fill="#8b949e" fontSize="11">P Generation</text>
-      <rect x="78" y="52" width="80" height="34" rx="8" fill="#1a2d1a" stroke="#3fb950" strokeWidth="2"/>
-      <text x="118" y="74" textAnchor="middle" fill="#3fb950" fontSize="14" fontWeight="bold">TT</text>
-      <rect x="262" y="52" width="80" height="34" rx="8" fill="#2d1a1a" stroke="#f85149" strokeWidth="2"/>
-      <text x="302" y="74" textAnchor="middle" fill="#f85149" fontSize="14" fontWeight="bold">tt</text>
-      <text x="210" y="74" textAnchor="middle" fill="#8b949e" fontSize="15">×</text>
-      <line x1="210" y1="94" x2="210" y2="112" stroke="#8b949e" strokeWidth="1.5"/>
-      <text x="210" y="128" textAnchor="middle" fill="#8b949e" fontSize="11">F₁ Generation</text>
-      <rect x="153" y="135" width="114" height="34" rx="8" fill="#1a2a1a" stroke="#d29922" strokeWidth="2"/>
-      <text x="210" y="157" textAnchor="middle" fill="#d29922" fontSize="14" fontWeight="bold">Tt</text>
-      <text x="210" y="190" textAnchor="middle" fill="#8b949e" fontSize="10">Self-pollination ↓</text>
-      <text x="210" y="215" textAnchor="middle" fill="#8b949e" fontSize="11">F₂ — Punnett Square</text>
-      <rect x="118" y="222" width="184" height="118" fill="none" stroke="#30363d" strokeWidth="1.5"/>
-      <line x1="210" y1="222" x2="210" y2="340" stroke="#30363d" strokeWidth="1.5"/>
-      <line x1="118" y1="281" x2="302" y2="281" stroke="#30363d" strokeWidth="1.5"/>
-      <text x="164" y="239" textAnchor="middle" fill="#d29922" fontSize="13" fontWeight="bold">T</text>
-      <text x="256" y="239" textAnchor="middle" fill="#f85149" fontSize="13" fontWeight="bold">t</text>
-      <text x="106" y="261" textAnchor="middle" fill="#d29922" fontSize="13" fontWeight="bold">T</text>
-      <text x="106" y="321" textAnchor="middle" fill="#f85149" fontSize="13" fontWeight="bold">t</text>
-      <rect x="119" y="223" width="90" height="57" fill="rgba(63,185,80,.08)"/>
-      <rect x="211" y="223" width="90" height="57" fill="rgba(210,153,34,.08)"/>
-      <rect x="119" y="282" width="90" height="57" fill="rgba(210,153,34,.08)"/>
-      <rect x="211" y="282" width="90" height="57" fill="rgba(248,81,73,.08)"/>
-      <text x="164" y="255" textAnchor="middle" fill="#3fb950" fontSize="14" fontWeight="bold">TT</text>
-      <text x="256" y="255" textAnchor="middle" fill="#d29922" fontSize="14" fontWeight="bold">Tt</text>
-      <text x="164" y="315" textAnchor="middle" fill="#d29922" fontSize="14" fontWeight="bold">Tt</text>
-      <text x="256" y="315" textAnchor="middle" fill="#f85149" fontSize="14" fontWeight="bold">tt</text>
-      <text x="210" y="358" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">Phenotype: 3 Tall : 1 Dwarf</text>
-      <text x="210" y="374" textAnchor="middle" fill="#8b949e" fontSize="10">Genotype: 1 TT : 2 Tt : 1 tt</text>
-    </svg>
-  )
-
-  const SVG_AtomFull = () => (
-    <svg viewBox="0 0 420 360" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <text x="210" y="18" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Bohr Model of Atom (Hydrogen)</text>
-      <circle cx="210" cy="185" r="20" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="2.5"/>
-      <text x="210" y="183" textAnchor="middle" fill="#bc8cff" fontSize="8" fontWeight="bold">Nucleus</text>
-      <text x="210" y="194" textAnchor="middle" fill="#8b949e" fontSize="6">p+ n0</text>
-      {[{r:50,n:1,col:'#f85149',label:'K (n=1)  max 2e-'},
-        {r:90,n:2,col:'#d29922',label:'L (n=2)  max 8e-'},
-        {r:130,n:3,col:'#3fb950',label:'M (n=3)  max 18e-'},
-        {r:170,n:4,col:'#58a6ff',label:'N (n=4)  max 32e-'}].map(({r,n,col,label},i)=>(
-        <g key={i}>
-          <circle cx="210" cy="185" r={r} fill="none" stroke={col} strokeWidth="1.5" strokeDasharray={i===0?'':'4,4'} opacity="0.6"/>
-          <circle cx={210+r} cy="185" r="6" fill={col} opacity="0.9"/>
-          <text x="210" y={185-r-5} textAnchor="middle" fill={col} fontSize="8">{label}</text>
-        </g>
-      ))}
-      <rect x="10" y="295" width="400" height="56" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d" strokeWidth="1"/>
-      <text x="210" y="313" textAnchor="middle" fill="#bc8cff" fontSize="10" fontWeight="bold">Bohr Model Key Equations</text>
-      <text x="20" y="330" fill="#3fb950" fontSize="9">Energy En = -13.6 Z²/n² eV | radius rn = n²a0/Z</text>
-      <text x="20" y="345" fill="#d29922" fontSize="9">a0 = 0.529 Å (Bohr radius) | n = principal quantum number</text>
-    </svg>
-  )
-
-  const SVG_ElectricFull = () => (
-    <svg viewBox="0 0 420 340" style={{width:'100%',maxWidth:420,height:'auto'}}>
-      <circle cx="138" cy="170" r="27" fill="#1a0a0a" stroke="#f85149" strokeWidth="2.5"/>
-      <text x="138" y="176" textAnchor="middle" fill="#f85149" fontSize="19" fontWeight="bold">+</text>
-      <circle cx="278" cy="170" r="27" fill="#0a0a1a" stroke="#58a6ff" strokeWidth="2.5"/>
-      <text x="278" y="176" textAnchor="middle" fill="#58a6ff" fontSize="23" fontWeight="bold">−</text>
-      {[-75,-52,-28,0,28,52,75].map((dy,i)=>{
-        if(Math.abs(dy)<10) return <path key={i} d="M165,170 L251,170" fill="none" stroke="#f0883e" strokeWidth="1.5" opacity="0.9"/>
-        return <path key={i} d={`M${165+Math.abs(dy)*0.1},${170+dy*0.4} Q${208},${170+dy} ${251-Math.abs(dy)*0.1},${170+dy*0.4}`}
-          fill="none" stroke="#f0883e" strokeWidth="1.5" opacity={0.9-Math.abs(dy)/200}/>
-      })}
-      {[48,85].map(r=>(
-        <g key={r}>
-          <circle cx="138" cy="170" r={r} fill="none" stroke="#bc8cff" strokeWidth="1" strokeDasharray="4,4" opacity="0.5"/>
-          <circle cx="278" cy="170" r={r} fill="none" stroke="#bc8cff" strokeWidth="1" strokeDasharray="4,4" opacity="0.5"/>
-        </g>
-      ))}
-      <rect x="128" y="32" width="162" height="44" rx="8" fill="#0d1020" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="209" y="52" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">Coulomb's Law</text>
-      <text x="209" y="68" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">F = kq₁q₂/r²</text>
-      <rect x="128" y="275" width="162" height="44" rx="8" fill="#0d1020" stroke="#f0883e" strokeWidth="1.5"/>
-      <text x="209" y="295" textAnchor="middle" fill="#f0883e" fontSize="11" fontWeight="bold">Electric Field</text>
-      <text x="209" y="312" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">E = kQ/r²</text>
-      <text x="138" y="212" textAnchor="middle" fill="#f85149" fontSize="9">+q (source)</text>
-      <text x="278" y="212" textAnchor="middle" fill="#58a6ff" fontSize="9">−q (sink)</text>
-      <text x="50" y="108" fill="#f0883e" fontSize="9">Field lines</text>
-      <text x="50" y="120" fill="#8b949e" fontSize="8">(+) to (−)</text>
-      <text x="328" y="108" fill="#bc8cff" fontSize="9">Equipotential</text>
-      <text x="328" y="120" fill="#bc8cff" fontSize="9">surfaces</text>
-    </svg>
-  )
-
-  const SVG_WaveFull = () => (
-    <svg viewBox="0 0 480 340" style={{width:'100%',maxWidth:480,height:'auto'}}>
-      <rect x="153" y="38" width="12" height="83" rx="2" fill="#484f58" stroke="#8b949e" strokeWidth="1.5"/>
-      <rect x="153" y="143" width="12" height="28" rx="2" fill="#484f58" stroke="#8b949e" strokeWidth="1.5"/>
-      <rect x="153" y="193" width="12" height="83" rx="2" fill="#484f58" stroke="#8b949e" strokeWidth="1.5"/>
-      <text x="151" y="140" textAnchor="end" fill="#d29922" fontSize="9" fontWeight="bold">S₁</text>
-      <text x="151" y="198" textAnchor="end" fill="#d29922" fontSize="9" fontWeight="bold">S₂</text>
-      {[0,1,2,3].map(i=>(
-        <line key={i} x1={18+i*32} y1="38" x2={18+i*32} y2="318" stroke="#58a6ff" strokeWidth="1.5" opacity="0.5"/>
-      ))}
-      {[155,185].map((slitY,si)=>(
-        [33,62,91,120].map(r=>(
-          <path key={si+'-'+r} d={`M165,${slitY} A${r},${r} 0 0 1 ${165+r},${slitY}`}
-            fill="none" stroke={si===0?'#58a6ff':'#f0883e'} strokeWidth="1.5" opacity={1.1-r/130}/>
-        ))
-      ))}
-      <rect x="368" y="38" width="10" height="278" fill="#1a2235" stroke="#58a6ff" strokeWidth="1.5"/>
-      {[0,1,2,3,4,5,6,7,8].map(i=>{
-        const y=78+i*24, brightness=Math.abs(4-i)
-        const opacity=brightness===0?1:brightness===1?0.7:brightness===2?0.35:0.1
-        return <rect key={i} x="378" y={y-10} width="18" height="20" fill="#58a6ff" opacity={opacity}/>
-      })}
-      <text x="400" y="160" fill="#58a6ff" fontSize="8" fontWeight="bold">n=0</text>
-      <text x="400" y="138" fill="#58a6ff" fontSize="8">n=1</text>
-      <text x="400" y="184" fill="#58a6ff" fontSize="8">n=1</text>
-      <rect x="18" y="278" width="120" height="52" rx="6" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="78" y="297" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">β = λD/d</text>
-      <text x="78" y="312" textAnchor="middle" fill="#8b949e" fontSize="8">λ = wavelength</text>
-      <text x="78" y="324" textAnchor="middle" fill="#8b949e" fontSize="8">D = dist to screen, d = slit sep</text>
-      <text x="270" y="336" textAnchor="middle" fill="#bc8cff" fontSize="9">Young's Double Slit Experiment — Wave nature of light</text>
-    </svg>
-  )
-
-  const SVG_NucleiFull = () => (
-    <svg viewBox="0 0 440 340" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">Radioactive Decay Types</text>
-      <circle cx="220" cy="128" r="44" fill="#1a0a0a" stroke="#f85149" strokeWidth="2.5"/>
-      {[[210,118],[230,118],[220,133],[208,136],[232,136],[220,106],[205,128],[235,128]].map(([x,y],i)=>(
-        <circle key={i} cx={x} cy={y} r={i%2===0?6:5} fill={i%2===0?"#f85149":"#58a6ff"} opacity="0.9"/>
-      ))}
-      <text x="220" y="185" textAnchor="middle" fill="#8b949e" fontSize="9">Parent Nucleus (Z, A)</text>
-      <path d="M175,108 L74,63" fill="none" stroke="#3fb950" strokeWidth="2.5"/>
-      <circle cx="60" cy="57" r="17" fill="#0a1a0a" stroke="#3fb950" strokeWidth="2"/>
-      <text x="60" y="61" textAnchor="middle" fill="#3fb950" fontSize="8" fontWeight="bold">⁴He</text>
-      <rect x="4" y="77" width="112" height="48" rx="6" fill="#0a1a0a" stroke="#3fb950" strokeWidth="1.5"/>
-      <text x="60" y="95" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">α-Decay</text>
-      <text x="60" y="108" textAnchor="middle" fill="#8b949e" fontSize="7">Z→Z-2, A→A-4</text>
-      <text x="60" y="120" textAnchor="middle" fill="#8b949e" fontSize="7">Stopped by paper</text>
-      <path d="M220,172 L220,238" fill="none" stroke="#d29922" strokeWidth="2.5"/>
-      <rect x="140" y="242" width="160" height="58" rx="6" fill="#1a1a0a" stroke="#d29922" strokeWidth="1.5"/>
-      <text x="220" y="260" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">β-Decay</text>
-      <text x="220" y="274" textAnchor="middle" fill="#8b949e" fontSize="7">n→p + e⁻ + antineutrino</text>
-      <text x="220" y="287" textAnchor="middle" fill="#8b949e" fontSize="7">Z→Z+1; A unchanged</text>
-      <text x="220" y="298" textAnchor="middle" fill="#8b949e" fontSize="7">Stopped by Al foil</text>
-      <path d="M262,108 L360,63" fill="none" stroke="#bc8cff" strokeWidth="2.5"/>
-      <rect x="324" y="48" width="112" height="58" rx="6" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="1.5"/>
-      <text x="380" y="68" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">γ-Decay</text>
-      <text x="380" y="82" textAnchor="middle" fill="#8b949e" fontSize="7">High energy photon</text>
-      <text x="380" y="95" textAnchor="middle" fill="#8b949e" fontSize="7">Z, A unchanged</text>
-      <text x="380" y="105" textAnchor="middle" fill="#8b949e" fontSize="7">Stopped by Pb</text>
-      <rect x="10" y="308" width="420" height="28" rx="6" fill="rgba(0,0,0,.3)" stroke="#30363d" strokeWidth="1"/>
-      <text x="220" y="326" textAnchor="middle" fill="#58a6ff" fontSize="10">N = N₀e⁻λt | t½ = 0.693/λ | Activity A = λN | 1 Ci = 3.7×10¹⁰ Bq</text>
-    </svg>
-  )
-
-  const SVG_SemiFull = () => (
-    <svg viewBox="0 0 440 350" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Semiconductor Electronics</text>
-      {[['Conductor',60,'#3fb950'],['Semiconductor',220,'#d29922'],['Insulator',380,'#f85149']].map(([type,cx,col],i)=>(
-        <g key={i}>
-          <text x={cx} y={56} textAnchor="middle" fill={col} fontSize="9" fontWeight="bold">{type}</text>
-          <rect x={cx-34} y={64} width="68" height="24" rx="3" fill={col} opacity="0.7"/>
-          <text x={cx} y={80} textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Conduction Band</text>
-          {i===0&&<rect x={cx-34} y={86} width="68" height="24" rx="3" fill={col} opacity="0.4"/>}
-          {i===1&&<rect x={cx-34} y={95} width="68" height="12" rx="2" fill="transparent" stroke={col} strokeWidth="1" strokeDasharray="3,2"/>}
-          {i===1&&<text x={cx} y={104} textAnchor="middle" fill={col} fontSize="7">~1eV gap</text>}
-          {i===2&&<rect x={cx-34} y={100} width="68" height="20" rx="2" fill="transparent" stroke={col} strokeWidth="1" strokeDasharray="3,2"/>}
-          {i===2&&<text x={cx} y={113} textAnchor="middle" fill={col} fontSize="7">&gt;3eV gap</text>}
-          <rect x={cx-34} y={i===0?88:i===1?114:136} width="68" height="24" rx="3" fill={col} opacity="0.7"/>
-          <text x={cx} y={i===0?104:i===1?130:152} textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Valence Band</text>
-        </g>
-      ))}
-      <rect x="18" y="180" width="404" height="158" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d" strokeWidth="1"/>
-      <text x="220" y="198" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">p-n Junction Diode</text>
-      <rect x="28" y="208" width="170" height="68" rx="4" fill="#2d0a0a" stroke="#f85149" strokeWidth="2"/>
-      <text x="113" y="240" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">p-type</text>
-      <text x="113" y="256" textAnchor="middle" fill="#8b949e" fontSize="8">majority: holes; trivalent dopant</text>
-      <rect x="242" y="208" width="170" height="68" rx="4" fill="#0a0a2d" stroke="#58a6ff" strokeWidth="2"/>
-      <text x="327" y="240" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">n-type</text>
-      <text x="327" y="256" textAnchor="middle" fill="#8b949e" fontSize="8">majority: electrons; pentavalent dopant</text>
-      <rect x="200" y="208" width="42" height="68" fill="#1a1a1a" stroke="#bc8cff" strokeWidth="1.5"/>
-      <text x="221" y="244" textAnchor="middle" fill="#bc8cff" fontSize="7">Depletion</text>
-      <text x="221" y="255" textAnchor="middle" fill="#bc8cff" fontSize="7">region</text>
-      <text x="220" y="298" textAnchor="middle" fill="#3fb950" fontSize="8">Forward bias &gt;0.7V (Si): conducts | Reverse bias: no conduction</text>
-      <text x="220" y="314" textAnchor="middle" fill="#8b949e" fontSize="8">NAND/NOR = universal gates | BJT: Ic = β Ib (β = 50-300)</text>
-      <text x="220" y="330" textAnchor="middle" fill="#d29922" fontSize="8">Rectifier: half-wave (1 diode) | full-wave bridge (4 diodes)</text>
-    </svg>
-  )
-
-  const SVG_MoleculeFull = () => (
-    <svg viewBox="0 0 380 360" style={{width:'100%',maxWidth:380,height:'auto'}}>
-      <defs>
-        <radialGradient id="cAtG" cx="50%" cy="35%" r="60%"><stop offset="0%" stopColor="#3d2060"/><stop offset="100%" stopColor="#1a0a30"/></radialGradient>
-        <radialGradient id="hAtG" cx="50%" cy="35%" r="60%"><stop offset="0%" stopColor="#103a10"/><stop offset="100%" stopColor="#051505"/></radialGradient>
-      </defs>
-      <text x="190" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">CH₄ — sp³ Hybridisation</text>
-      <line x1="190" y1="155" x2="190" y2="56" stroke="#bc8cff" strokeWidth="3" strokeLinecap="round"/>
-      <line x1="190" y1="185" x2="83" y2="262" stroke="#bc8cff" strokeWidth="5" strokeLinecap="round"/>
-      <line x1="190" y1="185" x2="297" y2="262" stroke="#bc8cff" strokeWidth="5" strokeLinecap="round"/>
-      <line x1="190" y1="168" x2="190" y2="292" stroke="#bc8cff" strokeWidth="2" strokeDasharray="6,4" strokeLinecap="round" opacity="0.6"/>
-      <circle cx="190" cy="175" r="55" fill="rgba(188,140,255,0.07)" stroke="rgba(188,140,255,0.2)" strokeWidth="1" strokeDasharray="4,4"/>
-      <ellipse cx="190" cy="118" rx="16" ry="30" fill="rgba(88,166,255,0.14)" stroke="#58a6ff" strokeWidth="1" opacity="0.7"/>
-      <ellipse cx="133" cy="232" rx="25" ry="12" fill="rgba(88,166,255,0.14)" stroke="#58a6ff" strokeWidth="1" opacity="0.7" transform="rotate(-35,133,232)"/>
-      <ellipse cx="247" cy="232" rx="25" ry="12" fill="rgba(88,166,255,0.14)" stroke="#58a6ff" strokeWidth="1" opacity="0.7" transform="rotate(35,247,232)"/>
-      <circle cx="190" cy="52" r="21" fill="url(#hAtG)" stroke="#3fb950" strokeWidth="2"/>
-      <text x="190" y="57" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">H</text>
-      <circle cx="78" cy="264" r="23" fill="url(#hAtG)" stroke="#3fb950" strokeWidth="2"/>
-      <text x="78" y="270" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">H</text>
-      <circle cx="302" cy="264" r="23" fill="url(#hAtG)" stroke="#3fb950" strokeWidth="2"/>
-      <text x="302" y="270" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">H</text>
-      <circle cx="190" cy="297" r="21" fill="url(#hAtG)" stroke="#3fb950" strokeWidth="2" opacity="0.75"/>
-      <text x="190" y="303" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold" opacity="0.75">H</text>
-      <circle cx="190" cy="175" r="31" fill="url(#cAtG)" stroke="#bc8cff" strokeWidth="2.5"/>
-      <text x="190" y="181" textAnchor="middle" fill="#bc8cff" fontSize="15" fontWeight="bold">C</text>
-      <rect x="50" y="318" width="280" height="38" rx="8" fill="rgba(20,15,35,.7)" stroke="#30363d" strokeWidth="1"/>
-      <text x="190" y="335" textAnchor="middle" fill="#bc8cff" fontSize="10" fontWeight="bold">Bond angle 109.5° | Tetrahedral geometry</text>
-      <text x="190" y="350" textAnchor="middle" fill="#8b949e" fontSize="9">4 equivalent sp³ C-H sigma bonds</text>
-    </svg>
-  )
-
-  const SVG_EcoFull = () => (
-    <svg viewBox="0 0 440 340" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Ecosystem — Energy Pyramid (10% Law)</text>
-      <polygon points="220,42 118,128 322,128" fill="rgba(63,185,80,.15)" stroke="#3fb950" strokeWidth="2"/>
-      <polygon points="220,138 88,202 352,202" fill="rgba(210,153,34,.15)" stroke="#d29922" strokeWidth="2"/>
-      <polygon points="220,212 52,288 388,288" fill="rgba(248,81,73,.15)" stroke="#f85149" strokeWidth="2"/>
-      <text x="220" y="96" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Producers (Plants)</text>
-      <text x="220" y="110" textAnchor="middle" fill="#8b949e" fontSize="8">10,000 kcal</text>
-      <text x="220" y="172" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Primary Consumers (Herbivores)</text>
-      <text x="220" y="186" textAnchor="middle" fill="#8b949e" fontSize="8">1,000 kcal</text>
-      <text x="220" y="258" textAnchor="middle" fill="#f85149" fontSize="10" fontWeight="bold">Secondary Consumers (Carnivores)</text>
-      <text x="220" y="272" textAnchor="middle" fill="#8b949e" fontSize="8">100 kcal</text>
-      <text x="25" y="295" fill="#58a6ff" fontSize="8">90% heat loss</text>
-      <text x="25" y="308" fill="#58a6ff" fontSize="8">per trophic level</text>
-      <rect x="10" y="300" width="420" height="36" rx="6" fill="rgba(0,0,0,.3)" stroke="#30363d" strokeWidth="1"/>
-      <text x="220" y="316" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Lindeman 10% Law (1942): only 10% energy transferred between trophic levels</text>
-      <text x="220" y="330" textAnchor="middle" fill="#8b949e" fontSize="8">Pyramid of energy always upright | Biomass and numbers can be inverted</text>
-    </svg>
-  )
-
-  const SVG_BiotechFull = () => (
-    <svg viewBox="0 0 440 340" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Recombinant DNA Technology</text>
-      <rect x="18" y="45" width="102" height="48" rx="8" fill="#0d1a0d" stroke="#3fb950" strokeWidth="2"/>
-      <text x="69" y="64" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Source DNA</text>
-      <text x="69" y="78" textAnchor="middle" fill="#8b949e" fontSize="8">(gene of interest)</text>
-      <rect x="153" y="45" width="112" height="48" rx="8" fill="#1a0d0d" stroke="#f85149" strokeWidth="2"/>
-      <text x="209" y="64" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Restriction</text>
-      <text x="209" y="78" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Endonuclease</text>
-      <path d="M120,69 L153,69" fill="none" stroke="#3fb950" strokeWidth="2" markerEnd="url(#a4)"/>
-      <circle cx="360" cy="95" r="36" fill="#0d0d2d" stroke="#58a6ff" strokeWidth="2"/>
-      <text x="360" y="92" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Vector</text>
-      <text x="360" y="106" textAnchor="middle" fill="#8b949e" fontSize="7">(Plasmid/Phage)</text>
-      <path d="M265,69 Q312,69 326,86" fill="none" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#a4)"/>
-      <rect x="153" y="150" width="112" height="38" rx="8" fill="#0a1a0a" stroke="#3fb950" strokeWidth="1.5"/>
-      <text x="209" y="167" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">DNA Ligase</text>
-      <text x="209" y="181" textAnchor="middle" fill="#8b949e" fontSize="8">joins sticky ends</text>
-      <path d="M265,95 L290,150 L265,190" fill="none" stroke="#3fb950" strokeWidth="1.5" strokeDasharray="4,3"/>
-      <rect x="88" y="218" width="132" height="38" rx="8" fill="#0d2d0d" stroke="#3fb950" strokeWidth="2"/>
-      <text x="154" y="234" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Recombinant DNA</text>
-      <text x="154" y="248" textAnchor="middle" fill="#8b949e" fontSize="8">vector + insert</text>
-      <rect x="268" y="218" width="132" height="38" rx="8" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="334" y="234" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Host Cell (E. coli)</text>
-      <text x="334" y="248" textAnchor="middle" fill="#8b949e" fontSize="8">transformation</text>
-      <path d="M220,256 L268,237" fill="none" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#a4)"/>
-      <rect x="18" y="278" width="188" height="52" rx="8" fill="#1a1a0d" stroke="#d29922" strokeWidth="1.5"/>
-      <text x="112" y="296" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">PCR (3 steps)</text>
-      <text x="112" y="310" textAnchor="middle" fill="#8b949e" fontSize="8">94°C denature → 55°C anneal</text>
-      <text x="112" y="323" textAnchor="middle" fill="#8b949e" fontSize="8">→ 72°C extend (Taq polymerase)</text>
-      <rect x="234" y="278" width="188" height="52" rx="8" fill="#0d1a1a" stroke="#bc8cff" strokeWidth="1.5"/>
-      <text x="328" y="296" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Gel Electrophoresis</text>
-      <text x="328" y="310" textAnchor="middle" fill="#8b949e" fontSize="8">agarose gel; smaller fragments</text>
-      <text x="328" y="323" textAnchor="middle" fill="#8b949e" fontSize="8">travel farther; EtBr staining</text>
-      <defs><marker id="a4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6Z" fill="#3fb950"/></marker></defs>
-    </svg>
-  )
-
-  const SVG_ElectroChemFull = () => (
-    <svg viewBox="0 0 440 340" style={{width:'100%',maxWidth:440,height:'auto'}}>
-      <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Daniell Cell — Electrochemical Cell</text>
-      <rect x="18" y="82" width="142" height="158" rx="8" fill="#0d1a0d" stroke="#3fb950" strokeWidth="2"/>
-      <text x="89" y="102" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Anode (−)</text>
-      <text x="89" y="116" textAnchor="middle" fill="#3fb950" fontSize="9">Oxidation</text>
-      <rect x="73" y="122" width="32" height="88" rx="4" fill="#2d2d00" stroke="#d29922" strokeWidth="2"/>
-      <text x="89" y="170" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Zn</text>
-      <text x="89" y="206" textAnchor="middle" fill="#3fb950" fontSize="8">Zn→Zn²⁺+2e⁻</text>
-      <text x="89" y="220" textAnchor="middle" fill="#8b949e" fontSize="7">1M ZnSO4</text>
-      <rect x="280" y="82" width="142" height="158" rx="8" fill="#1a0d00" stroke="#f0883e" strokeWidth="2"/>
-      <text x="351" y="102" textAnchor="middle" fill="#f0883e" fontSize="10" fontWeight="bold">Cathode (+)</text>
-      <text x="351" y="116" textAnchor="middle" fill="#f0883e" fontSize="9">Reduction</text>
-      <rect x="335" y="122" width="32" height="88" rx="4" fill="#2d1a00" stroke="#f0883e" strokeWidth="2"/>
-      <text x="351" y="170" textAnchor="middle" fill="#f0883e" fontSize="9" fontWeight="bold">Cu</text>
-      <text x="351" y="206" textAnchor="middle" fill="#f0883e" fontSize="8">Cu²⁺+2e⁻→Cu</text>
-      <text x="351" y="220" textAnchor="middle" fill="#8b949e" fontSize="7">1M CuSO4</text>
-      <rect x="153" y="56" width="134" height="24" rx="10" fill="#1a1a2d" stroke="#bc8cff" strokeWidth="2"/>
-      <text x="220" y="72" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Salt Bridge (KCl)</text>
-      <line x1="89" y1="82" x2="89" y2="52" stroke="#3fb950" strokeWidth="2"/>
-      <line x1="89" y1="52" x2="351" y2="52" stroke="#58a6ff" strokeWidth="2"/>
-      <line x1="351" y1="52" x2="351" y2="82" stroke="#f0883e" strokeWidth="2"/>
-      <text x="220" y="48" textAnchor="middle" fill="#58a6ff" fontSize="9">e⁻ flow: Anode → Cathode (external wire)</text>
-      <rect x="190" y="28" width="60" height="22" rx="5" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
-      <text x="220" y="43" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">1.10V</text>
-      <rect x="18" y="258" width="404" height="72" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d" strokeWidth="1"/>
-      <text x="220" y="276" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Key Equations</text>
-      <text x="28" y="292" fill="#3fb950" fontSize="8.5">E°cell = E°cathode − E°anode = +0.34−(−0.76) = +1.10 V</text>
-      <text x="28" y="307" fill="#58a6ff" fontSize="8.5">Nernst: E = E° − (0.0592/n) log Q (at 298K)</text>
-      <text x="28" y="322" fill="#bc8cff" fontSize="8.5">Faraday: m = ZIt = (M/nF)It | F = 96485 C mol⁻¹</text>
-    </svg>
-  )
-
-  // ─── CHAPTER → DIAGRAM MAP ────────────────────────────────────
-  const CHAPTER_DIAGRAMS = {
-    'The Living World':              [{title:'Plant Kingdom Overview',           SvgC:SVG_PlantKingdom2,   parts:['Algae - aquatic; no true organs','Bryophyta - amphibians of plant kingdom; no vascular tissue','Pteridophyta - first vascular plants; seedless','Gymnosperms - naked seeds; no fruit','Angiosperms - seeds enclosed in fruit; dominant'],facts:['Whittaker (1969): 5 kingdoms','Binomial nomenclature: Linnaeus (1753)','Taxonomy hierarchy: Kingdom→Phylum→Class→Order→Family→Genus→Species']}],
-    'Biological Classification':     [{title:'Five Kingdom Classification',       SvgC:SVG_PlantKingdom2,   parts:['Monera - prokaryotes; bacteria; no nucleus','Protista - unicellular eukaryotes; Euglena, Amoeba','Fungi - saprophytes; chitin cell wall; Rhizopus, Penicillium','Plantae - autotrophs; cellulose cell wall; embryophytes','Animalia - heterotrophs; no cell wall; multicellular'],facts:['Fungi cell wall: chitin | Bacteria wall: peptidoglycan','Viruses are acellular; not included in 5 kingdoms','Mycorrhiza: symbiosis between fungi and plant roots']}],
-    'Plant Kingdom':                 [{title:'Plant Kingdom Classification',       SvgC:SVG_PlantKingdom2,   parts:['Algae (Thallophyta) - aquatic; Chara, Spirogyra','Bryophyta - liverworts, mosses; Funaria; no vascular tissue','Pteridophyta - ferns; Dryopteris; first vascular; no seeds','Gymnosperms - Pinus, Cycas; naked seeds; heterosporous','Angiosperms - Mango, Rose; enclosed seeds; double fertilization'],facts:['Bryophytes: gametophyte dominant; need water for fertilization','Pteridophytes: sporophyte dominant; first true vascular tissue','Angiosperms: most evolved; largest group of land plants']}],
-    'Animal Kingdom':                [{title:'Animal Kingdom — Major Phyla',       SvgC:SVG_AnimalKingdom,   parts:['Porifera - sponges; canal system; choanocytes','Coelenterata - Hydra; nematocysts; radial symmetry','Platyhelminthes - flatworms; acoelomate; Taenia (tapeworm)','Aschelminthes - Ascaris; pseudocoelomate; roundworm','Annelida - earthworm; true coelom (schizocoel); segmented','Arthropoda - largest phylum; jointed legs; chitin exoskeleton','Chordata - notochord; dorsal nerve cord; pharyngeal slits'],facts:['Coelom: first true in Annelida (schizocoel)','Arthropoda: largest animal phylum (~80% all animal species)','Notochord: defining feature of phylum Chordata']}],
-    'Morphology of Flowering Plants':[{title:'Morphology of Flowering Plant',      SvgC:SVG_FloweringPlant2, parts:['Root - tap (dicot) or fibrous (monocot); absorption; anchorage','Stem - node, internode, axillary bud; transport; support','Leaf - lamina + petiole; reticulate (dicot) or parallel (monocot) venation','Flower - calyx, corolla, androecium (stamen), gynoecium (pistil)','Fruit - ripened ovary; true vs false fruit (apple = false)','Seed - embryo + endosperm + seed coat (testa + tegmen)'],facts:['Dicot: tap root, reticulate venation, 4-5 floral parts, 2 cotyledons','Monocot: fibrous root, parallel venation, 3 floral parts, 1 cotyledon','Epigeal germination (bean): cotyledons above ground | Hypogeal (maize): below']}],
-    'Anatomy of Flowering Plants':   [{title:'T.S. of Dicot Stem',                SvgC:SVG_AnatomyStem2,    parts:['Epidermis - outermost; cuticle; stomata; no chloroplasts','Cortex - parenchyma; stores food; collenchyma near epidermis in some','Endodermis - Casparian strip; controls water and mineral movement','Pericycle - meristematic; gives lateral roots (in roots); fibres in stem','Vascular Bundle - xylem (water) + phloem (food) + cambium (in dicot)','Pith - central parenchyma; storage'],facts:['Dicot stem: open vascular bundles (with cambium); ring arrangement','Monocot stem: closed vascular bundles (no cambium); scattered','Xylem: dead at maturity; tracheids + vessels. Phloem: living; sieve tubes + companion cells']}],
-    'Structural Organisation in Animals':[{title:'Earthworm Internal Anatomy', SvgC:SVG_Earthworm,        parts:['Prostomium - sensory lobe above mouth; no segment','Pharynx - muscular; sucks food in','Oesophagus - connects pharynx to gizzard','Gizzard (seg 8-9) - grinds food with soil particles','Intestine - main digestion + absorption; typhlosole increases surface area','Nephridia - excretory organs in each segment; equivalent to kidney','Clitellum (seg 14-16) - secretes cocoon for reproduction'],facts:['Pheretima posthuma: 100-120 segments','Blood: red; haemoglobin in plasma (not RBCs)','Hermaphrodite: both male and female reproductive organs']}],
-    'Cell: The Unit of Life':        [{title:'Animal Cell',                        SvgC:SVG_AnimalCell,      parts:['Cell Membrane - fluid mosaic model (Singer & Nicolson 1972)','Nucleus - double membrane; nuclear pores; chromosomes; nucleolus','Mitochondria - powerhouse; 70S ribosomes; cristae; matrix; mtDNA','Ribosome - 80S in cytoplasm; 60S+40S subunits; protein synthesis','Golgi Body - packaging; glycosylation; secretory vesicles','Lysosome - suicide bag; hydrolytic enzymes at pH 5; autophagy','ER - rough (ribosomes, protein) and smooth (lipid, detox)'],facts:['Cell theory: Schleiden+Schwann (1838-1839); Virchow (1855) added cells from cells','Prokaryote: 70S ribosomes, no membrane-bound organelles, circular DNA','Eukaryote: 80S ribosomes, membrane-bound organelles, linear DNA']},
-                                       {title:'Plant Cell',                         SvgC:SVG_PlantCell,       parts:['Cell Wall - cellulose; rigid; provides shape and protection','Chloroplast - photosynthesis; own DNA (70S); double membrane; thylakoids','Large Central Vacuole - maintains turgor; stores pigments and waste','Plastids - chloroplast (green), chromoplast (red/orange), leucoplast (storage)','Plasmodesmata - cytoplasmic connections between adjacent plant cells','Middle Lamella - pectin; cements adjacent cells together'],facts:['Plant cell has cell wall, chloroplast, large vacuole; no centriole, no lysosomes','Centrioles: in animal cells and lower plants; involved in spindle formation','Tonoplast = membrane of vacuole']}],
-    'Biomolecules':                  [{title:'Biomolecules Overview',              SvgC:SVG_DNAFull,         parts:['Carbohydrates - C:H:O = 1:2:1; monosaccharides, disaccharides, polysaccharides','Proteins - amino acids + peptide bonds; 4 structural levels','Lipids - glycerol + fatty acids; fats, phospholipids, steroids','Nucleic Acids - nucleotides; DNA (double helix) and RNA (single stranded)','Enzymes - protein catalysts; active site; Km = substrate at ½Vmax','Vitamins - organic micronutrients; fat-soluble (A,D,E,K) and water-soluble (B,C)'],facts:['Chargaff rule: A=T, G=C in double-stranded DNA','Enzymes not consumed in reaction; lower activation energy','Glycolysis: cytoplasm; 2 ATP net; anaerobic']}],
-    'Cell Cycle and Cell Division':  [{title:'Mitosis Phases',                     SvgC:SVG_Mitosis2,        parts:['Interphase - G1 (growth), S (DNA replication), G2 (preparation); longest phase','Prophase - chromosomes condense; nucleolus disappears; spindle forms','Metaphase - chromosomes at equatorial plate; centromeres attach to spindle','Anaphase - centromeres split; sister chromatids to opposite poles','Telophase - nuclear envelope reforms; chromosomes decondense','Cytokinesis - cell plate (plants) or cleavage furrow (animals)'],facts:['PMAT: Prophase→Metaphase→Anaphase→Telophase','Mitosis: 2 genetically identical diploid daughter cells','CDK-cyclin complexes control cell cycle checkpoints; p53 = guardian of genome']},
-                                       {title:'Meiosis',                            SvgC:SVG_Meiosis2,        parts:['Prophase I - synapsis; bivalents form; crossing over at Pachytene (key stage)','Metaphase I - bivalents at equatorial plate; centromeres face poles','Anaphase I - homologous chromosomes separate (NOT chromatids)','Meiosis II - similar to mitosis; sister chromatids separate','Result - 4 haploid (n) genetically unique cells (gametes)','Significance - genetic variation via crossing over and independent assortment'],facts:['Crossing over: exchange between non-sister chromatids of homologous chromosomes','Meiosis II: no DNA replication between meiosis I and II','Oogenesis: produces 1 egg + 3 polar bodies (unequal cytokinesis)']}],
-    'Transport in Plants':           [{title:'Transport in Plants',                 SvgC:SVG_AnatomyStem2,    parts:['Apoplast - through cell walls and intercellular spaces (non-living)','Symplast - through cytoplasm via plasmodesmata (living)','Osmosis - water from high water potential to low; across semipermeable membrane','Transpiration pull - cohesion-tension theory (Dixon and Jolly 1894)','Active transport - against concentration gradient; requires ATP; carrier proteins','Phloem transport - pressure flow (Munch): source→sink; active loading of sucrose'],facts:['Water potential ψ = ψs + ψp (solute potential + pressure potential)','Plasmolysis: water loss from vacuole → protoplast shrinks from wall','Root pressure: positive pressure; responsible for guttation (water from hydathodes)']}],
-    'Mineral Nutrition':             [{title:'Mineral Nutrition and Nitrogen Cycle', SvgC:SVG_FloweringPlant2, parts:['Macronutrients - N, P, K, Ca, Mg, S, C, H, O (needed in large amounts)','Micronutrients - Fe, Mn, Cu, Zn, Mo, B, Cl, Ni (trace amounts)','Nitrogen fixation - Rhizobium (legumes); Azotobacter (free-living); biological N fixation','Nitrification - NH4+→NO2- (Nitrosomonas)→NO3- (Nitrobacter)','Denitrification - NO3-→N2 (Pseudomonas); reduces soil nitrogen','Deficiency symptoms - chlorosis (yellowing), necrosis (death), stunting, purpling'],facts:['Nitrogen = component of amino acids, proteins, nucleic acids, ATP, chlorophyll','Iron deficiency: chlorosis in young leaves (unlike Mg where old leaves affected first)','Hydroponics: growing plants in mineral solution without soil; determines essential elements']}],
-    'Photosynthesis in Higher Plants':[{title:'Photosynthesis — Z-Scheme + Calvin Cycle', SvgC:SVG_Chloroplast2, parts:['PS II (P680) - absorbs 680nm; oxidises water; releases O2; first in Z-scheme','PS I (P700) - absorbs 700nm; reduces NADP+ to NADPH','Electron transport chain - PQ→Cytochrome b6f→PC→PS I→Fd','ATP Synthase (CF0CF1) - chemiosmosis; H+ gradient drives ATP synthesis','Calvin Cycle - stroma; CO2+RuBP→2×3-PGA (RuBisCO); 3 ATP+2 NADPH per CO2','C4 pathway - CO2 first fixed as OAA (PEP carboxylase) in mesophyll cells'],facts:['Light reactions (thylakoid): 2H2O+2NADP++3ADP→O2+2NADPH+3ATP','Calvin cycle (stroma): 3CO2+9ATP+6NADPH→G3P→Glucose (6 turns)','C4 plants (maize, sugarcane): overcome photorespiration; more efficient in hot/dry']}],
-    'Respiration in Plants':         [{title:'Cellular Respiration Pathways',       SvgC:SVG_Mitochondria2,   parts:['Glycolysis (cytoplasm) - glucose→2 pyruvate; net 2 ATP; 2 NADH; no O2 needed','Pyruvate decarboxylation - pyruvate→Acetyl CoA+CO2+NADH (in matrix)','Krebs Cycle (matrix) - per pyruvate: 3NADH+1FADH2+1GTP+2CO2','ETC (inner membrane) - NADH and FADH2 oxidised; 34 ATP via chemiosmosis','Fermentation - anaerobic; yeast: ethanol+CO2; muscle: lactic acid; net 2 ATP','Pentose Phosphate Pathway - alternative; NADPH + ribose-5-phosphate'],facts:['Total from 1 glucose: 36-38 ATP (10 NADH×2.5 + 2 FADH2×1.5 + 4 substrate-level)','RQ = CO2/O2: carbohydrates=1.0; fats=0.7; proteins=0.9; ethanol>1','Pasteur effect: presence of O2 suppresses fermentation (anaerobic glycolysis)']}],
-    'Plant Growth and Development':  [{title:'Plant Hormones',                      SvgC:SVG_FloweringPlant2, parts:['Auxin (IAA) - apical dominance; phototropism; cell elongation; delays abscission','Gibberellin (GA3) - stem elongation; seed germination; breaks dormancy; parthenocarpy','Cytokinin (Zeatin) - cell division; delays senescence; promotes lateral bud growth','Abscisic Acid (ABA) - stress hormone; stomatal closure; seed dormancy; inhibitor','Ethylene (C2H4) - fruit ripening; abscission; promotes senescence; gas at room temp','Photoperiodism - SDP (<critical dark period), LDP (>critical dark period), Day-neutral'],facts:['Apical dominance: auxin from apex inhibits lateral buds; cytokinin reverses this','Vernalisation: cold treatment required for flowering in wheat (Triticum)','Bolting: rapid stem elongation before flowering; caused by gibberellins']}],
-    'Digestion and Absorption':      [{title:'Digestive System',                    SvgC:SVG_Earthworm,       parts:['Mouth - salivary amylase (ptyalin) digests starch→maltose; mucin; pH 6.8','Stomach - HCl (pH 1.5-3.5); pepsinogen→pepsin; churning; intrinsic factor (Vit B12)','Small intestine - duodenum+jejunum+ileum; bile (liver) + pancreatic juice; main absorption','Liver - bile (stored in gall bladder); emulsification of fats; glycogen storage; detox','Pancreas - amylase, lipase, trypsinogen, chymotrypsinogen; also insulin+glucagon','Large intestine - water+electrolyte absorption; bacterial synthesis of Vit K and B12'],facts:['Brush border enzymes: maltase, sucrase, lactase, peptidases in SI wall','Bile: no enzymes; emulsifies fats; bile salts + bile pigments (bilirubin, biliverdin)','Absorption: villi + microvilli (brush border) increase surface area ~600 times']}],
-    'Breathing and Exchange of Gases':[{title:'Human Respiratory System',           SvgC:SVG_AtomFull,        parts:['Nasal cavity - filters, warms, moistens air; mucus+cilia; olfactory epithelium','Larynx - voice box; epiglottis prevents food entering; vocal cords','Trachea - 11cm long; C-shaped cartilage rings; ciliated epithelium','Bronchi → Bronchioles → Terminal bronchioles → Alveoli','Alveoli - 300 million; 70m² surface area; wall = 1 cell thick; capillary network','Diaphragm - contraction → inspiration; relaxation → expiration'],facts:['Lung volumes: Tidal=500mL; IRV=2500mL; ERV=1100mL; RV=1100mL; VC=3800mL','Oxygen: 97% as OxyHb; 3% dissolved in plasma','CO2: 70% as HCO3-; 23% carbamino-Hb; 7% dissolved; Bohr effect']}],
-    'Body Fluids and Circulation':   [{title:'Heart Chambers and Blood Flow',       SvgC:SVG_HeartFull,       parts:['Right Atrium - receives deoxygenated blood from superior and inferior vena cava','Right Ventricle - pumps blood to lungs via pulmonary artery','Left Atrium - receives oxygenated blood from lungs via 4 pulmonary veins','Left Ventricle - thickest wall (3× right); pumps blood to body via aorta','SA Node - pacemaker; generates 72 impulses/min; right atrium wall','AV Node - delays impulse 0.1s; Bundle of His → Purkinje fibres → ventricles'],facts:['Cardiac output = SV × HR = 70mL × 72/min = ~5 L/min','Normal BP: 120/80 mmHg (systolic/diastolic)','Heart sounds: S1 (lubb) = AV valves close; S2 (dupp) = semilunar valves close']},
-                                       {title:'Blood Cells and ABO Groups',          SvgC:SVG_BloodCells2,     parts:['RBC - biconcave; no nucleus; Hb; 5 million/mm³; 120 days lifespan','Neutrophil - 60-70%; lobed nucleus; phagocytosis of bacteria','Lymphocyte - 20-30%; large nucleus; B cells (antibodies) and T cells (cell-mediated)','Monocyte - 2-8%; kidney-shaped nucleus; becomes macrophage in tissues','Platelets - 1.5-3.5 lakh/mm³; thrombocytes; clotting; fragment of megakaryocyte','ABO: O (universal donor); AB (universal recipient); Rh+ vs Rh-'],facts:['Haemopoiesis: RBC production in red bone marrow','WBC: increases in infection (leukocytosis); decreases in AIDS','Clotting: damaged platelet→thrombokinase→prothrombin→thrombin→fibrinogen→fibrin']}],
-    'Excretory Products':            [{title:'Nephron Structure',                    SvgC:SVG_Nephron2,        parts:['Glomerulus - capillary tuft; ultrafiltration at 125 mL/min (GFR)','Bowman\'s Capsule - collects filtrate; filters everything < 70,000 MW','PCT - reabsorbs 70% water, all glucose+amino acids, Na+, K+, HCO3-','Loop of Henle - descending (H2O permeable); ascending (NaCl, impermeable to water)','DCT - regulated by Aldosterone (Na+) and ADH (water reabsorption)','Collecting Duct - final concentration; urine → renal pelvis → ureter → bladder'],facts:['GFR = 125 mL/min; 180 L filtered/day → only 1.5 L urine (99% reabsorbed)','Glucose threshold: 180 mg/100mL blood; glycosuria = diabetes mellitus','Countercurrent multiplier (Loop of Henle) creates medullary osmotic gradient up to 1200 mOsm']}],
-    'Locomotion and Movement':       [{title:'Sliding Filament Theory',              SvgC:SVG_LocomotionFull,  parts:['Sarcomere - functional unit; Z line to Z line; contains both actin and myosin','Myosin (thick) - A band; globular heads form cross-bridges; myosin ATPase','Actin (thin) - I band; troponin-tropomyosin complex; F-actin polymer','Sliding - actin slides over myosin; I band and H zone shorten; A band constant','Troponin C - Ca2+ binding displaces tropomyosin; exposes myosin-binding sites on actin','ATP role - myosin head bends (power stroke); ATP needed to detach head'],facts:['Ca2+ released from sarcoplasmic reticulum on nerve impulse (T-tubule)','Rigor mortis: ATP depletion post-death → permanent cross-bridges','Types: skeletal (voluntary, striated), cardiac (involuntary, striated), smooth (involuntary, non-striated)']}],
-    'Neural Control and Coordination':[{title:'Neuron and Synapse',                 SvgC:SVG_AnimalCell,      parts:['Dendrites - tree-like processes; receive signals from other neurons','Cell body (Soma) - contains nucleus, Nissl bodies (RER); metabolic centre','Axon - carries impulse away from cell body; up to 1m long in humans','Myelin Sheath - Schwann cells (PNS) or oligodendrocytes (CNS); speeds conduction','Nodes of Ranvier - gaps in myelin; ion exchange; saltatory conduction','Synapse - synaptic knob; neurotransmitter vesicles; synaptic cleft (20nm)'],facts:['Resting potential: -70mV; Na+/K+ pump (3Na+ out, 2K+ in)','Action potential: Na+ rushes in (+40mV); repolarised by K+ rush out','Acetylcholine at NMJ and cholinergic synapses; destroyed by AChE']}],
-    'Chemical Coordination and Integration':[{title:'Endocrine Glands',             SvgC:SVG_Endocrine,       parts:['Hypothalamus - master controller; releasing/inhibiting hormones; connects nervous and endocrine','Anterior Pituitary - GH, TSH, ACTH, FSH, LH, Prolactin (tropic hormones)','Posterior Pituitary - stores ADH (water reabsorption) and Oxytocin (uterine contraction)','Thyroid - T3+T4 (raise BMR, growth); Calcitonin (lowers blood Ca2+)','Adrenal Cortex - Cortisol (stress); Aldosterone (Na+ retention); Androgens','Pancreatic Islets - β cells: Insulin (lowers glucose); α cells: Glucagon (raises glucose)'],facts:['Feedback inhibition: high T4→inhibits TRH (hypothalamus) and TSH (pituitary)','Diabetes mellitus: Type I (no insulin production); Type II (insulin resistance)','Oxytocin = milk ejection reflex; uterine contraction during parturition']}],
-    'Reproduction in Organisms':     [{title:'Types of Reproduction',               SvgC:SVG_MendelFull,      parts:['Binary fission - Amoeba, bacteria; simplest; genetic copy of parent','Budding - Hydra, yeast; daughter organism from parent body','Fragmentation - Spirogyra; body breaks and each part grows','Vegetative propagation - Ginger (rhizome), Potato (stem tuber), Onion (bulb)','Asexual spores - Rhizopus (zoospores), Penicillium (conidia); haploid; airborne','Sexual reproduction - two parents; gametes; meiosis; genetic variation'],facts:['Clone: genetically identical to parent; from asexual reproduction','Parthenogenesis: egg develops without fertilization; e.g., honey bee drones','Parthenocarpy: seedless fruit development without fertilization; e.g., banana']}],
-    'Sexual Reproduction in Flowering Plants':[{title:'Flower and Double Fertilization', SvgC:SVG_FloweringPlant2, parts:['Stamen - filament + anther; pollen grains (male gametophyte) produced by meiosis','Pistil - stigma + style + ovary; ovule contains megaspore (female gametophyte)','Pollen grain - 2-celled: vegetative cell (tube) + generative cell (2 male gametes)','Pollination - self (autogamy) or cross (allogamy); wind, water, insects, animals','Pollen tube - germinates from pollen; grows down style to ovule','Double fertilization - syngamy (egg+sperm→2n zygote) + triple fusion (2 polar nuclei+sperm→3n endosperm)'],facts:['Double fertilization: unique to angiosperms; discovered by Nawaschin (1898)','Endosperm (3n): nutritive tissue for embryo; persistent in monocots (rice, wheat)','Apomixis: seed formation without fertilization; seen in Asteraceae']}],
-    'Human Reproduction':            [{title:'Human Reproductive System',            SvgC:SVG_Endocrine,       parts:['Testes - seminiferous tubules (sperm); Leydig cells (testosterone); 34°C optimal','Spermatogenesis - spermatogonia→primary spermatocyte→secondary→spermatid→sperm; 64 days','Ovaries - Graafian follicle develops; ovulation on day 14; corpus luteum','Oogenesis - starts fetal life; primary oocyte arrested at prophase I until puberty','Menstrual cycle - follicular (1-13), ovulation (14), luteal (15-28) phases','Fertilization - ampulla of fallopian tube; acrosome reaction; cortical reaction (prevents polyspermy)'],facts:['LH surge → ovulation on day 14 of 28-day cycle','Corpus luteum → progesterone (maintains pregnancy for first 3 months)','HCG from placenta maintains corpus luteum; detected in pregnancy tests']}],
-    'Reproductive Health':           [{title:'Reproductive Health',                  SvgC:SVG_MendelFull,      parts:['Contraceptive methods - barrier (condom, diaphragm), hormonal (pills), IUD (Cu-T), surgical','Natural methods - calendar, lactational amenorrhea (effective up to 6 months)','Sexually transmitted infections - gonorrhoea, syphilis, HIV, hepatitis B, chlamydia','Amniocentesis - amniotic fluid test for chromosomal abnormalities; detects Down syndrome','Test tube baby - IVF+ET; egg fertilized in vitro; embryo transferred to uterus','ZIFT/GIFT - Zygote/Gamete Intra-Fallopian Transfer'],facts:['MTP (Medical Termination of Pregnancy): legal in India up to 20 weeks','RCH programme: Reproductive and Child Health; government initiative','STDs: prevention by safe sex, single partner, vaccination (Hep B)']}],
-    'Principles of Inheritance and Variation':[{title:"Mendel's Laws",              SvgC:SVG_MendelFull,      parts:['Law of Dominance - dominant allele masks recessive in F1 heterozygote','Law of Segregation - alleles separate during gamete formation (meiosis); most fundamental law','Law of Independent Assortment - genes on different chromosomes assort independently','Codominance - both alleles expressed; ABO blood groups (IA and IB)','Incomplete dominance - F1 intermediate; e.g. snapdragon flower color (red×white=pink)','Linkage - genes on same chromosome; inherited together; reduces recombination frequency'],facts:['Test cross: dominant phenotype × homozygous recessive (aa) → reveals genotype','Dihybrid F2 ratio: 9:3:3:1 (if genes on different chromosomes)','Sickle cell anaemia: HbA/HbS codominant; HbS/HbS = disease; malaria resistance in HbA/HbS']}],
-    'Molecular Basis of Inheritance':[{title:'DNA Structure and Replication',       SvgC:SVG_DNAFull,         parts:['DNA double helix - antiparallel; B-form; right-handed; 10 bp/turn; 0.34nm/bp','Chargaff rule - A=T (2H bonds); G=C (3H bonds); A+G = T+C','Replication - semi-conservative (Meselson-Stahl 1958); bidirectional from oriC','Transcription - RNA polymerase reads template 3→5; mRNA made 5→3','Translation - ribosome; mRNA codons (3 nt) decoded by tRNA anticodons; start AUG','Lac operon - negative control; repressor binds operator; inducer (lactose) removes repressor'],facts:['Start codon: AUG (Met); Stop codons: UAA, UAG, UGA (non-sense codons)','Genetic code: 64 codons; 61 sense; 3 stop; degenerate (multiple codons for one aa)','One gene-one enzyme hypothesis: Beadle and Tatum (1941); Neurospora crassa']}],
-    'Evolution':                     [{title:'Evolution Timeline and Evidence',      SvgC:SVG_AtomFull,        parts:['Chemical evolution - Miller-Urey (1953): CH4+H2+NH3+H2O+sparks→amino acids','First cells - 3.5 bya; prokaryotes; RNA world hypothesis (RNA first)','Lamarck - use and disuse; inheritance of acquired characters (disproved)','Darwin - natural selection; On Origin of Species (1859); struggle for existence','Modern Synthesis - Neo-Darwinism; Darwinism + Mendelian genetics + population genetics','Molecular evidence - DNA sequences; cytochrome c similarities; molecular phylogeny'],facts:['Hardy-Weinberg law: p²+2pq+q²=1; equilibrium maintained if no evolution','Genetic drift: random change in allele frequency; Bottleneck + Founder effect','Convergent evolution→analogous organs; Divergent evolution→homologous organs']}],
-    'Human Health and Disease':      [{title:'Immune System and Diseases',           SvgC:SVG_BloodCells2,     parts:['Innate immunity - non-specific; barriers (skin, mucus), fever, NK cells, phagocytes','Adaptive immunity - specific; B cells (humoral: antibodies) + T cells (cell-mediated)','Antibody structure - Y-shaped; 4 chains; 5 classes (IgG most abundant)','Vaccines - stimulate primary immune response; memory cells; long-term protection','HIV - retrovirus; attacks CD4+ T helper cells; AIDS when CD4 count <200/mm³','Cancer - oncogenes; carcinogens; uncontrolled cell division; metastasis'],facts:['Primary response: slow (7-10 days); Secondary response: fast (1-3 days); higher titre','Monoclonal antibodies: from single B cell clone; diagnostic and therapeutic uses','Malaria: Plasmodium falciparum (most lethal); transmitted by female Anopheles mosquito']}],
-    'Strategies for Enhancement in Food Production':[{title:'Food Production Enhancement', SvgC:SVG_BiotechFull, parts:['Plant breeding - hybridization; selection; mutation breeding (colchicine)','Heterosis (Hybrid vigour) - F1 hybrid superior to both parents; used in crops','Biofortification - crops bred for higher vitamins/minerals; Golden Rice (Vit A)','SCP (Single Cell Protein) - Spirulina, Fusarium; protein-rich food from microbes','Tissue culture - somatic embryogenesis; somaclonal variation; virus-free plants','Animal husbandry - cross-breeding; MOET (Multiple Ovulation Embryo Transfer)'],facts:['Sonalika (wheat): Norman Borlaug; Green Revolution variety; high-yielding, disease-resistant','MOET: superovulation + embryo collection → multiple offspring from superior female','Aquaculture: culture of aquatic organisms; pisciculture (fish), apiculture (bees)']}],
-    'Microbes in Human Welfare':     [{title:'Useful Microorganisms',                SvgC:SVG_BiotechFull,     parts:['Lactobacillus - lactic acid fermentation; curd formation; probiotic','Saccharomyces cerevisiae - yeast; bread rising (CO2); alcohol fermentation (ethanol)','Aspergillus niger - citric acid production; industrial fermentation','Penicillium notatum - penicillin discovery (Fleming 1928); antibiotic','Trichoderma - biocontrol agent; produces enzymes; plant growth promotion','Biogas plant - mixed microbes (methanogens); CH4+CO2 from organic waste; gobar gas'],facts:['Primary sewage treatment: physical removal (sedimentation)','Secondary sewage treatment: BOD reduction by microbes; activated sludge process','Nitrogen fixation by Rhizobium (legumes) and Azotobacter (free-living)']}],
-    'Biotechnology: Principles and Processes':[{title:'Recombinant DNA Technology', SvgC:SVG_BiotechFull,     parts:['Restriction endonuclease - cuts DNA at palindromic sequences; EcoRI: GAATTC; 3000+ known','Gel electrophoresis - agarose gel; DNA fragments separated by size; EtBr staining; UV visualisation','PCR - 3 steps: 94°C denature; 55°C anneal primers; 72°C extend (Taq pol); 30 cycles = 10⁹ copies','Cloning vector - plasmid (pBR322); ori; selectable markers; MCS; can be viral (bacteriophage)','Transformation - CaCl2 method or electroporation; introduces recombinant DNA into host','Southern blotting - DNA→membrane; probe hybridization; detects specific DNA sequence'],facts:['EcoRI: from E. coli R Y13; recognition site GAATTC; gives sticky ends (AATT)','Ti plasmid: from Agrobacterium tumefaciens; natural vector for plant genetic engineering','Bioreactor: large-scale production (10-100 litre); pH, O2, temperature controlled']}],
-    'Biotechnology and its Applications':[{title:'Biotechnology Applications',      SvgC:SVG_BiotechFull,     parts:['Bt cotton - Bacillus thuringiensis Cry proteins; toxic to bollworm; insect resistant','Golden Rice - β-carotene (Vit A precursor) genes from daffodil; addresses Vit A deficiency','Insulin production - humulin; A+B chains separately in E. coli; combined; 1982 first biotech drug','Gene therapy - ADA deficiency (SCID); retroviral vector; first human gene therapy (1990)','Molecular diagnostics - PCR, ELISA; detect pathogens before symptoms','Transgenic animals - Rosie (cow, human protein in milk); OncoMouse (cancer research)'],facts:['Genetically Modified Organisms (GMO): modified for herbicide resistance, pest resistance, nutrition','RNAi: RNA interference; double-stranded RNA silences specific gene; used against pests','Bioprospecting: exploring biodiversity for commercially useful genes and molecules']}],
-    'Organisms and Populations':     [{title:'Population Ecology',                  SvgC:SVG_EcoFull,         parts:['Population attributes - birth rate, death rate, age distribution, sex ratio','Growth models - J-curve (exponential: dN/dt=rN) and S-curve (logistic: dN/dt=rN(K-N)/K)','Carrying capacity K - maximum population size environment can support','Natality - birth rate; mortality - death rate; immigration; emigration','Age pyramid - growing (triangular), stable (bell), declining (urn shaped)','Species interactions - mutualism, commensalism, predation, competition, parasitism, amensalism'],facts:['r = intrinsic rate of natural increase; higher in small organisms','Competitive exclusion principle (Gause): two species competing for same resource→one excluded','Coevolution: predator-prey arms race; parasite-host evolution']}],
-    'Ecosystem':                     [{title:'Ecosystem Structure and Function',    SvgC:SVG_EcoFull,         parts:['Producers - autotrophs; primary producers; chlorophyll; fix solar energy','Consumers - primary (herbivores), secondary, tertiary (carnivores)','Decomposers - saprotrophic fungi and bacteria; mineralisation','Food chain - linear energy transfer; grassland vs detritus food chains','Food web - complex interlinking food chains; more stable than food chain','Energy flow - unidirectional; 10% law (Lindeman 1942); pyramids of energy/biomass/number'],facts:['GPP (Gross Primary Productivity) = total photosynthesis; NPP = GPP - respiration','Biogeochemical cycles: nitrogen, carbon, phosphorus, water (sedimentary vs gaseous)','Tropical rainforest: highest NPP; Desert and deep ocean: lowest NPP']}],
-    'Biodiversity and Conservation': [{title:'Biodiversity and Conservation',       SvgC:SVG_EcoFull,         parts:['Genetic diversity - within species; 50,000 rice varieties in India','Species diversity - number of species; species richness; Shannon index','Ecosystem diversity - variety of habitat types; forest, wetland, grassland, ocean','In-situ conservation - protect in natural habitat; national parks, biosphere reserves, wildlife sanctuaries','Ex-situ conservation - outside habitat; zoos, botanical gardens, cryopreservation, gene banks','Biodiversity hotspot - >1500 endemic plant species AND lost >70% original habitat; 34 worldwide'],facts:['India has 2 hotspots: Western Ghats + Sri Lanka; and Eastern Himalayas','IUCN Red List: Extinct, EW, CR, EN, VU, NT, LC','Alien/invasive species: Lantana camara, water hyacinth (Eichhornia) threaten native biodiversity']}],
-    'Environmental Issues':          [{title:'Environmental Issues',                 SvgC:SVG_EcoFull,         parts:['Global warming - greenhouse gases (CO2, CH4, N2O, CFCs); +1.5°C catastrophic','Ozone depletion - CFCs release Cl; Cl+O3→ClO+O2; Antarctica ozone hole','Acid rain - SO2+NOx+H2O→H2SO4+HNO3; pH<5.6; damages ecosystems and buildings','Water pollution - BOD (biological oxygen demand); eutrophication; heavy metals','Biomagnification - DDT, mercury accumulate up food chain (trophic magnification)','Radioactive waste - nuclear power and weapons; long half-lives; contamination'],facts:['Montreal Protocol (1987): international treaty to phase out CFCs; successful','BOD: high BOD = high pollution = low dissolved O2 = fish kill','Noise pollution: >75 dB harmful; industrial areas up to 120 dB']}],
-    // Chemistry
-    'Some Basic Concepts of Chemistry':[{title:'Mole Concept',                      SvgC:SVG_AtomFull,        parts:['Mole - 6.022×10²³ entities (Avogadro number); SI unit of amount','Molar mass - mass of 1 mole in grams; numerically = atomic/molecular weight','Molarity (M) - moles of solute per litre of solution; temperature-dependent','Molality (m) - moles of solute per kg of solvent; temperature-independent','Empirical formula - simplest whole number ratio of atoms in compound','Molecular formula - actual number of atoms; multiple of empirical formula'],facts:['1 mole of any gas at STP (0°C, 1 atm) = 22.4 L (molar volume)','Limiting reagent: determines maximum product; used up completely','% composition and % yield important in stoichiometry calculations']}],
-    'Structure of Atom':             [{title:'Atomic Structure — Bohr Model',       SvgC:SVG_AtomFull,        parts:['Nucleus - protons (+1) + neutrons (0); diameter ~10⁻¹⁵ m (femtometre)','Electron shells - K(2), L(8), M(18), N(32); maximum = 2n² electrons','Bohr model - circular orbits; quantised energy; only for H-like atoms','Quantum numbers - n (shell), l (subshell 0 to n-1), m (-l to +l), s (+½,-½)','Aufbau principle - fill lowest energy orbitals first; 1s<2s<2p<3s<3p<4s<3d','Heisenberg uncertainty - Δx·Δp ≥ h/4π; cannot know both position and momentum exactly'],facts:['Wave-particle duality: λ = h/mv (de Broglie 1924)','Pauli exclusion: no two electrons can have all 4 quantum numbers same','Hund\'s rule: maximise unpaired electrons in degenerate orbitals (maximum multiplicity)']}],
-    'Classification of Elements and Periodicity':[{title:'Periodic Table Trends',   SvgC:SVG_AtomFull,        parts:['Atomic radius - increases down group (more shells); decreases across period (more Zeff)','Ionization energy - increases across period; decreases down group; Na< Mg < Al < Si','Electron affinity - increases across period; Cl has highest (not F; F is small)','Electronegativity - F highest (3.98 Pauling); increases across period; decreases down group','Metallic character - decreases left to right; increases top to bottom','Shielding effect - inner electrons reduce effective nuclear charge felt by outer electrons'],facts:['Lanthanide contraction: 4f electrons poor shielding → size decrease from La to Lu','Noble gases: complete valence shell; highest IE; chemically inert (except Xe compounds)','Diagonal relationship: Li-Mg, Be-Al, B-Si have similar properties']}],
-    'Chemical Bonding and Molecular Structure':[{title:'Chemical Bonding',          SvgC:SVG_MoleculeFull,    parts:['Ionic bond - electrostatic attraction; metal gives electrons to non-metal; NaCl, MgO','Covalent bond - sharing of electrons; sigma (σ) and pi (π) bonds','VSEPR theory - lone pairs repel more than bonding pairs; determines shape','sp3 hybridisation - CH4 (109.5°, tetrahedral); NH3 (107°, pyramidal); H2O (104.5°, bent)','sp2 hybridisation - C2H4 (120°, trigonal planar); BF3; benzene','sp hybridisation - C2H2 (180°, linear); CO2; BeCl2'],facts:['Polarity: depends on electronegativity difference AND molecular symmetry (CCl4 is non-polar)','Bond order = (bonding electrons - antibonding electrons)/2','O2 is paramagnetic (2 unpaired electrons); explained by MOT only']}],
-    'States of Matter':              [{title:'States of Matter and Gas Laws',       SvgC:SVG_AtomFull,        parts:['Ideal gas - PV=nRT; no intermolecular forces; no volume of molecules','van der Waals - (P+an²/V²)(V-nb)=nRT; a corrects pressure; b corrects volume','Boyle\'s law - PV=constant at constant T; isothermal compression','Charles\'s law - V/T=constant at constant P; V extrapolates to 0 at -273°C','Dalton\'s law - Ptotal=P1+P2+P3... each gas acts independently','Graham\'s law - rate ∝ 1/√M; lighter gas diffuses faster'],facts:['Critical temperature Tc: above which gas cannot be liquefied (CO2: 31°C)','Viscosity of liquids decreases with temperature; gases increase with temperature','Surface tension of liquids decreases with temperature; detergents decrease it']}],
-    'Thermodynamics':                [{title:'Thermodynamic Laws',                  SvgC:SVG_AtomFull,        parts:['System - matter under study; open/closed/isolated systems','First Law - ΔU=q+w; energy conserved; U is state function; q and w are path functions','Enthalpy H=U+PV; ΔH=qp (heat at constant pressure); ΔH=ΔU+ΔngRT','Entropy S - disorder; ΔSuniverse>0 for spontaneous; ΔS=qrev/T','Gibbs Free Energy G=H-TS; spontaneous if ΔG<0; equilibrium if ΔG=0','Standard state - 1 atm, 298K, 1M concentration; standard enthalpies tabulated'],facts:['Hess\'s law: ΔH is path-independent (state function); can add/subtract reactions','Exothermic: ΔH<0 | Endothermic: ΔH>0 (takes heat from surroundings)','Bond dissociation enthalpy: energy to break 1 mole of bonds in gaseous molecules']}],
-    'Equilibrium':                   [{title:'Chemical and Ionic Equilibrium',      SvgC:SVG_AtomFull,        parts:['Dynamic equilibrium - rate of forward = rate of reverse; concentrations constant','Kc = [products]/[reactants]; only gaseous and dissolved species included','Kp = Kc(RT)^Δn; Δn = moles gas products - moles gas reactants','Le Chatelier principle - system shifts to oppose imposed stress (T, P, concentration)','pH = -log[H+]; pOH = -log[OH-]; pH+pOH = 14 at 25°C','Buffer - weak acid + its conjugate base; resists pH change; Henderson-Hasselbalch'],facts:['Kc>1: products favoured | Kc<1: reactants favoured at equilibrium','Ka×Kb = Kw = 10⁻¹⁴ at 25°C (conjugate acid-base pair)','Solubility product Ksp: PbCl2 ⇌ Pb²⁺+2Cl⁻; Ksp=[Pb²⁺][Cl⁻]²']}],
-    'Redox Reactions':               [{title:'Redox Reactions and Oxidation Number', SvgC:SVG_ElectroChemFull, parts:['Oxidation - loss of electrons; increase in oxidation state; OIL','Reduction - gain of electrons; decrease in oxidation state; RIG','Oxidation number rules - F always -1; O usually -2 (except peroxides); H usually +1','Balancing redox - half-reaction method; balance atoms then charge with e-','Disproportionation - same element oxidised AND reduced simultaneously; e.g. Cl2+NaOH','Comproportionation - opposite of disproportionation; two different oxidation states→same'],facts:['MnO4⁻ in acid: Mn +7→+2 (gain 5e⁻); in neutral: +7→+4; in base: +7→+6','Cr2O7²⁻ in acid: Cr +6→+3 (gain 3e⁻ per Cr; 6e⁻ total)','Strongest oxidising agents: F2>MnO4⁻>Cr2O7²⁻>HNO3 (conc.)>Cl2']}],
-    'Hydrogen':                      [{title:'Hydrogen and Water',                  SvgC:SVG_AtomFull,        parts:['Isotopes - Protium ¹H (99.985%), Deuterium ²H (0.015%), Tritium ³H (radioactive)','Preparation - reaction of metals with dilute acids; steam reforming of methane','Water structure - V-shaped; sp3 O; bond angle 104.5°; strong H-bonding; high BP (100°C)','Hardness of water - temporary (Ca/Mg bicarbonates; remove by boiling) and permanent (sulphates; ion exchange)','Heavy water D2O - neutron moderator in nuclear reactors; used in NMR; density 1.11 g/mL','H2O2 - weak acid; oxidising and reducing agent; bleaching agent; 2H2O2→2H2O+O2'],facts:['H-bonding in water: O-H...O; strongest among common H-bond donors (N-H, O-H, F-H)','Hydrogen economy: H2 as fuel; fuel cell (H2+O2→H2O+electricity); zero emission','Hydrides: saline (NaH), covalent (CH4, H2O, NH3), metallic/interstitial (TiH2)']}],
-    's-Block Elements':              [{title:'Alkali and Alkaline Earth Metals',    SvgC:SVG_AtomFull,        parts:['Group 1 (Li,Na,K,Rb,Cs,Fr) - ns1; very reactive; soft; low MP/BP; flame colours','Group 2 (Be,Mg,Ca,Sr,Ba) - ns2; harder than group 1; higher MP; less reactive than group 1','Reactivity - increases down group; Li most anomalous (resembles Mg due to diagonal relationship)','Flame test - Li (crimson/red), Na (yellow), K (violet/lilac), Ca (brick red), Ba (apple green)','NaOH production - chlor-alkali process (electrolysis of brine); also produces Cl2 and H2','Biological importance - Na+/K+ pump; Ca2+ in bones, teeth, blood clotting, nerve signaling'],facts:['Solvay process: Na2CO3 from NaCl+NH3+CO2; most important industrial process for alkali','Gypsum: CaSO4·2H2O | Plaster of Paris: CaSO4·½H2O (sets by absorbing water)','Li has highest charge density; anomalous properties compared to rest of group 1']}],
-    'p-Block Elements (11)':         [{title:'p-Block Elements — Group 13-18',      SvgC:SVG_AtomFull,        parts:['Group 13 (B,Al,Ga,In,Tl) - Al most abundant metal; Al2O3 amphoteric; BF3 Lewis acid','Group 14 (C,Si,Ge,Sn,Pb) - C allotropes (diamond, graphite, C60); Si semiconductor','Group 15 (N,P,As,Sb,Bi) - N2 very stable (triple bond); P allotropes (white, red, black)','Group 16 (O,S,Se,Te,Po) - O=most electronegative after F; S allotropes (rhombic, monoclinic)','Group 17 - Halogens (F,Cl,Br,I); F most reactive; Cl from NaCl electrolysis','Group 18 - Noble gases (He,Ne,Ar,Kr,Xe,Rn); full outer shell; Xe forms compounds'],facts:['N: no d-orbitals; can only form 4 bonds max; forms pπ-pπ multiple bonds','PCl3: sp3 pyramidal | PCl5: sp3d trigonal bipyramidal; P can expand octet (d-orbitals)','Ozone O3: V-shaped (sp3 with lone pair); protects from UV; unstable at low altitude']}],
-    'Organic Chemistry: Basic Principles':[{title:'Organic Chemistry Basics',      SvgC:SVG_MoleculeFull,    parts:['Hybridisation - sp3 (109.5°, tetrahedral), sp2 (120°, planar), sp (180°, linear)','Inductive effect - permanent; through σ bonds; -I: F>Cl>Br>I>OH; +I: alkyl groups','Resonance - delocalization of π electrons; depicted by double-headed arrow between structures','Hyperconjugation - σ C-H electrons delocalise into adjacent empty p or π*; stabilises carbocations','Electrophile - electron-deficient species; attacks electron-rich centre; H+, Br+, NO2+','Nucleophile - electron-rich species; attacks electron-poor centre; OH-, CN-, NH3, H2O'],facts:['Carbocation stability: 3°>2°>1°>methyl (due to hyperconjugation and induction)','Carbanion stability: opposite of carbocation; methyl>1°>2°>3°','Free radicals: stabilised by hyperconjugation and induction; 3°>2°>1°']}],
-    'Hydrocarbons':                  [{title:'Hydrocarbons',                        SvgC:SVG_MoleculeFull,    parts:['Alkanes (CnH2n+2) - sp3 C; free rotation; free radical halogenation (UV light)','Alkenes (CnH2n) - sp2 C; electrophilic addition; Markovnikov rule; geometrical isomerism','Alkynes (CnH2n-2) - sp C; triple bond; more acidic than alkenes; electrophilic addition','Benzene (C6H6) - sp2; 6π electrons; aromatic; electrophilic aromatic substitution (EAS)','Markovnikov rule - in addition of HX to alkene: H adds to C with more H; X to C with less H','Saytzeff rule - in elimination: major product has more substituted double bond'],facts:['Wurtz reaction: 2RX + 2Na → R-R + 2NaX; carbon-carbon bond formation','Ozonolysis: cleaves C=C; identifies position of double bond','Benzene resonance energy = 150 kJ/mol; less reactive than alkenes toward addition']}],
-    'Environmental Chemistry':       [{title:'Environmental Chemistry',              SvgC:SVG_EcoFull,         parts:['Greenhouse effect - CO2, CH4, N2O, H2O vapour, CFCs; trap outgoing IR radiation','Ozone layer depletion - CFCs+UV→Cl; Cl+O3→ClO+O2; Antarctica ozone hole each spring','Acid rain - pH<5.6; SO2+H2O→H2SO3; NOx+H2O→HNO3; damages plants, buildings, aquatic life','BOD (Biological Oxygen Demand) - O2 needed by bacteria to decompose organic matter; high=polluted','Photochemical smog - NOx + hydrocarbons + UV → ozone + PAN; Los Angeles type','Classical smog - SO2 + smoke + fog; London type; reducing type'],facts:['Clean Air Act; Kyoto Protocol (1997); Paris Agreement (2015): CO2 reduction targets','Mercury biomagnification: Minimata disease (Japan 1956); methyl mercury poisoning','pH of normal rain = 5.6 (due to dissolved CO2 forming H2CO3)']}],
-    'Solid State':                   [{title:'Crystal Systems and Defects',         SvgC:SVG_AtomFull,        parts:['Simple cubic - Z=1; APF=52%; CN=6; only Po','BCC (Body Centred Cubic) - Z=2; APF=68%; CN=8; Na,K,Fe,Cr,W','FCC/CCP (Face Centred Cubic) - Z=4; APF=74%; CN=12; Cu,Ag,Au,Al,Ni','HCP (Hexagonal Close Packing) - Z=6 (eff.); APF=74%; CN=12; Mg,Zn,Ti','Schottky defect - equal cation+anion missing; decreases density; NaCl,KCl','Frenkel defect - cation moves to interstitial; no density change; ZnS,AgCl'],facts:['Close packed: ABABAB=HCP; ABCABC=CCP(FCC)','Tetrahedral voids=2N; Octahedral voids=N (N=number of atoms in CCP)','Electrical conductivity: metals (band theory) > semiconductors > insulators']}],
-    'Solutions':                     [{title:'Solutions and Colligative Properties', SvgC:SVG_AtomFull,        parts:['Mole fraction XA=nA/(nA+nB); dimensionless; sum of all mole fractions=1','Raoult\'s law - PA=XA×PA°; ideal solution; Henry\'s law for gases in liquid','Colligative properties - depend on number of solute particles; 4 types','Relative lowering of vapour pressure - ΔP/P°A=XB; simplest colligative property','Elevation of boiling point - ΔTb=Kb×m; Kb(water)=0.52 K kg mol⁻¹','Depression of freezing point - ΔTf=Kf×m; Kf(water)=1.86 K kg mol⁻¹'],facts:['Van\'t Hoff factor i: accounts for dissociation/association; NaCl i≈2 if fully dissociated','Osmotic pressure π=iMRT; used to determine molar mass of polymers and large molecules','Reverse osmosis: applied pressure > osmotic pressure; used in water purification']}],
-    'Electrochemistry':              [{title:'Electrochemical Cell (Daniell Cell)',  SvgC:SVG_ElectroChemFull, parts:['Galvanic cell - spontaneous redox → electrical energy; Daniell cell (Zn/Cu)','Electrolytic cell - electrical energy → non-spontaneous redox; electrolysis','Standard electrode potential E° - vs SHE (E°=0.00V) at 1M, 1 atm, 298K','Cell EMF = E°cathode - E°anode; positive EMF = spontaneous = ΔG negative','Faraday\'s first law - m=ZIt; Z=electrochemical equivalent=M/nF','Nernst equation - E=E°-(0.0592/n)logQ at 298K; links EMF and concentration'],facts:['1 Faraday=96485 C mol⁻¹=charge of 1 mole electrons','Kohlrausch law: Λm°(electrolyte)=sum of λ°(individual ions) at infinite dilution','Conductance=1/Resistance; Molar conductance increases with dilution']}],
-    'Chemical Kinetics':             [{title:'Chemical Kinetics',                   SvgC:SVG_AtomFull,        parts:['Rate of reaction - Δ[concentration]/Δt; rate law determined experimentally','Zero order - rate=k; [A]t=[A]0-kt; t½=[A]0/2k; unit of k: mol L⁻¹ s⁻¹','First order - rate=k[A]; [A]t=[A]0e⁻ᵏᵗ; t½=0.693/k; unit: s⁻¹','Second order - rate=k[A]²; 1/[A]t=1/[A]0+kt; unit: L mol⁻¹ s⁻¹','Arrhenius equation - k=Ae⁻ᴱᵃ/ᴿᵀ; lnk=-Ea/RT+lnA; Ea from ln k vs 1/T plot','Activation energy Ea - minimum energy required; lowered by catalyst'],facts:['Order determined by experiment; not from stoichiometry','Half-life of first order is constant (independent of initial concentration)','Integrated rate laws used to determine order from concentration-time data']}],
-    'Surface Chemistry':             [{title:'Surface Chemistry and Colloids',       SvgC:SVG_AtomFull,        parts:['Adsorption - accumulation at surface; adsorbent vs adsorbate','Physisorption - weak Van der Waals; reversible; multilayer; low Ea; decreases with T','Chemisorption - strong covalent/ionic bond; irreversible; monolayer; high Ea; optimal T','Freundlich isotherm - x/m=kP^(1/n); empirical; n between 1 and 10','Colloid - particle size 1-1000 nm; shows Tyndall effect; Brownian motion','Coagulation - adding electrolyte destroys colloid; Hardy-Schulze rule: higher charge = more effective'],facts:['Tyndall effect: scattering of light by colloidal particles; distinguishes colloid from solution','Gold number: minimum amount of protective colloid to prevent coagulation by 1% NaCl','Emulsion: liquid in liquid; oil-in-water (milk) or water-in-oil (butter); stabilised by emulsifier']}],
-    'General Principles of Metallurgy':[{title:'Extraction of Metals',              SvgC:SVG_AtomFull,        parts:['Ore - naturally occurring mineral with economically viable metal','Concentration - gravity (hydraulic washing), froth flotation (sulphides), magnetic, leaching (Al2O3)','Calcination - heating without air; removes CO2 from carbonates; MgCO3→MgO+CO2','Roasting - heating in excess air; converts sulphides to oxides; ZnS+O2→ZnO+SO2','Reduction - smelting; carbon or CO reduces oxide; ZnO+C→Zn+CO','Refining - electrolytic (Cu, Al), zone refining (semiconductors, Si, Ge), vapour phase (Ni: Mond process)'],facts:['Ellingham diagram: ΔG vs T; predicts feasibility of reduction by carbon','Thermite welding: Al+Fe2O3→Al2O3+Fe (aluminothermic reaction; very exothermic)','Copper: Cu2S+O2→2Cu+SO2 (self-reduction method; no external reducing agent)']}],
-    'p-Block Elements (12)':         [{title:'p-Block Elements Class 12',           SvgC:SVG_AtomFull,        parts:['Group 15 - Oxides of N (N2O to N2O5); H3PO3 is diprotic (one P-H bond, not ionizable)','Group 16 - SO2 (V-shaped, sp3); H2SO4 (contact process); SO3 (trigonal planar, sp2)','Group 17 - Interhalogen compounds (ClF, ClF3, BrF5, IF7); oxoacids (HOCl to HClO4)','Group 18 - Xe compounds: XeF2 (linear sp3d), XeF4 (square planar sp3d2), XeF6 (distorted octahedral)','Nitric acid - Ostwald: 4NH3+5O2→4NO+6H2O; then NO→NO2→HNO3','Sulphuric acid - Contact: S+O2→SO2; 2SO2+O2→2SO3 (V2O5 catalyst); SO3+H2SO4→oleum'],facts:['Concentrated H2SO4: dehydrating, oxidising, sulphonating agent; oily, hygroscopic','Concentrated HNO3 on metals: passivation of Fe, Cr, Al due to oxide layer','Bleaching powder: Ca(OCl)Cl; releases Cl2 with CO2+H2O']}],
-    'd and f Block Elements':        [{title:'Transition Metals (d-block)',          SvgC:SVG_AtomFull,        parts:['Electronic configuration - (n-1)d1-10 ns0-2; variable oxidation states due to d electrons','Colour - d-d transition absorbs visible light; complementary colour observed','Magnetic properties - paramagnetic (unpaired d electrons); ferromagnetic (Fe, Co, Ni)','Catalytic activity - variable oxidation state; surface adsorption; V2O5, Ni, Pt, Fe','Complex formation - d-orbitals available to accept lone pairs from ligands','Tungsten W - highest MP (3422°C) among all metals; many d-d unpaired electrons'],facts:['Mn has most oxidation states (+2 to +7); Cr is +2 to +6','KMnO4 in acid: Mn +7→+2 | in neutral: +7→+4 | in alkali: +7→+6','K2Cr2O7 (orange/dichromate) vs CrO4²⁻ (yellow/chromate); equilibrium at pH 4']}],
-    'Coordination Compounds':        [{title:'Coordination Chemistry',               SvgC:SVG_AtomFull,        parts:['Central metal ion - Lewis acid; accepts electron pairs from ligands','Ligands - Lewis bases; monodentate (NH3, Cl⁻, H2O), bidentate (en, ox), hexadentate (EDTA)','Coordination number - number of donor atoms directly bonded to metal (2,4,6 common)','Werner\'s theory - primary valency (oxidation state) + secondary valency (coordination number)','Crystal field theory - explains colour and magnetism; Δo (octahedral splitting)','Isomerism - ionisation (different counter ions), linkage (ambidentate ligand), optical, geometrical'],facts:['EDTA: hexadentate; forms very stable chelate complexes; Kf very high','Spectrochemical series: I⁻<Br⁻<Cl⁻<F⁻<OH⁻<H2O<NH3<en<NO2⁻<CN⁻ (increasing field strength)','cis-platin: anti-cancer drug; [Pt(NH3)2Cl2] cis isomer; not trans']}],
-    'Haloalkanes and Haloarenes':    [{title:'Haloalkanes — Reactions',              SvgC:SVG_MoleculeFull,    parts:['SN1 - unimolecular; rate=k[RX]; forms carbocation; racemisation; 3°>2°>1°','SN2 - bimolecular; rate=k[RX][Nu⁻]; backside attack; Walden inversion; 1°>2°>3°','E1 - elimination; carbocation intermediate; follows SN1 conditions (3°, polar solvent)','E2 - concerted; anti-periplanar requirement; strong base; Saytzeff product favoured','Grignard reagent RMgX - prepared in dry ether; very reactive; nucleophile+base','Nucleophilic aromatic substitution - requires electron-withdrawing groups on ring; ortho/para positions'],facts:['Order of reactivity with Nu: RI>RBr>RCl>RF (C-X bond strength)','Markovnikov addition of HX to alkene gives 2° or 3° alkyl halide','Freon (CCl2F2): refrigerant; depletes ozone; being phased out under Montreal Protocol']}],
-    'Alcohols, Phenols and Ethers':  [{title:'Alcohols and Phenols',                SvgC:SVG_MoleculeFull,    parts:['Primary ROH - CH2OH terminal; oxidised to aldehyde then carboxylic acid','Secondary R2CHOH - oxidised to ketone only','Tertiary R3COH - not easily oxidised; E1/E2 predominates over SN','Phenol (C6H5OH) - pKa=10; more acidic than alcohol; OH activates ring (ortho, para directing)','Dehydration - conc H2SO4; >170°C gives alkene; 140°C gives ether (Williamson synthesis)','Lucas test - ZnCl2/HCl: 3° (immediate turbidity), 2° (5 min), 1° (no reaction at room T)'],facts:['Kolbe reaction: phenol + CO2 (under pressure) → salicylic acid (aspirin precursor)','Reimer-Tiemann: phenol + CHCl3 + KOH → salicylaldehyde (ortho-hydroxybenzaldehyde)','Denatured alcohol: ethanol + methanol; unfit for drinking; used industrially']}],
-    'Aldehydes, Ketones and Carboxylic Acids':[{title:'Carbonyl Compounds',         SvgC:SVG_MoleculeFull,    parts:['Aldehyde RCHO - carbonyl at terminal C; easily oxidised to RCOOH','Ketone RCOR\' - carbonyl at internal C; not oxidised by mild agents (Tollens, Fehling)','Nucleophilic addition - CN⁻, RMgX, NaBH4 attack sp2 carbonyl carbon','Aldol condensation - base+α-H required; β-hydroxy carbonyl → α,β-unsaturated carbonyl','Cannizzaro reaction - HCHO or ArCHO (no α-H); disproportionation with strong base','Carboxylic acid - strongest organic acid; resonance-stabilised carboxylate anion'],facts:['Tollens test (AgNH3): silver mirror with aldehydes only; ketones do not react','Fehling test (Cu2+ complex): Cu2O brick-red precipitate with aldehydes (not aromatic)','Acidity order: RCOOH>ArOH>H2O>ROH>RC≡CH>RH (reverse of H+ donation ability)']}],
-    'Amines':                        [{title:'Amines',                               SvgC:SVG_MoleculeFull,    parts:['Primary R-NH2 - one alkyl on N; basic due to lone pair; stronger base than aromatic','Secondary R2NH - two alkyl groups; even more basic than primary (more electron donation)','Tertiary R3N - three alkyl groups; less basic than secondary (steric hindrance to protonation)','Aniline (ArNH2) - lone pair delocalised into ring; much weaker base than aliphatic amines','Hofmann rearrangement - amide+Br2+KOH→amine with one less C; rearrangement of N=C=O','Diazonium salts ArN2+Cl⁻ - prepared at 0-5°C; coupling reaction gives azo dyes'],facts:['Aniline (pKa(conjugate acid)=4.6) << methylamine (pKa=10.6): ring delocalisation reduces basicity','Gabriel synthesis: phthalimide→primary amine only (no 2° or 3° contamination)','Mustard gas (β-chloroethyl sulphide): vesicant; chemical warfare agent; WWII']}],
-    'Biomolecules':                  [{title:'Biological Molecules',                 SvgC:SVG_DNAFull,         parts:['Monosaccharides - glucose (C6H12O6); aldose vs ketose; α and β anomers','Disaccharides - maltose (α-1,4 glucose-glucose); sucrose (glucose-fructose, non-reducing)','Polysaccharides - starch (amylose+amylopectin); cellulose (β-1,4 linkage; structural)','Protein levels - primary (sequence), secondary (helix/sheet), tertiary (3D fold), quaternary','Enzyme kinetics - Michaelis-Menten; Km = substrate concentration at ½Vmax','DNA vs RNA - deoxyribose vs ribose; thymine vs uracil; double vs single stranded'],facts:['Reducing sugars: free anomeric -OH; glucose, fructose, maltose (NOT sucrose)','Denaturation: loss of 3D structure; reversible (by cooling) or irreversible (by boiling)','Essential amino acids (8): Val, Leu, Ile, Lys, Met, Phe, Thr, Trp; must come from diet']}],
-    'Polymers':                      [{title:'Polymers',                              SvgC:SVG_MoleculeFull,    parts:['Addition polymer - monomer adds; no byproduct; polyethylene, PVC, polystyrene, Teflon','Condensation polymer - monomers join with elimination of H2O (or HCl); nylon, polyester, Bakelite','Nylon-6,6 - hexamethylenediamine + adipic acid; polyamide; synthetic fibre; Tg=263°C','Nylon-6 - caprolactam; ring-opening polymerisation; polyamide','Bakelite - phenol + formaldehyde; thermosetting; cross-linked network; cannot be remoulded','Natural rubber - cis-polyisoprene; vulcanisation with S (3-5%): improves elasticity and strength'],facts:['PET (Dacron): polyethylene terephthalate; polyester; bottles, clothing','Degree of polymerisation n: number of monomer units in polymer chain','PHBV: biodegradable; used in packaging; produced by bacteria']}],
-    'Chemistry in Everyday Life':    [{title:'Chemistry in Daily Life',              SvgC:SVG_AtomFull,        parts:['Analgesics - aspirin (antipyretic+anti-inflammatory+antiplatelet); ibuprofen; morphine (narcotic)','Antibiotics - penicillin (beta-lactam; kills bacteria); tetracycline (bacteriostatic); streptomycin','Antacids - NaHCO3; Mg(OH)2; Al(OH)3; neutralise excess HCl; reduce acidity','Antiseptics - applied to living tissue; Dettol (chloroxylenol+terpineol); boric acid; iodine','Disinfectants - applied to non-living; bleach (1% NaOCl); phenol at high concentration','Soaps - sodium (hard)/potassium (soft) salts of fatty acids; micelle formation'],facts:['Sulfa drugs: 1st antibiotics (1930s); inhibit folic acid synthesis in bacteria','Synthetic sweeteners: saccharin (500× sweet); aspartame (100×); sucralose (600×); low-calorie','Rocket propellants: UDMH+N2O4 (liquid); NH4ClO4+Al (solid); liquid H2+O2 (cryogenic)']}],
-    // Physics
-    'Physical World':                [{title:'Fundamental Forces in Nature',         SvgC:SVG_AtomFull,        parts:['Gravitational force - weakest; infinite range; always attractive; F=Gm1m2/r²','Electromagnetic force - 10⁴² times stronger than gravity; infinite range; repulsive+attractive','Weak nuclear force - short range (~10⁻¹⁸m); responsible for beta decay; radioactivity','Strong nuclear force - strongest; very short range (10⁻¹⁵m); holds nucleus together; 100× EM','Grand Unified Theory (GUT) - attempts to unify 3 forces (not gravity)','Standard Model - describes quarks, leptons; doesn\'t include gravity'],facts:['All forces except gravity explained by exchange of virtual particles','Graviton: hypothetical particle mediating gravity; not yet detected','String theory: attempts to unify all 4 forces; requires extra dimensions']}],
-    'Units and Measurements':        [{title:'Units, Dimensions and Errors',         SvgC:SVG_AtomFull,        parts:['SI base units - metre (m), kilogram (kg), second (s), ampere (A), kelvin (K), mole (mol), candela (cd)','Dimensional analysis - [M^a L^b T^c]; checking equations; unit conversions','Significant figures - rules: non-zero digits + zeros between + trailing zeros after decimal','Absolute error = |measured - true|; mean absolute error = Δa_mean','Relative error = Δa/a; percentage error = (Δa/a)×100%','Random error - reduced by repetition; systematic error - corrected by calibration'],facts:['Dimensional formula of force: [MLT⁻²] | Planck constant: [ML²T⁻¹]','Light year = distance light travels in 1 year = 9.46×10¹⁵ m','Parallax method: distance = b/θ (b=baseline, θ=parallax angle in radians)']}],
-    'Motion in a Straight Line':     [{title:'1D Kinematics',                        SvgC:SVG_AtomFull,        parts:['Position vector - reference to origin; displacement = final - initial position','Velocity - v=ds/dt (instantaneous); average v=Δs/Δt; vector quantity','Acceleration - a=dv/dt; can be negative (deceleration); constant or variable','Equations of motion - v=u+at; s=ut+½at²; v²=u²+2as; s_n=u+a(2n-1)/2','Free fall - a=g=9.8 m/s² downward; initial velocity=0 for dropped object','Relative motion - velocity of A relative to B: VAB=VA-VB'],facts:['Area under v-t graph = displacement; slope = acceleration','Area under a-t graph = change in velocity; slope of x-t graph = velocity','Motion in uniform gravitational field: parabolic trajectory']}],
-    'Motion in a Plane':             [{title:'Projectile and Circular Motion',       SvgC:SVG_WaveFull,        parts:['Projectile motion - horizontal: uniform (vx=ucosθ); vertical: free fall (g downward)','Range R = u²sin2θ/g; maximum at θ=45°; same for complementary angles (30° and 60°)','Time of flight T = 2usinθ/g; maximum height H = u²sin²θ/2g','Uniform circular motion - constant speed; centripetal acceleration a=v²/r=ω²r (toward center)','Centripetal force - not a new force; provided by tension, normal, gravity, friction as needed','Relative velocity in 2D - vector subtraction; rain-umbrella problems'],facts:['At highest point of projectile: vy=0; vx=ucosθ; speed is minimum','Centripetal force = mv²/r = mω²r; directed toward center of circle','Banking angle: tanθ=v²/rg (no friction); for friction: tanθ=(v²/rg±μ)/(1∓μv²/rg)']}],
-    'Laws of Motion':                [{title:'Newton\'s Laws of Motion',              SvgC:SVG_ElectricFull,    parts:['First Law (Inertia) - every body continues its state unless external net force acts','Second Law - F=ma=dp/dt; net force proportional to rate of change of momentum','Third Law - action and reaction: equal magnitude, opposite direction, different bodies','Static friction fs≤μsN; kinetic friction fk=μkN; rolling friction (smallest)','Free body diagram - all forces on one object; resolve; apply Newton\'s 2nd law','Impulse J=FΔt=Δp; area under F-t graph; changes momentum'],facts:['Inertia: resistance to change in state; measured by mass','Pseudo force in non-inertial frame = -ma (Newton\'s 2nd law not directly valid)','Friction is not always opposing motion; static friction can be in direction of motion']}],
-    'Work, Energy and Power':        [{title:'Work, Energy and Power',               SvgC:SVG_AtomFull,        parts:['Work W=F·d·cosθ; scalar; zero if F⊥d (normal force) or zero displacement','Kinetic energy KE=½mv²; work-energy theorem: Wnet=ΔKE','Potential energy - gravitational (mgh); elastic (½kx²); PE depends on position/configuration','Conservation of mechanical energy - KE+PE=constant (no friction/dissipation)','Power P=W/t=Fv; instantaneous P=F·v; unit: watt (1W=1J/s); kW, HP','Elastic collision - KE+momentum conserved; inelastic - only momentum conserved'],facts:['Coefficient of restitution e=relative speed after/relative speed before; 1=elastic; 0=perfectly inelastic','Power of engine = Fv = (mg sinθ + friction force) × velocity for inclined plane','Conservative force: work done is path-independent (gravity, spring); non-conservative: friction']}],
-    'System of Particles and Rotational Motion':[{title:'Rotational Motion',         SvgC:SVG_LocomotionFull,  parts:['Centre of mass - weighted average position; for system of particles: r_cm=Σmiri/Σmi','Torque τ=r×F=Iα; vector; about chosen axis; unit: N·m','Moment of inertia I=Σmr²; depends on mass distribution AND axis of rotation','Angular momentum L=Iω=r×p; dL/dt=τ; conserved if τ=0','Parallel axis theorem I=Icm+Md²; perpendicular axis Iz=Ix+Iy (for lamina)','Rolling without slipping: v=Rω; KE=½Iω²+½Mv²=½Mv²(1+I/MR²)'],facts:['Conservation of L: figure skater pulls arms in → I decreases → ω increases','KE of rolling sphere = ½Mv²(1+2/5) = 7/10 Mv² (I=2MR²/5 for solid sphere)','Torque couples: two equal and opposite forces not at same point; net force=0 but net torque≠0']}],
-    'Gravitation':                   [{title:'Gravitation',                           SvgC:SVG_AtomFull,        parts:['Newton\'s law F=Gm1m2/r²; G=6.67×10⁻¹¹ N m² kg⁻²; inverse square law','Gravitational field g=GM/r²; near Earth surface g=9.8 m/s²; decreases with altitude','Gravitational potential V=-GM/r; work done per unit mass to bring from infinity','Orbital velocity vo=√(GM/r)≈7.9 km/s near Earth surface; independent of satellite mass','Escape velocity ve=√(2GM/R)=√(2gR)≈11.2 km/s; condition: KE≥PE','Kepler\'s laws: 1.Ellipse; 2.Equal areas (conservation of angular momentum); 3.T²∝a³'],facts:['Geostationary orbit: T=24h; h≈36000km above equator; appears stationary','g varies: 0 at center; maximum at surface; decreases above and below surface','Black hole: escape velocity > c; Schwarzschild radius Rs=2GM/c²']}],
-    'Mechanical Properties of Solids':[{title:'Mechanical Properties',              SvgC:SVG_LocomotionFull,  parts:['Stress = Force/Area; unit: Pa (pascal)=N/m²; tensile, compressive, shear','Strain = ΔL/L (longitudinal), ΔV/V (volumetric), Δx/L (shear); dimensionless','Young\'s modulus Y = tensile stress/longitudinal strain; steel~2×10¹¹ Pa','Bulk modulus K = volumetric stress/volumetric strain; liquids have B not Y','Shear modulus (Rigidity) η = shear stress/shear strain','Elastic limit - Hooke\'s law valid up to this; beyond this: permanent deformation'],facts:['Steel: higher Young\'s modulus than rubber → steel is stiffer (less strain per stress)','Rubber: higher elastic limit than steel proportionally; can be stretched more before permanent deformation','Resilience: energy stored per unit volume = σ²/2Y; toughness: energy to fracture']}],
-    'Mechanical Properties of Fluids':[{title:'Fluid Mechanics',                    SvgC:SVG_AtomFull,        parts:['Pressure P=F/A=ρgh; Pascal\'s principle: pressure transmitted equally in all directions','Archimedes\' principle - buoyant force = weight of displaced fluid; floats if density < fluid','Bernoulli equation - P+½ρv²+ρgh=constant (energy conservation; ideal fluid)','Continuity equation - A1v1=A2v2 (incompressible fluid; conservation of mass)','Viscosity η - tangential force per unit area per velocity gradient; Pa·s (poise)','Stokes\' law - F=6πηrv (sphere); terminal velocity when F_drag=W-buoyancy'],facts:['Bernoulli explains: aircraft lift, atomiser, Pitot tube, Venturimeter','Terminal velocity vt=2r²(ρ-σ)g/9η; proportional to r²','Capillary rise h=2Tcosθ/rρg; rise in narrow tube; water rises (θ<90°), mercury falls (θ>90°)']}],
-    'Thermal Properties of Matter':  [{title:'Thermal Properties',                   SvgC:SVG_AtomFull,        parts:['Temperature scales - Kelvin=Celsius+273; Fahrenheit=9/5°C+32','Thermal expansion - linear ΔL=αLΔT; area Δa=βAΔT (β=2α); volume ΔV=γVΔT (γ=3α)','Specific heat c=Q/mΔT; water=4200 J/kg/K (very high; anomalous)','Latent heat - no temperature change; fusion (ice→water) and vaporisation (water→steam)','Heat transfer - conduction (Fourier: Q/t=KAΔθ/l), convection (fluid motion), radiation (Stefan-Boltzmann)','Stefan-Boltzmann P=σAT⁴; Wien\'s displacement: λmT=2.9×10⁻³ m·K'],facts:['Newton\'s law of cooling: dT/dt=-k(T-T0); exponential decay; valid for small temp difference','Anomalous expansion of water: maximum density at 4°C; ice floats on water','Bimetallic strip: different expansion coefficients → bending on heating; thermostat, fire alarm']}],
-    'Thermodynamics':                [{title:'Thermodynamic Laws',                   SvgC:SVG_AtomFull,        parts:['Zeroth law - if A in equilibrium with C and B in equilibrium with C, then A in equilibrium with B; defines temperature','First law - ΔU=q+w; U is internal energy (state function); q=heat absorbed; w=work done on system','Second law - entropy of universe always increases for spontaneous process; Kelvin-Planck statement','Carnot engine - most efficient possible heat engine; η=1-T2/T1','Isothermal process - T constant; ΔU=0 for ideal gas; q=-w','Adiabatic process - q=0; PV^γ=constant; temperature changes'],facts:['Efficiency of heat engine: η=(W/QH)=(1-QL/QH); always <1 (Carnot)','Entropy: disorder measure; ΔSuniv=ΔSsys+ΔSsurr≥0; equals 0 at equilibrium','Refrigerator COP=QL/W=T2/(T1-T2); higher T2 (cold reservoir) → higher COP']}],
-    'Kinetic Theory':                [{title:'Kinetic Theory of Gases',              SvgC:SVG_AtomFull,        parts:['KTG postulates - point masses; elastic collisions; random motion; intermolecular forces negligible','Pressure P=⅓ρvrms²=⅓(nm)vrms²; from Newton\'s 2nd law on gas molecules','RMS speed vrms=√(3RT/M)','Mean speed v̄=√(8RT/πM)=0.921 vrms','Most probable speed vmp=√(2RT/M)=0.816 vrms','Equipartition of energy - each degree of freedom has ½kT energy; Cv=(f/2)R'],facts:['vrms:v̄:vmp = √3:√(8/π):√2 ≈ 1.732:1.596:1.414','Mean free path λ=1/(√2 πd²n); increases with T at constant P; decreases with P at constant T','Real gas: Z=PV/nRT; Z>1 (repulsion dominates); Z<1 (attraction dominates)']}],
-    'Oscillations':                  [{title:'Simple Harmonic Motion',               SvgC:SVG_WaveFull,        parts:['SHM definition - F=-kx; restoring force proportional to displacement; toward equilibrium','Equation of motion - x=A sin(ωt+φ); A=amplitude; ω=angular frequency; φ=phase constant','Velocity v=ω√(A²-x²); max at x=0; zero at x=±A','Acceleration a=-ω²x; max at x=±A; zero at x=0','Simple pendulum T=2π√(L/g); valid for small angles (θ<15°)','Spring-mass T=2π√(m/k); independent of amplitude; parallel: k=k1+k2; series: 1/k=1/k1+1/k2'],facts:['At equilibrium: v=max, a=0, KE=max, PE=min (zero)','At extremes x=±A: v=0, a=ω²A (max), KE=0, PE=max=½kA²','Resonance: driving frequency = natural frequency → amplitude theoretically infinite (if no damping)']}],
-    'Waves':                         [{title:'Wave Motion',                           SvgC:SVG_WaveFull,        parts:['Transverse wave - displacement ⊥ to propagation; e.g. light, string vibration','Longitudinal wave - displacement ∥ to propagation; e.g. sound, spring compression','Wave equation y=A sin(kx-ωt); k=2π/λ (wave number); ω=2πf; v=fλ=ω/k','Speed of sound in air v=√(γP/ρ)=332 m/s at 0°C; increases with T','Standing waves - superposition of equal amplitude waves in opposite directions; nodes and antinodes','Beats - two waves of slightly different frequencies; fbeat=f1-f2 Hz'],facts:['Doppler effect: fo=fs(v±vo)/(v∓vs); + for approach, - for recession','Open pipe: fn=nf1 (all harmonics); closed pipe: fn=(2n-1)f1 (odd harmonics only)','Sound: Infrasonic<20Hz<audible<20kHz<ultrasonic; medical imaging uses ultrasound']}],
-    'Electric Charges and Fields':   [{title:'Electric Charges and Coulomb\'s Law',  SvgC:SVG_ElectricFull,    parts:['Coulomb\'s law F=kq1q2/r²; k=9×10⁹ N m² C⁻²=1/4πε₀; vector form F=kq1q2r̂/r²','Electric field E=F/q₀; unit N/C or V/m; superposition principle applies','Field lines - originate from +; end at -; tangent=field direction; density=magnitude','Gauss\'s law ΦE=Q_enclosed/ε₀; useful for symmetric distributions (sphere, cylinder, plane)','Electric dipole p=qd (C·m); torque τ=p×E; potential energy U=-p·E','Electric flux Φ=E·A cosθ; unit: N m²/C or V·m'],facts:['Field of infinite plane sheet: E=σ/2ε₀; uniform; independent of distance','Field inside conductor = 0; all charge on outer surface; field ⊥ to surface','Faraday cage: no field inside hollow conductor; used to shield sensitive electronics']}],
-    'Electrostatic Potential and Capacitance':[{title:'Potential and Capacitors',   SvgC:SVG_ElectricFull,    parts:['Electric potential V=kQ/r; scalar; work done per unit positive charge; unit: volt (V)','Potential difference: work done to move unit charge from one point to another','Equipotential surface - V=constant; no work done moving along it; ⊥ to field lines','Capacitance C=Q/V; unit farad (F); 1F=1 C/V; physical property of capacitor','Parallel plate capacitor C=ε₀A/d; with dielectric: C=Kε₀A/d (K=dielectric constant)','Energy stored U=½QV=½CV²=Q²/2C; energy density u=½ε₀E²'],facts:['Series capacitors: 1/C=1/C1+1/C2 (equivalent is less than smallest)','Parallel capacitors: C=C1+C2 (total is sum)','Van de Graaff generator: charge accumulation on dome; used as particle accelerator']}],
-    'Current Electricity':           [{title:'Electric Circuits',                    SvgC:SVG_ElectricFull,    parts:['Ohm\'s law V=IR; resistance R=ρL/A; resistivity ρ increases with T for metals','Kirchhoff Current Law (KCL) - Σi=0 at node; conservation of charge','Kirchhoff Voltage Law (KVL) - ΣV=0 around closed loop; conservation of energy','Wheatstone bridge P/Q=R/S when balanced; null method; measures unknown resistance','Potentiometer - no current from source; compares EMFs; measures internal resistance','Drift velocity vd=I/nAe; mobility μ=vd/E=eτ/m'],facts:['Resistivities: metals ~10⁻⁸Ω·m; semiconductors 10⁻³ to 10³; insulators >10⁶ Ω·m','Temperature coefficient of resistance α: metals positive; semiconductors negative','Power P=IV=I²R=V²/R; energy E=Pt (kWh for household use); 1 unit=1kWh=3.6 MJ']}],
-    'Moving Charges and Magnetism':  [{title:'Magnetic Force and Biot-Savart Law',  SvgC:SVG_ElectricFull,    parts:['Magnetic force F=qv×B=qvBsinθ; zero if v∥B; maximum if v⊥B','Biot-Savart law dB=μ₀/4π × Idl×r̂/r²; analogous to Coulomb but for magnetic field','Field at center of circular loop B=μ₀I/2R; proportional to current, inversely to radius','Ampere\'s law ∮B·dl=μ₀I_enclosed; analogous to Gauss\'s law for magnetism','Solenoid B=μ₀nI (inside); n=turns per unit length; uniform field inside','Cyclotron - r=mv/qB; T=2πm/qB; frequency independent of speed'],facts:['Lorentz force: F=q(E+v×B); qvB provides centripetal force in cyclotron','Galvanometer: coil+spring; converted to ammeter (low shunt parallel) or voltmeter (high resistance series)','Hall effect: perpendicular voltage when current conductor in magnetic field; determines charge carrier type']}],
-    'Magnetism and Matter':          [{title:'Magnetic Properties of Materials',     SvgC:SVG_AtomFull,        parts:['Diamagnetic - repelled by magnet; χm slightly negative (10⁻⁵); Bi, Cu, Pb, H2O','Paramagnetic - weakly attracted; χm small positive (10⁻⁵-10⁻³); Al, O2, Na; follows Curie law','Ferromagnetic - strongly attracted; χm large positive (10³-10⁵); Fe, Co, Ni, Gd','Hysteresis - B-H loop; retentivity (B when H=0); coercivity (H to make B=0)','Curie temperature Tc - above this, ferromagnet→paramagnetic (Fe: 1043K; Ni: 631K)','Earth\'s magnetism - declination, inclination (dip), horizontal component BH'],facts:['Magnetic domains: ferromagnetism due to domain alignment; Weiss theory','Soft iron: high retentivity, low coercivity → transformer core, electromagnets','Hard steel: high retentivity, high coercivity → permanent magnets']}],
-    'Electromagnetic Induction':     [{title:'Electromagnetic Induction',            SvgC:SVG_ElectricFull,    parts:['Faraday\'s law EMF=-NdΦ/dt; flux Φ=B·A·cosθ; rate of flux change = EMF','Lenz\'s law - induced current opposes the change causing it; energy conservation','Motional EMF ε=BLv; conductor moving in field; force on charges creates EMF','Self-inductance L=NΦ/I; EMF=-LdI/dt; unit: henry (H); coil opposes change in current','Mutual inductance M=N₂Φ₂₁/I₁; EMF₂=-MdI₁/dt; depends on geometry and orientation','AC generator - rotating coil in uniform B; ε=NBAω sin(ωt)=ε₀ sin(ωt)'],facts:['Eddy currents: induced in solid conductors in varying B field; reduce by lamination','Transformer ratio Vs/Vp=Ns/Np; ideal: power in=power out; step-up or step-down','Back EMF in motor opposes applied voltage; limits current; efficiency = back-EMF/applied-EMF']}],
-    'Alternating Current':           [{title:'AC Circuits',                           SvgC:SVG_WaveFull,        parts:['AC basics - v=Vm sinωt; Vrms=Vm/√2=0.707Vm; f=ω/2π; T=1/f','Resistive circuit - I in phase with V; P=Vrms²/R=Vrms Irms','Inductive circuit - I lags V by 90°; XL=ωL; P=0 (wattless)','Capacitive circuit - I leads V by 90°; XC=1/ωC; P=0 (wattless)','Series LCR - impedance Z=√(R²+(XL-XC)²); phase φ=tan⁻¹((XL-XC)/R)','Resonance - XL=XC; Z=R (minimum); I=maximum; f₀=1/2π√(LC)'],facts:['Power factor cosφ=R/Z; average power P=Vrms Irms cosφ=I²R','Q factor=ω₀L/R=1/ω₀CR; sharpness of resonance; selectivity of tuned circuits','Choke coil: inductor in AC circuit; wattless current; used in fluorescent lamp']}],
-    'Electromagnetic Waves':         [{title:'EM Spectrum',                           SvgC:SVG_AtomFull,        parts:['Maxwell\'s prediction - changing E field creates B field and vice versa; self-propagating wave','Speed c=1/√(μ₀ε₀)=3×10⁸ m/s in vacuum; all EM waves travel at c','Radio waves (>1mm) - communication; AM, FM radio; mobile phones; radar','Microwaves (1mm-30cm) - microwave oven; RADAR; satellite communication','Infrared (700nm-1mm) - heat radiation; remote control; night vision; medical imaging','Visible (400-700nm) - only EM wave visible to human eye; VIBGYOR'],facts:['UV radiation: photosynthesis; Vitamin D synthesis; sterilization; causes sunburn','X-rays: penetrate soft tissue; diffraction by crystals (Bragg\'s law); cancer treatment','Gamma rays: from nuclear decay; highest energy; most penetrating; sterilisation of medical equipment']}],
-    'Ray Optics and Optical Instruments':[{title:'Ray Optics',                       SvgC:SVG_WaveFull,        parts:['Mirror formula 1/v+1/u=1/f; f=R/2; sign convention: distances from pole','Refraction - Snell\'s law n1sinθ1=n2sinθ2; n=c/v; denser medium has higher n','Lens formula 1/v-1/u=1/f; power P=1/f (dioptre); converging: P positive','Lens maker equation 1/f=(n-1)(1/R1-1/R2); determines focal length from geometry','Total internal reflection - at interface from denser to rarer; angle>critical angle θc=sin⁻¹(1/n)','Optical fibre - TIR principle; total confinement; used in internet, endoscope'],facts:['For concave mirror f<0; convex f>0 (using New Cartesian sign convention)','Apparent depth = real depth / n; apparent depth < real depth in denser medium','Compound microscope: magnification m=-L/fo × D/fe; L=tube length, D=least distance of distinct vision']}],
-    'Wave Optics':                   [{title:"Young's Double Slit Experiment",       SvgC:SVG_WaveFull,        parts:['Huygens principle - every point on wavefront is source of secondary wavelets','Interference - constructive: path diff=nλ; destructive: (2n-1)λ/2; bright and dark fringes','YDSE fringe width β=λD/d; bright fringes at y=nβ; dark fringes at y=(2n-1)β/2','Coherence - constant phase relationship; essential for stable interference pattern','Diffraction - bending at edges; single slit: central max width=2λD/a','Polarisation - transverse wave property; Malus law I=I₀cos²θ; Brewster angle tanθ=n'],facts:['Fringe width β=λD/d: larger λ → wider fringes; larger D → wider; larger d → narrower','Thin film interference: soap bubble colours; anti-reflection coating (AR); minimum thickness λ/4n','Angular resolution limit: 1.22λ/D (Rayleigh criterion); applies to telescope, eye, camera lens']}],
-    'Dual Nature of Radiation and Matter':[{title:'Photoelectric Effect',            SvgC:SVG_AtomFull,        parts:['Photoelectric effect - light ejects electrons from metal surface; proved quantum nature of light','Einstein equation KE_max=hf-φ=h(f-f₀); φ=work function; f₀=threshold frequency','Key observations - instantaneous; depends on frequency not intensity; no emission below f₀','Stopping potential eVs=KE_max; Vs is independent of intensity','de Broglie wavelength λ=h/mv=h/p; all matter has wave nature','Davisson-Germer experiment - electron diffraction (1927); proved wave nature of electrons'],facts:['Work function φ: Cs (1.9eV)< Na (2.3eV)< Al (4.1eV)< Cu (4.5eV)< W (4.5eV)','Heisenberg uncertainty: ΔxΔp≥h/4π; ΔEΔt≥h/4π; fundamental limit, not measurement error','Electron microscope: uses de Broglie wavelength (much smaller than visible light) → higher resolution']}],
-    'Atoms':                         [{title:'Atomic Models',                         SvgC:SVG_AtomFull,        parts:['Thomson\'s plum pudding model - electrons embedded in positive sphere; failed Rutherford','Rutherford\'s model - nuclear; α-particle scattering; 1911; most mass in tiny nucleus','Rutherford\'s problems - should emit radiation; electrons should spiral in (classical EM)','Bohr\'s model - quantised orbits; En=-13.6/n² eV; rn=n²×0.529 Å (for H)','Spectral series - Lyman (n→1, UV); Balmer (n→2, visible); Paschen (n→3, IR)','Energy levels - ground state n=1 (-13.6eV); ionisation from n=1 needs +13.6eV'],facts:['Rydberg formula: 1/λ=R(1/n1²-1/n2²); R=1.097×10⁷ m⁻¹','Bohr radius a₀=0.529 Å; radius scales as n²; energy scales as 1/n²','Atomic spectra: emission (hot gas) and absorption (cool gas in front of hot source)']}],
-    'Nuclei':                        [{title:'Nuclear Physics',                       SvgC:SVG_NucleiFull,      parts:['Nucleus size R=R₀A^(1/3); R₀=1.2 fm; nuclear density~2.3×10¹⁷ kg/m³ (constant for all nuclei)','Binding energy BE=Δm×c²; mass defect Δm=Zmp+(A-Z)mn-M_nucleus','BE per nucleon - peaks at Fe-56 (8.8 MeV/nucleon); most stable nucleus','Radioactive decay - alpha (⁴He; A-4,Z-2); beta (e⁻; Z+1,A same); gamma (photon; no change)','Radioactive decay law N=N₀e⁻λt; activity A=λN=A₀e⁻λt','Half-life t½=0.693/λ; mean life τ=1/λ=1.44t½'],facts:['Nuclear fission: U-235+n→Ba-141+Kr-92+3n+energy; chain reaction; critical mass','Nuclear fusion: ²H+³H→⁴He+n+17.6 MeV; needs ~10⁷ K (stellar temperature)','1 amu=931.5 MeV; 1 Curie=3.7×10¹⁰ dps; 1 Becquerel=1 decay/second']}],
-    'Semiconductor Electronics':     [{title:'Semiconductor Devices',                 SvgC:SVG_SemiFull,        parts:['Intrinsic semiconductor - pure Si/Ge; few carriers; n=p; increases exponentially with T','p-type - trivalent impurity (B, Al, Ga); majority=holes; minority=electrons','n-type - pentavalent impurity (P, As, Sb); majority=electrons; minority=holes','p-n junction - depletion region (barrier ~0.7V Si, ~0.3V Ge); junction diode','Forward bias - Vapplied>Vbarrier; conducts; depletion layer narrows','Transistor (BJT) - PNP or NPN; 3 regions: emitter, base, collector; current amplifier'],facts:['Reverse bias: reverse saturation current (mA); depletion layer widens; breakdown at Zener voltage','NAND and NOR: universal gates (any logic circuit can be made from these alone)','IC (Integrated Circuit): millions of transistors on single silicon chip; SSI/MSI/LSI/VLSI/ULSI']}],
-    'Communication Systems':         [{title:'Communication Systems',                 SvgC:SVG_WaveFull,        parts:['Modulation - amplitude (AM), frequency (FM), phase (PM); needed to transmit audio signals on carrier','AM bandwidth=2fm; FM bandwidth=2(Δf+fm); FM has less noise than AM','Ground wave propagation - along surface; MF band (0.3-3 MHz); range limited by absorption','Sky wave propagation - reflects off ionosphere; HF (3-30 MHz); long range','Space wave propagation - line of sight; VHF, UHF, microwave; needs repeaters or satellite','Optical fibre - TIR; high bandwidth; low loss; no EM interference; secure'],facts:['Ionosphere layers: D (60-90km), E (100-130km), F1+F2 (160-400km); reflect HF waves','Range of TV transmission d=√(2hT×Re); hT=antenna height; increases with antenna height','Mobile communication: cells (hexagonal); frequency reuse; base station; handoff/handover']}],
+  const BIO_CHAPTERS = {
+    'The Living World': {
+      title:'Taxonomic Hierarchy',
+      parts:['Kingdom → Phylum → Class → Order → Family → Genus → Species','Binomial nomenclature: Genus (capital) + species (small) in italics','Species: most basic unit; members can interbreed freely','Taxonomic key: used to identify organisms based on characters'],
+      facts:['Linnaeus introduced binomial nomenclature (1753)','KPCOFGS — King Philip Came Over For Good Soup (mnemonic)','Herbarium = dried plant specimens; type specimen = standard reference'],
+      svg: () => (
+        <svg viewBox="0 0 420 310" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="18" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Taxonomic Hierarchy</text>
+          {[['Kingdom','Animalia','#f85149',42],['Phylum','Chordata','#f0883e',82],['Class','Mammalia','#d29922',122],['Order','Primates','#3fb950',162],['Family','Hominidae','#58a6ff',202],['Genus','Homo','#bc8cff',242],['Species','sapiens','#f85149',282]].map(([rank,eg,col,y],i)=>(
+          <g key={i}>
+            <rect x={28+i*6} y={y-14} width={364-i*12} height={26} rx={6} fill="rgba(0,0,0,.4)" stroke={col} strokeWidth={1.8}/>
+            <text x="115" y={y+4} fill={col} fontSize="11" fontWeight="bold">{rank}</text>
+            <text x="275" y={y+4} textAnchor="middle" fill="#e6edf3" fontSize="11" fontStyle="italic">{eg}</text>
+          </g>))}
+          <text x="210" y="302" textAnchor="middle" fill="#8b949e" fontSize="9">Broadest → Narrowest | Each rank more specific than the one above</text>
+        </svg>)
+    },
+    'Biological Classification': {
+      title:'Five Kingdom Classification (Whittaker 1969)',
+      parts:['Monera — Prokaryotes; bacteria and cyanobacteria; 70S ribosomes; no nuclear membrane','Protista — Unicellular eukaryotes; Amoeba, Euglena, Paramecium; autotrophic or heterotrophic','Fungi — Saprophytes; chitin cell wall; no chlorophyll; Rhizopus, Penicillium, Agaricus','Plantae — Autotrophs; cellulose cell wall; embryo present; includes all plants','Animalia — Heterotrophs; no cell wall; ingestive nutrition; multicellular'],
+      facts:['Fungi cell wall: chitin | Plant cell wall: cellulose | Bacteria: peptidoglycan','Viruses are acellular — not placed in any kingdom','Lichens = algae + fungi (mutualism); Mycorrhiza = fungi + plant roots'],
+      svg: () => (
+        <svg viewBox="0 0 440 290" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="18" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Five Kingdom Classification</text>
+          {[{k:'Monera',c:'#f85149',ex:'Bacteria, Cyanobacteria',note:'Prokaryote; 70S ribosome; no nuclear membrane; oldest life form'},
+            {k:'Protista',c:'#f0883e',ex:'Amoeba, Euglena, Paramecium',note:'Unicellular eukaryote; diverse; link between kingdoms'},
+            {k:'Fungi',c:'#d29922',ex:'Rhizopus, Penicillium, Agaricus',note:'Saprophyte; chitin wall; heterotrophic; absorptive nutrition'},
+            {k:'Plantae',c:'#3fb950',ex:'Moss, Fern, Rose, Mango',note:'Autotrophic; cellulose cell wall; photosynthesis; embryo present'},
+            {k:'Animalia',c:'#58a6ff',ex:'Sponge, Earthworm, Frog, Humans',note:'Heterotrophic; no cell wall; ingestive; multicellular; motile'},
+          ].map(({k,c,ex,note},i)=>(
+            <g key={k}>
+              <rect x="10" y={38+i*46} width="420" height="42" rx="7" fill="rgba(0,0,0,.35)" stroke={c} strokeWidth="2"/>
+              <text x="20" y={55+i*46} fill={c} fontSize="12" fontWeight="bold">{k}</text>
+              <text x="20" y={69+i*46} fill="#d29922" fontSize="8">e.g. {ex}</text>
+              <text x="20" y={74+i*46} fill="#8b949e" fontSize="7.5">  {note}</text>
+            </g>))}
+        </svg>)
+    },
+    'Plant Kingdom': {
+      title:'Plant Kingdom — Classification',
+      parts:['Algae (Thallophyta) — No true roots/stem/leaves; aquatic; Chara, Volvox, Spirogyra','Bryophyta — No vascular tissue; need water to reproduce; Funaria (moss), Marchantia','Pteridophyta — First vascular plants; no seeds; sporophyte dominant; Dryopteris, Equisetum','Gymnosperms — Naked seeds; cones; heterosporous; Pinus, Cycas, Gnetum','Angiosperms — Seeds enclosed in fruit; double fertilization; dominant land plants today'],
+      facts:['Bryophytes = amphibians of plant kingdom (need water for fertilization)','Pteridophytes = first vascular, seedless plants; Selaginella is heterosporous','Angiosperms: most evolved; 300,000 species; divided into monocots and dicots'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="18" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Plant Kingdom — Evolutionary Series</text>
+          <line x1="75" y1="42" x2="75" y2="300" stroke="#3fb950" strokeWidth="2" strokeDasharray="4,4" opacity=".5"/>
+          {[{n:'Algae',y:55,c:'#2ea043',ex:'Chara, Spirogyra, Volvox',note:'No embryo; aquatic; gametophyte dominant; no vascular tissue'},
+            {n:'Bryophyta',y:110,c:'#3fb950',ex:'Funaria, Marchantia, Riccia',note:'Amphibians of plant kingdom; no vascular; need water for fertilization'},
+            {n:'Pteridophyta',y:165,c:'#58a6ff',ex:'Selaginella, Dryopteris, Equisetum',note:'First vascular plants; seedless; sporophyte dominant'},
+            {n:'Gymnosperms',y:220,c:'#d29922',ex:'Pinus, Cycas, Gnetum, Ephedra',note:'Naked seeds; no fruit; heterosporous; cones'},
+            {n:'Angiosperms',y:275,c:'#f85149',ex:'Rose, Mango, Wheat, Maize',note:'Seeds in fruit; double fertilization; most dominant group'},
+          ].map(({n,y,c,ex,note})=>(
+            <g key={n}>
+              <circle cx="75" cy={y} r="6" fill={c}/>
+              <rect x="95" y={y-18} width="335" height="40" rx="6" fill="rgba(0,0,0,.35)" stroke={c} strokeWidth="1.5"/>
+              <text x="105" y={y-3} fill={c} fontSize="11" fontWeight="bold">{n}</text>
+              <text x="105" y={y+11} fill="#d29922" fontSize="8">e.g. {ex}</text>
+              <text x="105" y={y+22} fill="#8b949e" fontSize="7.5">{note}</text>
+            </g>))}
+        </svg>)
+    },
+    'Animal Kingdom': {
+      title:'Animal Kingdom — Major Phyla',
+      parts:['Porifera — Pore-bearing; canal system; choanocytes; Sycon, Spongilla','Coelenterata — Nematocysts; radial symmetry; diploblastic; Hydra, Aurelia','Platyhelminthes — Flatworms; acoelomate; bilateral; Taenia (tapeworm), Fasciola','Aschelminthes — Roundworms; pseudocoelomate; complete gut; Ascaris, Wuchereria','Annelida — True coelom (schizocoel); metamerism; nephridia; earthworm, Nereis','Arthropoda — Largest phylum; jointed legs; chitin exoskeleton; cockroach, prawn','Chordata — Notochord + dorsal nerve cord + pharyngeal gill slits at some stage'],
+      facts:['Arthropoda = largest animal phylum (>80% of all animal species)','True coelom first appears in Annelida (schizocoel — splits in mesoderm)','All vertebrates are chordates, but NOT all chordates are vertebrates'],
+      svg: () => (
+        <svg viewBox="0 0 440 350" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="11" fontWeight="bold">Animal Kingdom — Key Phyla</text>
+          {[{p:'Porifera',ex:'Sycon, Spongilla',c:'#58a6ff',note:'Pore-bearing; canal system; choanocytes; sessile'},
+            {p:'Coelenterata',ex:'Hydra, Obelia, Aurelia',c:'#3fb950',note:'Nematocysts; radial symmetry; diploblastic; polymorphism'},
+            {p:'Platyhelminthes',ex:'Taenia, Fasciola, Planaria',c:'#d29922',note:'Flat; acoelomate; bilateral symmetry; flame cells for excretion'},
+            {p:'Aschelminthes',ex:'Ascaris, Wuchereria',c:'#f0883e',note:'Round; pseudocoelomate; complete gut; dioecious (separate sexes)'},
+            {p:'Annelida',ex:'Pheretima, Nereis, Hirudo',c:'#bc8cff',note:'True coelom (schizocoel); metamerism; nephridia; closed circulation'},
+            {p:'Arthropoda',ex:'Cockroach, Prawn, Butterfly',c:'#f85149',note:'LARGEST phylum; jointed legs; chitin exoskeleton; open circulation'},
+            {p:'Echinodermata',ex:'Starfish, Sea urchin, Holothuria',c:'#58a6ff',note:'Spiny skin; water vascular system; radial symmetry (adult)'},
+            {p:'Chordata',ex:'Fish, Frog, Snake, Birds, Mammals',c:'#3fb950',note:'Notochord; dorsal hollow nerve cord; pharyngeal gill slits'},
+          ].map(({p,ex,c,note},i)=>(
+            <g key={p}>
+              <rect x="10" y={24+i*40} width="420" height="36" rx="5" fill="rgba(0,0,0,.3)" stroke={c} strokeWidth="1.4"/>
+              <text x="20" y={38+i*40} fill={c} fontSize="10" fontWeight="bold">{p}</text>
+              <text x="20" y={52+i*40} fill="#8b949e" fontSize="7.5">e.g. {ex} | {note}</text>
+            </g>))}
+        </svg>)
+    },
+    'Morphology of Flowering Plants': {
+      title:'Parts of a Flowering Plant',
+      parts:['Root system — Tap root (dicot) or fibrous root (monocot); absorption and anchorage','Stem — Node (leaf attached) + internode; transport; support','Leaf — Lamina + petiole; reticulate venation (dicot) or parallel (monocot)','Flower — Calyx (sepals) + Corolla (petals) + Androecium (stamens) + Gynoecium (pistil)','Fruit — Ripened ovary; true fruit (mango) vs false fruit (apple = thalamus)','Seed — Embryo + endosperm + testa + tegmen (two seed coats)'],
+      facts:['Dicot: tap root, reticulate venation, 4-5 floral parts, 2 cotyledons','Monocot: fibrous root, parallel venation, 3 floral parts, 1 cotyledon','Epigeal germination (cotyledons above soil): bean | Hypogeal (below): maize'],
+      svg: () => (
+        <svg viewBox="0 0 400 360" style={{width:'100%',height:'auto'}}>
+          <text x="200" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Morphology of Flowering Plant</text>
+          <rect x="192" y="162" width="16" height="148" rx="5" fill="#2ea043" stroke="#3fb950" strokeWidth="1.5"/>
+          <circle cx="200" cy="205" r="5" fill="#d29922"/>
+          <circle cx="200" cy="248" r="5" fill="#d29922"/>
+          <path d="M200,310 Q182,335 170,352 M200,310 Q218,335 230,352 M200,310 Q200,340 200,358 M200,322 Q166,345 156,362 M200,322 Q234,345 244,362" fill="none" stroke="#d29922" strokeWidth="2"/>
+          <ellipse cx="156" cy="232" rx="36" ry="14" fill="#1a3a1a" stroke="#3fb950" strokeWidth="1.5" transform="rotate(-30,156,232)"/>
+          <ellipse cx="244" cy="248" rx="36" ry="14" fill="#1a3a1a" stroke="#3fb950" strokeWidth="1.5" transform="rotate(30,244,248)"/>
+          {[0,60,120,180,240,300].map((a,i)=>(<ellipse key={i} cx={200+38*Math.cos(a*Math.PI/180)} cy={138+24*Math.sin(a*Math.PI/180)} rx="17" ry="11" fill="#f85149" stroke="#d29922" strokeWidth="1" opacity=".85" transform={`rotate(${a},${200+38*Math.cos(a*Math.PI/180)},${138+24*Math.sin(a*Math.PI/180)})`}/>))}
+          <circle cx="200" cy="138" r="18" fill="#d29922" stroke="#f0883e" strokeWidth="2"/>
+          <text x="200" y="142" textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Receptacle</text>
+          <line x1="200" y1="120" x2="200" y2="92" stroke="#f85149" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="200" y="88" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Flower</text>
+          <line x1="152" y1="226" x2="72" y2="210" stroke="#3fb950" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="28" y="208" fill="#3fb950" fontSize="9">Leaf</text>
+          <line x1="200" y1="205" x2="340" y2="188" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="342" y="186" fill="#d29922" fontSize="9">Node</text>
+          <line x1="200" y1="230" x2="340" y2="225" stroke="#2ea043" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="342" y="223" fill="#2ea043" fontSize="9">Internode</text>
+          <line x1="192" y1="338" x2="330" y2="330" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="332" y="328" fill="#f0883e" fontSize="9">Tap Root (dicot)</text>
+          <text x="200" y="352" textAnchor="middle" fill="#8b949e" fontSize="9">Dicot: tap root | reticulate venation | 4-5 floral parts</text>
+        </svg>)
+    },
+    'Anatomy of Flowering Plants': {
+      title:'T.S. of Dicot Stem',
+      parts:['Epidermis — Outermost layer; cuticle on surface; stomata; no chloroplasts','Cortex — Parenchyma cells below epidermis; stores starch; collenchyma near corners','Endodermis — Single layer with Casparian strip; controls water and mineral passage','Pericycle — Meristematic; gives rise to lateral roots; fibres in stem','Vascular Bundle — Xylem (wood, conducts water upward) + Phloem (conducts food downward)','Cambium — Present in dicot (open VB); absent in monocot (closed VB)','Pith — Central ground tissue; parenchyma; storage'],
+      facts:['Dicot stem: ring arrangement of VBs with cambium (open)','Monocot stem: scattered VBs without cambium (closed)','Xylem: vessels + tracheids (dead, lignified) | Phloem: sieve tubes + companion cells (living)'],
+      svg: () => (
+        <svg viewBox="0 0 420 340" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">T.S. of Dicot Stem</text>
+          <circle cx="210" cy="188" r="148" fill="#0d1a0d" stroke="#3fb950" strokeWidth="3"/>
+          <circle cx="210" cy="188" r="133" fill="#0a1500" stroke="#2ea043" strokeWidth="2"/>
+          <circle cx="210" cy="188" r="96" fill="#060f06" stroke="#d29922" strokeWidth="2"/>
+          <circle cx="210" cy="188" r="46" fill="#030703" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="210" y="192" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Pith</text>
+          {[0,45,90,135,180,225,270,315].map((angle,i)=>(
+            <g key={i}>
+              <ellipse cx={210+70*Math.cos(angle*Math.PI/180)} cy={188+70*Math.sin(angle*Math.PI/180)} rx="11" ry="8" fill="#2d1500" stroke="#f0883e" strokeWidth="1.5" transform={`rotate(${angle},${210+70*Math.cos(angle*Math.PI/180)},${188+70*Math.sin(angle*Math.PI/180)})`}/>
+              <text x={210+70*Math.cos(angle*Math.PI/180)} y={191+70*Math.sin(angle*Math.PI/180)} textAnchor="middle" fill="#f0883e" fontSize="5">VB</text>
+            </g>))}
+          {[['Epidermis+Cuticle',148,'#3fb950',-85],['Cortex',112,'#2ea043',-50],['Endodermis',96,'#d29922',5],['Pericycle',85,'#bc8cff',35],['VB (Xylem+Phloem)',70,'#f0883e',65]].map(([name,r,col,angle],i)=>(
+            <g key={i}>
+              <line x1={210+r*Math.cos(angle*Math.PI/180)} y1={188+r*Math.sin(angle*Math.PI/180)} x2={210+(r+62)*Math.cos(angle*Math.PI/180)} y2={188+(r+62)*Math.sin(angle*Math.PI/180)} stroke={col} strokeWidth="1" strokeDasharray="3,2"/>
+              <text x={210+(r+70)*Math.cos(angle*Math.PI/180)} y={191+(r+70)*Math.sin(angle*Math.PI/180)} textAnchor="middle" fill={col} fontSize="8">{name}</text>
+            </g>))}
+          <text x="210" y="332" textAnchor="middle" fill="#8b949e" fontSize="9">Ring VBs (dicot) vs Scattered VBs (monocot)</text>
+        </svg>)
+    },
+    'Structural Organisation in Animals': {
+      title:'Earthworm — Pheretima posthuma',
+      parts:['Prostomium — Sensory lobe above mouth; not a true segment','Pharynx (seg 3-4) — Muscular; sucks food; salivary glands','Oesophagus (seg 5-7) — Passage connecting pharynx to gizzard','Gizzard (seg 8-9) — Grinds food with soil particles (muscular)','Intestine (seg 15 onwards) — Main digestion + absorption; typhlosole increases surface area','Nephridia — Excretory organs; present in each segment; like kidney','Clitellum (seg 14-16) — Glandular; secretes cocoon for reproduction'],
+      facts:['Pheretima posthuma has 100-120 segments','Haemoglobin in plasma (NOT inside RBCs) — blood is red','Hermaphrodite: both male and female reproductive organs in one individual'],
+      svg: () => (
+        <svg viewBox="0 0 440 268" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Earthworm — Pheretima posthuma</text>
+          <ellipse cx="220" cy="132" rx="192" ry="68" fill="#1a0d00" stroke="#d29922" strokeWidth="2.5"/>
+          {[60,88,116,144,172,200,228,256,284,312,340,368].map(x=>(<line key={x} x1={x} y1="86" x2={x} y2="178" stroke="#d29922" strokeWidth=".8" opacity=".35"/>))}
+          <ellipse cx="48" cy="132" r="23" fill="#2d1a00" stroke="#f0883e" strokeWidth="2"/>
+          <text x="48" y="136" textAnchor="middle" fill="#f0883e" fontSize="8" fontWeight="bold">Mouth</text>
+          <rect x="76" y="120" width="36" height="22" rx="4" fill="#2d0a0a" stroke="#f85149" strokeWidth="1.5"/>
+          <text x="94" y="134" textAnchor="middle" fill="#f85149" fontSize="7">Pharynx</text>
+          <rect x="120" y="122" width="44" height="20" rx="4" fill="#1a1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="142" y="135" textAnchor="middle" fill="#58a6ff" fontSize="7">Oesophagus</text>
+          <rect x="172" y="118" width="30" height="26" rx="4" fill="#2d2d00" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="187" y="134" textAnchor="middle" fill="#d29922" fontSize="7">Gizzard</text>
+          <rect x="210" y="118" width="125" height="26" rx="4" fill="#0d2d0d" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="272" y="134" textAnchor="middle" fill="#3fb950" fontSize="7">Intestine + Typhlosole</text>
+          <ellipse cx="390" cy="132" rx="18" ry="15" fill="#1a0d00" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="390" y="136" textAnchor="middle" fill="#d29922" fontSize="7">Anus</text>
+          <line x1="126" y1="100" x2="126" y2="75" stroke="#bc8cff" strokeWidth="1" strokeDasharray="2,2"/>
+          <text x="126" y="71" textAnchor="middle" fill="#bc8cff" fontSize="8">Clitellum (seg 14-16)</text>
+          <text x="220" y="230" textAnchor="middle" fill="#8b949e" fontSize="8">100-120 segments | Nephridia = excretory | Hermaphrodite</text>
+          <text x="220" y="244" textAnchor="middle" fill="#8b949e" fontSize="8">Haemoglobin in plasma (not RBCs) | Setae for locomotion</text>
+        </svg>)
+    },
+    'Cell: The Unit of Life': {
+      title:'Animal Cell — Eukaryotic',
+      parts:['Cell Membrane — Fluid Mosaic Model (Singer & Nicolson 1972); phospholipid bilayer + proteins','Nucleus — Double membrane; nuclear pores; contains DNA; nucleolus makes rRNA','Mitochondria — Double membrane; cristae; matrix; 70S ribosomes; mtDNA; powerhouse','Ribosome — 80S in cytoplasm (60S+40S); site of protein synthesis','Golgi Body — Packaging; glycosylation; secretory vesicles; cis and trans faces','Lysosome — Suicide bag; 40+ hydrolytic enzymes at pH 5; autophagy','Endoplasmic Reticulum — Rough (ribosomes; protein) and Smooth (lipid; detox)'],
+      facts:['Cell theory: Schleiden+Schwann (1838-39); Virchow (1855): cells from cells','Prokaryote: 70S ribosomes, no membrane-bound organelles, circular DNA, no nuclear membrane','Eukaryote: 80S ribosomes, membrane-bound organelles, linear DNA, true nucleus'],
+      svg: () => (
+        <svg viewBox="0 0 420 340" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Animal Cell — Eukaryotic</text>
+          <defs><radialGradient id="cg" cx="50%" cy="45%" r="55%"><stop offset="0%" stopColor="#1a3a2a"/><stop offset="100%" stopColor="#0d1f17"/></radialGradient></defs>
+          <ellipse cx="210" cy="178" rx="182" ry="155" fill="url(#cg)" stroke="#3fb950" strokeWidth="2.5"/>
+          <ellipse cx="210" cy="165" rx="60" ry="52" fill="#0d1520" stroke="#58a6ff" strokeWidth="2"/>
+          <ellipse cx="214" cy="160" rx="19" ry="13" fill="#0a2030" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="210" y="165" textAnchor="middle" fill="#58a6ff" fontSize="7.5">Nucleolus</text>
+          <text x="210" y="180" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Nucleus</text>
+          {[{x:82,y:116,name:'Mito-chondria',col:'#f0883e',rx:22,ry:11},
+            {x:322,y:112,name:'Golgi Body',col:'#d29922',rx:21,ry:11},
+            {x:70,y:252,name:'Ribosome',col:'#bc8cff',rx:13,ry:8},
+            {x:328,y:252,name:'Rough ER',col:'#3fb950',rx:21,ry:9},
+            {x:188,y:308,name:'Lysosome',col:'#f85149',rx:15,ry:9},
+            {x:50,y:178,name:'Smooth ER',col:'#2ea043',rx:16,ry:8},
+            {x:342,y:178,name:'Centriole',col:'#58a6ff',rx:13,ry:7},
+          ].map(({x,y,name,col,rx,ry})=>(
+            <g key={name}>
+              <ellipse cx={x} cy={y} rx={rx} ry={ry} fill="rgba(0,0,0,.4)" stroke={col} strokeWidth="1.5"/>
+              <text x={x} y={y+3} textAnchor="middle" fill={col} fontSize="6" fontWeight="bold">{name}</text>
+            </g>))}
+          <text x="210" y="330" textAnchor="middle" fill="#8b949e" fontSize="9">Fluid Mosaic Model | 80S cytoplasmic ribosomes | No cell wall</text>
+        </svg>)
+    },
+    'Biomolecules': {
+      title:'Classes of Biomolecules',
+      parts:['Carbohydrates — C:H:O = 1:2:1; glucose, fructose (monosaccharides); sucrose, maltose (disaccharides)','Proteins — 20 amino acids linked by peptide bonds; 4 levels of structure (primary to quaternary)','Lipids — Glycerol + fatty acids → triglycerides; phospholipids in membrane; steroids','Nucleic Acids — DNA (deoxyribose; double helix; ATGC) and RNA (ribose; single strand; AUGC)','Enzymes — Protein catalysts; active site; lower activation energy; Km = [S] at ½Vmax','Vitamins — Fat-soluble (A,D,E,K) stored in liver; Water-soluble (B complex, C) excreted'],
+      facts:['Chargaff rule: A=T (2H-bonds); G≡C (3H-bonds) in double-stranded DNA','Reducing sugars: free anomeric -OH; glucose, fructose, maltose — NOT sucrose','Peptide bond: -CO-NH-; formed by condensation (dehydration); broken by hydrolysis'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Biomolecules — Classes and Structure</text>
+          {[{name:'Carbohydrates',col:'#3fb950',y:48,info:'Monosaccharides: Glucose C6H12O6 (aldohexose), Fructose (ketohexose)',info2:'Polysaccharides: Starch (α-1,4 + α-1,6), Cellulose (β-1,4), Glycogen'},
+            {name:'Proteins',col:'#58a6ff',y:108,info:'Amino acids → peptide bond → polypeptide → protein','info2':'1°sequence → 2°helix/sheet → 3°3D-fold → 4°quaternary (Hb)'},
+            {name:'Lipids',col:'#f0883e',y:168,info:'Triglycerides: glycerol + 3 fatty acids (ester bonds)','info2':'Phospholipids: bilayer of cell membrane | Steroids: cholesterol'},
+            {name:'Nucleic Acids',col:'#bc8cff',y:228,info:'Nucleotide = base + sugar + phosphate (monomer unit)','info2':'DNA: deoxyribose; A≡T(2H), G≡C(3H); double helix; 3.4nm pitch'},
+            {name:'Enzymes',col:'#d29922',y:288,info:'Protein catalysts; active site fits substrate (lock & key / induced fit)','info2':'Km = substrate conc at half Vmax; lower Km = higher affinity'},
+          ].map(({name,col,y,info,info2})=>(
+            <g key={name}>
+              <rect x="10" y={y-14} width="420" height="50" rx="7" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="2"/>
+              <text x="20" y={y+2} fill={col} fontSize="11" fontWeight="bold">{name}</text>
+              <text x="20" y={y+16} fill="#8b949e" fontSize="8">{info}</text>
+              <text x="20" y={y+28} fill="#8b949e" fontSize="8">{info2}</text>
+            </g>))}
+        </svg>)
+    },
+    'Cell Cycle and Cell Division': {
+      title:'Mitosis and Meiosis',
+      parts:['Interphase — G1 (cell growth) + S (DNA replication) + G2 (preparation); longest phase','Prophase — Chromatin condenses; spindle forms; nucleolus disappears; nuclear envelope breaks','Metaphase — Chromosomes align at equatorial plate; centromeres attached to spindle fibres','Anaphase — Centromeres split; sister chromatids pulled to opposite poles (PMAT)','Telophase — Nuclear envelope reforms; chromosomes decondense; nucleolus reappears','Meiosis I — Prophase I (crossing over at Pachytene); homologs separate; 2 haploid cells','Meiosis II — Like mitosis; sister chromatids separate; 4 haploid gametes produced'],
+      facts:['PMAT: Prophase → Metaphase → Anaphase → Telophase','Crossing over: non-sister chromatids exchange during Pachytene of Prophase I','Mitosis: 2 identical diploid cells | Meiosis: 4 unique haploid cells'],
+      svg: () => (
+        <svg viewBox="0 0 460 300" style={{width:'100%',height:'auto'}}>
+          <text x="230" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Mitosis — PMAT</text>
+          {[['Prophase',55,75,'#f0883e','Chromatin condenses; spindle forms'],['Metaphase',170,75,'#d29922','Chromosomes at equatorial plate'],['Anaphase',285,75,'#3fb950','Chromatids pulled to poles'],['Telophase',400,75,'#58a6ff','Nuclear envelope reforms']].map(([ph,cx,cy,col,desc],i)=>(
+          <g key={i}>
+            <ellipse cx={cx} cy={cy+65} rx="42" ry="56" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="2"/>
+            <text x={cx} y={cy+10} textAnchor="middle" fill={col} fontSize="10" fontWeight="bold">{ph}</text>
+            <text x={cx} y={cy+153} textAnchor="middle" fill="#8b949e" fontSize="7" style={{dominantBaseline:'hanging'}}>{desc}</text>
+            {i===1&&<line x1={cx} y1={cy+30} x2={cx} y2={cy+126} stroke={col} strokeWidth="1" strokeDasharray="4,3"/>}
+          </g>))}
+          <text x="230" y="278" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">PMAT → 2 identical diploid daughter cells</text>
+          <text x="230" y="292" textAnchor="middle" fill="#8b949e" fontSize="8">Meiosis: PMAT×2 → 4 haploid cells | Crossing over in Pachytene</text>
+        </svg>)
+    },
+    'Photosynthesis in Higher Plants': {
+      title:'Z-Scheme — Light Reactions',
+      parts:['PS II (P680) — Absorbs 680nm; oxidises water; releases O2; starts Z-scheme','Water splitting — 2H2O → O2 + 4H+ + 4e- at Oxygen Evolving Complex (OEC)','Plastoquinone (PQ) — Mobile electron carrier from PS II to Cyt b6f complex','Cyt b6f complex — Pumps H+ into thylakoid lumen; builds proton gradient for ATP','PS I (P700) — Absorbs 700nm; re-energizes electrons; reduces NADP+ to NADPH','ATP Synthase (CF0CF1) — H+ gradient drives rotation; synthesizes ATP (photophosphorylation)','Calvin Cycle — CO2 + RuBP (RuBisCO) → 3-PGA → G3P → regenerate RuBP + glucose'],
+      facts:['Non-cyclic photophosphorylation: 2H2O + 2NADP+ + 3ADP → O2 + 2NADPH + 3ATP','P680 is the strongest biological oxidant (E° = +1.1V)','C4 plants (maize, sugarcane): CO2 first fixed as OAA by PEP carboxylase in mesophyll'],
+      svg: () => (
+        <svg viewBox="0 0 460 340" style={{width:'100%',height:'auto'}}>
+          <text x="230" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Z-Scheme — Light Reactions in Thylakoid</text>
+          <rect x="10" y="148" width="440" height="18" rx="5" fill="#0d2a0d" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="230" y="160" textAnchor="middle" fill="#3fb950" fontSize="8">Thylakoid Membrane</text>
+          <rect x="28" y="72" width="98" height="64" rx="8" fill="#1a2d0d" stroke="#3fb950" strokeWidth="2"/>
+          <text x="77" y="94" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">PS II</text>
+          <text x="77" y="108" textAnchor="middle" fill="#d29922" fontSize="9">P680</text>
+          <text x="77" y="122" textAnchor="middle" fill="#8b949e" fontSize="7">absorbs 680nm</text>
+          <rect x="18" y="196" width="98" height="40" rx="6" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="67" y="213" textAnchor="middle" fill="#58a6ff" fontSize="8" fontWeight="bold">H2O splitting</text>
+          <text x="67" y="226" textAnchor="middle" fill="#3fb950" fontSize="7">O2+4H++4e-</text>
+          <line x1="77" y1="196" x2="77" y2="136" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#za)"/>
+          <rect x="155" y="152" width="48" height="26" rx="5" fill="#1a1a0a" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="179" y="168" textAnchor="middle" fill="#d29922" fontSize="8" fontWeight="bold">PQ</text>
+          <line x1="126" y1="104" x2="157" y2="157" stroke="#f0883e" strokeWidth="2" strokeDasharray="4,3" markerEnd="url(#za)"/>
+          <rect x="224" y="88" width="82" height="48" rx="6" fill="#1a0d2d" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="265" y="109" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Cyt b6f</text>
+          <text x="265" y="123" textAnchor="middle" fill="#8b949e" fontSize="7">pumps H+</text>
+          <line x1="203" y1="165" x2="226" y2="116" stroke="#d29922" strokeWidth="2" markerEnd="url(#za)"/>
+          <rect x="328" y="152" width="42" height="26" rx="5" fill="#1a1a0a" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="349" y="168" textAnchor="middle" fill="#d29922" fontSize="8">PC</text>
+          <line x1="306" y1="112" x2="330" y2="155" stroke="#bc8cff" strokeWidth="2" markerEnd="url(#za)"/>
+          <rect x="330" y="48" width="98" height="64" rx="8" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="379" y="70" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">PS I</text>
+          <text x="379" y="84" textAnchor="middle" fill="#d29922" fontSize="9">P700</text>
+          <text x="379" y="98" textAnchor="middle" fill="#8b949e" fontSize="7">absorbs 700nm</text>
+          <line x1="371" y1="152" x2="371" y2="112" stroke="#d29922" strokeWidth="2" markerEnd="url(#za)"/>
+          <rect x="330" y="205" width="98" height="44" rx="6" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="379" y="222" textAnchor="middle" fill="#58a6ff" fontSize="8" fontWeight="bold">Fd → NADP+</text>
+          <text x="379" y="238" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">→ NADPH</text>
+          <line x1="379" y1="112" x2="379" y2="205" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#za)"/>
+          <rect x="158" y="205" width="90" height="44" rx="6" fill="#0a200a" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="203" y="222" textAnchor="middle" fill="#3fb950" fontSize="8" fontWeight="bold">ATP Synthase</text>
+          <text x="203" y="238" textAnchor="middle" fill="#3fb950" fontSize="9">→ ATP</text>
+          <text x="55" y="62" fill="#f0883e" fontSize="15">☀</text>
+          <text x="356" y="42" fill="#f0883e" fontSize="15">☀</text>
+          <defs><marker id="za" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L7,3L0,6Z" fill="#3fb950"/></marker></defs>
+          <text x="230" y="332" textAnchor="middle" fill="#8b949e" fontSize="9">Non-cyclic: 2H2O + 2NADP+ + 3ADP → O2 + 2NADPH + 3ATP</text>
+        </svg>)
+    },
+    'Respiration in Plants': {
+      title:'Cellular Respiration — Glycolysis + Krebs + ETC',
+      parts:['Glycolysis (cytoplasm) — Glucose → 2 Pyruvate; net 2 ATP + 2 NADH; no O2 needed','Pyruvate → Acetyl CoA — In mitochondrial matrix; releases CO2 + NADH per pyruvate','Krebs Cycle (matrix) — Per pyruvate: 3NADH + 1FADH2 + 1GTP + 2CO2','ETC (inner membrane) — NADH + FADH2 oxidised; H+ gradient drives ATP synthase','Total ATP — 2 (glycolysis) + 2 (Krebs substrate) + 34 (ETC) = 36-38 ATP per glucose','Fermentation — Anaerobic; yeast: glucose → ethanol + CO2; muscle: glucose → lactic acid'],
+      facts:['RQ = CO2/O2: carbohydrates=1.0; fats=0.7; proteins≈0.9','Krebs cycle enzyme citrate synthase: most important regulatory enzyme','NADH → 2.5 ATP; FADH2 → 1.5 ATP (via ETC oxidative phosphorylation)'],
+      svg: () => (
+        <svg viewBox="0 0 440 350" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Krebs Cycle (TCA Cycle)</text>
+          <circle cx="220" cy="178" r="115" fill="none" stroke="#f0883e" strokeWidth="1" strokeDasharray="5,4" opacity=".5"/>
+          {[['Acetyl CoA\n+OAA',220,48,'#f0883e','CoA,NADH,CO2'],
+            ['Citrate (C6)',368,108,'#d29922','isocitrate'],
+            ['Isocitrate (C6)',382,202,'#3fb950','NADH+CO2'],
+            ['α-KG (C5)',308,305,'#58a6ff','NADH+CO2'],
+            ['Succinyl CoA (C4)',128,305,'#bc8cff','GTP here'],
+            ['Succinate (C4)',52,202,'#f85149','FADH2'],
+            ['Fumarate (C4)',40,108,'#d29922','fumarase'],
+            ['Malate→OAA',148,48,'#3fb950','NADH'],
+          ].map(([name,x,y,col,note],i)=>(
+            <g key={i}>
+              <rect x={x-50} y={y-14} width="100" height="28" rx="6" fill="rgba(0,0,0,.5)" stroke={col} strokeWidth="1.5"/>
+              <text x={x} y={y-2} textAnchor="middle" fill={col} fontSize="8" fontWeight="bold">{name.replace('\n',' ')}</text>
+              <text x={x} y={y+11} textAnchor="middle" fill="#8b949e" fontSize="7">{note}</text>
+            </g>))}
+          <text x="220" y="168" textAnchor="middle" fill="#f0883e" fontSize="9" fontWeight="bold">Per Pyruvate:</text>
+          <text x="220" y="182" textAnchor="middle" fill="#3fb950" fontSize="9">3 NADH + 1 FADH2</text>
+          <text x="220" y="196" textAnchor="middle" fill="#d29922" fontSize="9">1 GTP + 2 CO2</text>
+          <text x="220" y="340" textAnchor="middle" fill="#8b949e" fontSize="9">Occurs in mitochondrial matrix | 2 turns per glucose molecule</text>
+        </svg>)
+    },
+    'Plant Growth and Development': {
+      title:'Plant Hormones',
+      parts:['Auxin (IAA) — Apical dominance; phototropism (bends toward light); cell elongation in stem','Gibberellin (GA3) — Stem elongation (bolting); seed germination; breaks dormancy; parthenocarpy','Cytokinin — Cell division; delays senescence (stay green); promotes lateral bud growth','ABA (Abscisic acid) — Stress hormone; stomatal closure; seed dormancy; opposes GA','Ethylene (C2H4) — Fruit ripening; abscission; promotes senescence; gas at room temperature','Photoperiodism — SDP (short day; long night), LDP (long day; short night), Day-neutral plants'],
+      facts:['Apical dominance: auxin from shoot apex inhibits lateral buds; cytokinin reverses it','Vernalisation: cold treatment promotes flowering in wheat and other winter crops','Ethylene used commercially to ripen bananas; fruit stores use CO2 to suppress ethylene'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Plant Hormones and Their Effects</text>
+          {[{name:'Auxin (IAA)',col:'#3fb950',y:50,e1:'Apical dominance; phototropism; cell elongation',e2:'Delays leaf abscission; fruit set; herbicide at high conc'},
+            {name:'Gibberellin (GA)',col:'#58a6ff',y:110,e1:'Stem elongation; seed germination; breaks dormancy',e2:'Parthenocarpy (seedless fruit); promotes male flowers'},
+            {name:'Cytokinin',col:'#d29922',y:170,e1:'Cell division (cytokinesis); lateral bud growth',e2:'Delays senescence; promotes chloroplast development'},
+            {name:'ABA',col:'#f85149',y:230,e1:'Stress hormone: drought → stomatal closure',e2:'Seed dormancy; inhibits growth (antagonist of GA)'},
+            {name:'Ethylene',col:'#f0883e',y:284,e1:'Fruit ripening; abscission of leaves/flowers/fruits',e2:'Promotes senescence; gas at room temperature (unique)'},
+          ].map(({name,col,y,e1,e2})=>(
+            <g key={name}>
+              <rect x="10" y={y-15} width="420" height="56" rx="7" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="2"/>
+              <text x="20" y={y+2} fill={col} fontSize="11" fontWeight="bold">{name}</text>
+              <text x="20" y={y+16} fill="#8b949e" fontSize="8">{e1}</text>
+              <text x="20" y={y+30} fill="#8b949e" fontSize="8">{e2}</text>
+            </g>))}
+        </svg>)
+    },
+    'Digestion and Absorption': {
+      title:'Human Digestive System',
+      parts:['Mouth — Salivary amylase (ptyalin) digests starch → maltose; pH 6.8; mucin lubricates','Stomach — HCl (pH 1.5-3.5) activates pepsinogen → pepsin; churning; intrinsic factor','Small intestine — Duodenum + jejunum + ileum; bile (liver) + pancreatic juice; main absorption','Liver — Produces bile; stored in gall bladder; emulsifies fats; glycogen storage; detox','Pancreas — Secretes amylase, lipase, trypsinogen, chymotrypsinogen (all proenzymes)','Large intestine — Water + electrolyte absorption; bacteria make Vit K and Vit B12'],
+      facts:['Brush border enzymes (in SI wall): maltase, sucrase, lactase, peptidases','Bile: no enzymes; bile salts emulsify fat; bilirubin gives yellow colour to faeces','Villi + microvilli in SI increase surface area ~600 times for absorption'],
+      svg: () => (
+        <svg viewBox="0 0 400 360" style={{width:'100%',height:'auto'}}>
+          <text x="200" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Human Digestive System</text>
+          <rect x="183" y="26" width="34" height="52" rx="8" fill="#0d1a0d" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="200" y="56" textAnchor="middle" fill="#3fb950" fontSize="7">Oesophagus</text>
+          <path d="M160,78 Q118,90 114,130 Q108,173 136,190 Q160,204 192,198 Q222,192 226,168 Q231,141 220,118 Q210,86 186,78Z" fill="#2d1a0d" stroke="#f0883e" strokeWidth="2.5"/>
+          <text x="168" y="140" textAnchor="middle" fill="#f0883e" fontSize="10" fontWeight="bold">Stomach</text>
+          <text x="168" y="153" textAnchor="middle" fill="#8b949e" fontSize="7">pH 1.5-3.5</text>
+          <text x="168" y="165" textAnchor="middle" fill="#8b949e" fontSize="7">HCl+pepsin</text>
+          <path d="M136,196 Q106,210 103,234 Q98,258 115,268 Q135,280 155,270 Q174,260 178,240 Q182,220 165,210 Q148,200 146,222 Q144,244 158,255 Q172,266 190,256 Q208,246 210,225 Q212,204 197,196 Q181,187 179,205" fill="none" stroke="#d29922" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M210,224 Q218,260 209,296 Q200,328 186,340 Q170,350 155,340 Q130,330 122,302 Q116,278 119,268" fill="none" stroke="#bc8cff" strokeWidth="6" strokeLinecap="round"/>
+          <ellipse cx="284" cy="114" rx="46" ry="31" fill="#2d1a00" stroke="#d29922" strokeWidth="2"/>
+          <text x="284" y="118" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Liver</text>
+          <line x1="256" y1="132" x2="226" y2="162" stroke="#d29922" strokeWidth="1.5" strokeDasharray="3,2"/>
+          <text x="264" y="160" fill="#d29922" fontSize="7">Bile duct</text>
+          <ellipse cx="266" cy="172" rx="40" ry="16" fill="#1a1a2d" stroke="#58a6ff" strokeWidth="1.5" transform="rotate(-18,266,172)"/>
+          <text x="264" y="176" textAnchor="middle" fill="#58a6ff" fontSize="8" fontWeight="bold">Pancreas</text>
+          <line x1="122" y1="126" x2="45" y2="108" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="5" y="104" fill="#f0883e" fontSize="7.5">HCl+Pepsin</text>
+          <line x1="155" y1="244" x2="45" y2="244" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="5" y="240" fill="#d29922" fontSize="7.5">Small intestine</text>
+          <text x="5" y="252" fill="#8b949e" fontSize="7">(absorption)</text>
+          <line x1="128" y1="300" x2="45" y2="300" stroke="#bc8cff" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="5" y="296" fill="#bc8cff" fontSize="7.5">Large intestine</text>
+          <text x="5" y="308" fill="#8b949e" fontSize="7">(water abs.)</text>
+        </svg>)
+    },
+    'Breathing and Exchange of Gases': {
+      title:'Human Respiratory System',
+      parts:['Nasal cavity — Filters, warms and moistens air; mucus + cilia; olfactory receptors','Larynx — Voice box; epiglottis prevents food entering trachea during swallowing','Trachea — 11cm long; C-shaped cartilaginous rings; ciliated epithelium; branches into bronchi','Bronchi → Bronchioles → Terminal bronchioles → Respiratory bronchioles → Alveoli','Alveoli — 300-400 million; surface area 70m²; wall only 1 cell thick; capillary network','Diaphragm — Contraction → inspiration (volume↑, pressure↓); relaxation → expiration'],
+      facts:['Lung volumes: Tidal=500mL; IRV=2500mL; ERV=1100mL; RV=1100mL; VC=3800mL','Oxygen: 97% as oxyhaemoglobin; 3% dissolved in plasma','CO2 transport: 70% as HCO3- (bicarbonate); 23% carbamino-Hb; 7% dissolved'],
+      svg: () => (
+        <svg viewBox="0 0 400 348" style={{width:'100%',height:'auto'}}>
+          <text x="200" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Human Respiratory System</text>
+          <path d="M150,30 Q200,20 250,30 Q264,40 260,56 Q254,73 200,75 Q146,73 140,56 Q134,40 150,30Z" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="200" y="56" textAnchor="middle" fill="#58a6ff" fontSize="8">Nasal Cavity</text>
+          <rect x="182" y="75" width="36" height="21" rx="3" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="200" y="90" textAnchor="middle" fill="#58a6ff" fontSize="7">Pharynx</text>
+          <rect x="182" y="96" width="36" height="19" rx="3" fill="#1a2d0d" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="200" y="110" textAnchor="middle" fill="#3fb950" fontSize="7">Larynx</text>
+          <rect x="189" y="115" width="22" height="38" rx="4" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          {[120,128,136,144].map(y=><line key={y} x1="189" y1={y} x2="211" y2={y} stroke="#58a6ff" strokeWidth="1" opacity=".6"/>)}
+          <text x="228" y="133" fill="#58a6ff" fontSize="8">Trachea</text>
+          <path d="M200,153 Q172,163 152,168" fill="none" stroke="#58a6ff" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M200,153 Q228,163 248,168" fill="none" stroke="#58a6ff" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M86,162 Q54,182 54,234 Q54,280 92,295 Q132,310 150,285 Q167,260 163,225 Q159,188 148,168Z" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="2"/>
+          <path d="M314,162 Q346,182 346,234 Q346,280 308,295 Q268,310 250,285 Q233,260 237,225 Q241,188 252,168Z" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="2"/>
+          {[[105,236],[124,254],[108,272],[136,245],[134,268]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r="11" fill="rgba(88,166,255,.1)" stroke="#58a6ff" strokeWidth="1" opacity=".7"/>)}
+          {[[295,236],[276,254],[292,272],[264,245],[266,268]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r="11" fill="rgba(88,166,255,.1)" stroke="#58a6ff" strokeWidth="1" opacity=".7"/>)}
+          <text x="106" y="320" textAnchor="middle" fill="#8b949e" fontSize="7">Left (2 lobes)</text>
+          <text x="296" y="320" textAnchor="middle" fill="#8b949e" fontSize="7">Right (3 lobes)</text>
+          <text x="200" y="340" textAnchor="middle" fill="#8b949e" fontSize="9">Alveoli: 300-400M | 70m² | Tidal volume = 500mL</text>
+        </svg>)
+    },
+    'Body Fluids and Circulation': {
+      title:'Human Heart — 4 Chambers',
+      parts:['Right Atrium — Receives deoxygenated blood from superior and inferior vena cava','Right Ventricle — Pumps blood to lungs via pulmonary artery (deoxygenated blood only)','Left Atrium — Receives oxygenated blood from 4 pulmonary veins','Left Ventricle — Thickest wall (3× right); pumps blood to entire body via aorta','Tricuspid valve — 3 cusps; between right atrium and right ventricle','Mitral (bicuspid) valve — 2 cusps; between left atrium and left ventricle','SA Node (pacemaker) — Generates 72 impulses/min spontaneously; right atrium wall'],
+      facts:['Cardiac output = Stroke volume × HR = 70mL × 72/min = ~5 L/min','Normal BP: 120/80 mmHg (systolic/diastolic)','Heart sounds: S1 (lubb) = AV valves close; S2 (dupp) = semilunar valves close'],
+      svg: () => (
+        <svg viewBox="0 0 420 360" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">Human Heart — 4 Chambers</text>
+          <defs><radialGradient id="hg3" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#200a0a"/><stop offset="100%" stopColor="#100505"/></radialGradient></defs>
+          <path d="M210,330 Q108,270 78,202 Q48,142 78,104 Q108,65 143,75 Q173,83 210,115 Q247,83 277,75 Q312,65 342,104 Q372,142 342,202 Q312,270 210,330Z" fill="url(#hg3)" stroke="#f85149" strokeWidth="3"/>
+          <line x1="210" y1="100" x2="210" y2="288" stroke="#f85149" strokeWidth="3"/>
+          <line x1="97" y1="188" x2="323" y2="188" stroke="#d29922" strokeWidth="2" strokeDasharray="5,3"/>
+          <text x="143" y="148" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">RA</text>
+          <text x="143" y="163" textAnchor="middle" fill="#8b949e" fontSize="8">deoxygenated</text>
+          <text x="278" y="148" textAnchor="middle" fill="#f85149" fontSize="11" fontWeight="bold">LA</text>
+          <text x="278" y="163" textAnchor="middle" fill="#8b949e" fontSize="8">oxygenated</text>
+          <text x="143" y="228" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">RV</text>
+          <text x="278" y="228" textAnchor="middle" fill="#f85149" fontSize="11" fontWeight="bold">LV</text>
+          <text x="278" y="244" textAnchor="middle" fill="#8b949e" fontSize="8">thick wall→aorta</text>
+          <text x="152" y="193" fill="#d29922" fontSize="8">Tricuspid</text>
+          <text x="216" y="193" fill="#d29922" fontSize="8">Mitral</text>
+          <path d="M128,88 Q88,56 73,31" fill="none" stroke="#58a6ff" strokeWidth="5" strokeLinecap="round"/>
+          <text x="26" y="28" fill="#58a6ff" fontSize="8">Pulm. Artery</text>
+          <path d="M292,88 Q322,61 347,36" fill="none" stroke="#f85149" strokeWidth="4" strokeLinecap="round"/>
+          <text x="350" y="34" fill="#f85149" fontSize="8">Pulm. Vein</text>
+          <path d="M252,91 Q272,51 302,26" fill="none" stroke="#f85149" strokeWidth="6" strokeLinecap="round"/>
+          <text x="304" y="24" fill="#f85149" fontSize="9" fontWeight="bold">Aorta</text>
+          <path d="M158,91 Q148,56 153,21" fill="none" stroke="#58a6ff" strokeWidth="5" strokeLinecap="round"/>
+          <text x="66" y="50" fill="#58a6ff" fontSize="8">Vena Cava</text>
+          <circle cx="163" cy="110" r="8" fill="#3fb950"/>
+          <text x="96" y="98" fill="#3fb950" fontSize="8" fontWeight="bold">SA Node</text>
+          <circle cx="208" cy="188" r="6" fill="#bc8cff"/>
+          <text x="210" y="206" textAnchor="middle" fill="#bc8cff" fontSize="7">AV Node</text>
+          <text x="210" y="348" textAnchor="middle" fill="#8b949e" fontSize="9">CO=5L/min | BP=120/80 mmHg | Double circulation</text>
+        </svg>)
+    },
+    'Excretory Products': {
+      title:'Nephron — Functional Unit of Kidney',
+      parts:['Glomerulus — Capillary tuft; ultrafiltration at 125 mL/min (GFR); high pressure','Bowman\'s Capsule — Cup-shaped; collects protein-free filtrate from glomerulus','PCT (Proximal Convoluted Tubule) — Reabsorbs 70% water; all glucose + amino acids + Na+','Loop of Henle — Descending limb (water permeable); ascending limb (NaCl, impermeable to water)','DCT (Distal Convoluted Tubule) — Regulated by Aldosterone (Na+) and ADH (water)','Collecting Duct — Final water reabsorption controlled by ADH; urine passes to renal pelvis'],
+      facts:['GFR = 125 mL/min; 180 L filtered/day → only 1.5 L urine (99% reabsorbed)','Glucose threshold: 180 mg/100mL blood; glycosuria indicates diabetes mellitus','Counter-current multiplier (Loop of Henle) creates medullary gradient up to 1200 mOsm/L'],
+      svg: () => (
+        <svg viewBox="0 0 420 365" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Nephron — Functional Unit of Kidney</text>
+          <circle cx="177" cy="56" r="28" fill="#1a0a0a" stroke="#f85149" strokeWidth="2.5"/>
+          {[0,60,120,180,240,300].map((angle,i)=>(<ellipse key={i} cx={177+17*Math.cos(angle*Math.PI/180)} cy={56+17*Math.sin(angle*Math.PI/180)} rx="7" ry="5" fill="#3d1010" stroke="#f85149" strokeWidth="1" transform={`rotate(${angle},${177+17*Math.cos(angle*Math.PI/180)},${56+17*Math.sin(angle*Math.PI/180)})`}/>))}
+          <text x="177" y="60" textAnchor="middle" fill="#f85149" fontSize="7" fontWeight="bold">Glomerulus</text>
+          <circle cx="177" cy="56" r="46" fill="none" stroke="#f0883e" strokeWidth="2" strokeDasharray="5,3"/>
+          <path d="M75,37 Q115,31 150,49" fill="none" stroke="#f85149" strokeWidth="5" strokeLinecap="round"/>
+          <text x="44" y="34" fill="#f85149" fontSize="8">Afferent</text>
+          <path d="M204,49 Q230,36 264,46" fill="none" stroke="#58a6ff" strokeWidth="4" strokeLinecap="round"/>
+          <text x="266" y="44" fill="#58a6ff" fontSize="8">Efferent</text>
+          <path d="M177,102 Q217,116 227,140 Q237,165 207,175 Q177,185 172,205" fill="none" stroke="#3fb950" strokeWidth="4" strokeLinecap="round"/>
+          <path d="M172,205 Q162,244 167,280 Q172,316 182,330" fill="none" stroke="#d29922" strokeWidth="4" strokeLinecap="round"/>
+          <path d="M182,330 Q197,313 207,280 Q215,244 212,205" fill="none" stroke="#bc8cff" strokeWidth="4" strokeLinecap="round"/>
+          <path d="M212,205 Q236,190 246,165 Q251,140 231,125 Q211,113 196,120" fill="none" stroke="#f0883e" strokeWidth="4" strokeLinecap="round"/>
+          <path d="M212,205 Q275,224 304,262 Q322,286 318,330" fill="none" stroke="#58a6ff" strokeWidth="5" strokeLinecap="round"/>
+          <line x1="145" y1="56" x2="57" y2="74" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="5" y="71" fill="#f0883e" fontSize="9" fontWeight="bold">Bowman's Capsule</text>
+          <line x1="219" y1="150" x2="305" y2="138" stroke="#3fb950" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="307" y="136" fill="#3fb950" fontSize="9" fontWeight="bold">PCT</text>
+          <line x1="169" y1="262" x2="76" y2="262" stroke="#d29922" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="5" y="258" fill="#d29922" fontSize="9" fontWeight="bold">Loop of Henle</text>
+          <line x1="238" y1="150" x2="305" y2="165" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="307" y="163" fill="#f0883e" fontSize="9" fontWeight="bold">DCT</text>
+          <line x1="304" y1="289" x2="356" y2="289" stroke="#58a6ff" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="358" y="287" fill="#58a6ff" fontSize="9" fontWeight="bold">Collecting Duct</text>
+          <text x="210" y="352" textAnchor="middle" fill="#8b949e" fontSize="9">GFR=125mL/min | 180L filtered/day → 1.5L urine</text>
+        </svg>)
+    },
+    'Locomotion and Movement': {
+      title:'Sliding Filament Theory — Muscle Contraction',
+      parts:['Sarcomere — Functional unit between two Z lines; contains actin and myosin','Myosin (thick filament) — A band; globular heads form cross-bridges; myosin ATPase activity','Actin (thin filament) — I band; tropomyosin covers myosin-binding sites at rest','Troponin C — Binds Ca2+; causes tropomyosin to shift; exposes myosin-binding sites','Power stroke — Myosin head bends; pulls actin toward centre; 1 ATP per cycle','I band shortens; H zone disappears; A band length remains constant during contraction'],
+      facts:['Ca2+ released from sarcoplasmic reticulum on nerve impulse via T-tubule system','Rigor mortis: ATP depletion post-death → permanent cross-bridges (stiffness)','Muscle types: skeletal (voluntary, striated), cardiac (involuntary, striated), smooth (involuntary)'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Sliding Filament Theory</text>
+          <rect x="18" y="48" width="404" height="92" rx="6" fill="#0d0d1a" stroke="#bc8cff" strokeWidth="2"/>
+          <text x="220" y="67" textAnchor="middle" fill="#bc8cff" fontSize="10" fontWeight="bold">Sarcomere</text>
+          <line x1="18" y1="48" x2="18" y2="140" stroke="#58a6ff" strokeWidth="3"/>
+          <line x1="422" y1="48" x2="422" y2="140" stroke="#58a6ff" strokeWidth="3"/>
+          <text x="18" y="155" textAnchor="middle" fill="#58a6ff" fontSize="8">Z line</text>
+          <text x="422" y="155" textAnchor="middle" fill="#58a6ff" fontSize="8">Z line</text>
+          <rect x="100" y="85" width="222" height="8" rx="4" fill="#f85149"/>
+          <rect x="100" y="97" width="222" height="8" rx="4" fill="#f85149"/>
+          <text x="211" y="82" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Myosin thick filament (A band)</text>
+          <rect x="18" y="100" width="155" height="5" rx="3" fill="#3fb950"/>
+          <rect x="249" y="100" width="155" height="5" rx="3" fill="#3fb950"/>
+          <rect x="18" y="110" width="155" height="5" rx="3" fill="#3fb950"/>
+          <rect x="249" y="110" width="155" height="5" rx="3" fill="#3fb950"/>
+          <text x="90" y="128" textAnchor="middle" fill="#3fb950" fontSize="8">Actin (I band)</text>
+          <rect x="133" y="48" width="155" height="92" fill="rgba(248,81,73,.07)" stroke="#f85149" strokeWidth="1" strokeDasharray="3,3"/>
+          <text x="211" y="154" textAnchor="middle" fill="#f85149" fontSize="7">H zone — disappears on contraction</text>
+          {[['1. Nerve impulse arrives',22,185,'#3fb950'],['2. Ca2+ from sarcoplasmic reticulum',152,185,'#d29922'],['3. Troponin binds Ca2+',298,185,'#f0883e'],['4. Tropomyosin moves; actin exposed',22,225,'#f85149'],['5. Myosin binds actin cross-bridge',185,225,'#bc8cff'],['6. Power stroke; ATP used',320,225,'#58a6ff']].map(([t,x,y,c])=>(
+            <g key={t}><rect x={x} y={y-13} width="118" height="24" rx="4" fill="rgba(0,0,0,.3)" stroke={c} strokeWidth="1.2"/>
+            <text x={x+59} y={y+2} textAnchor="middle" fill={c} fontSize="7.5">{t}</text></g>))}
+          <text x="220" y="272" textAnchor="middle" fill="#8b949e" fontSize="9">I band shortens | A band constant | H zone disappears</text>
+          <text x="220" y="285" textAnchor="middle" fill="#8b949e" fontSize="9">Ca2+ from SR | 1 ATP per power stroke | Rigor mortis if no ATP</text>
+        </svg>)
+    },
+    'Neural Control and Coordination': {
+      title:'Neuron Structure and Synapse',
+      parts:['Dendrites — Highly branched; receive incoming signals from other neurons','Cell body (Soma) — Contains nucleus, Nissl bodies (RER); metabolic centre of neuron','Axon — Long single process; carries impulse away from cell body; up to 1m long','Myelin sheath — Formed by Schwann cells (PNS); insulates; speeds up conduction','Nodes of Ranvier — Gaps in myelin; allow saltatory conduction (jumps between nodes)','Synapse — Junction between neurons; neurotransmitters released into 20nm synaptic cleft','Resting potential: -70mV (inside); maintained by Na+/K+ ATPase pump (3Na+ out, 2K+ in)'],
+      facts:['Myelinated fibres: 70-120 m/s (saltatory conduction) vs unmyelinated: 0.5-2 m/s','Action potential: Na+ rushes in (+40mV) → repolarisation by K+ outflow','Acetylcholine at NMJ and cholinergic synapses; destroyed by acetylcholinesterase'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Neuron Structure</text>
+          {[[-60,-20],[-50,15],[-75,5],[-40,32]].map(([dx,dy],i)=>(<path key={i} d={`M220,138 Q${220+dx/2},${138+dy/2} ${220+dx},${138+dy}`} fill="none" stroke="#bc8cff" strokeWidth="2" strokeLinecap="round"/>))}
+          <circle cx="220" cy="138" r="27" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="2"/>
+          <text x="220" y="135" textAnchor="middle" fill="#bc8cff" fontSize="8">Cell body</text>
+          <text x="220" y="147" textAnchor="middle" fill="#8b949e" fontSize="7">(Soma)</text>
+          <line x1="247" y1="138" x2="408" y2="138" stroke="#3fb950" strokeWidth="4" strokeLinecap="round"/>
+          {[272,302,332,362,392].map(x=>(<rect key={x} x={x-8} y={128} width="16" height="20" rx="3" fill="#d29922" opacity=".5"/>))}
+          {[260,290,320,350,380].map(x=>(<line key={x} x1={x} y1={129} x2={x} y2={147} stroke="#0d0d0d" strokeWidth="3"/>))}
+          <circle cx="418" cy="138" r="12" fill="#1a2d1a" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="418" y="142" textAnchor="middle" fill="#3fb950" fontSize="6.5">Term.</text>
+          <text x="148" y="55" fill="#bc8cff" fontSize="9">Dendrites</text>
+          <text x="330" y="125" textAnchor="middle" fill="#d29922" fontSize="8">Myelin Sheath</text>
+          <text x="290" y="165" textAnchor="middle" fill="#8b949e" fontSize="7">Nodes of Ranvier</text>
+          <text x="340" y="155" fill="#3fb950" fontSize="8">Axon terminal</text>
+          <rect x="18" y="185" width="404" height="100" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="203" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Action Potential</text>
+          <line x1="35" y1="270" x2="410" y2="270" stroke="#30363d" strokeWidth="1"/>
+          <line x1="35" y1="215" x2="35" y2="274" stroke="#30363d" strokeWidth="1"/>
+          <path d="M40,258 L100,258 L130,218 L155,215 L178,258 L215,268 L410,268" fill="none" stroke="#f85149" strokeWidth="2"/>
+          <text x="37" y="211" fill="#f85149" fontSize="7">+40mV</text>
+          <text x="37" y="262" fill="#58a6ff" fontSize="7">-70mV</text>
+          <text x="128" y="213" fill="#3fb950" fontSize="7">Na+ in</text>
+          <text x="170" y="263" fill="#d29922" fontSize="7">K+ out</text>
+          <text x="280" y="260" fill="#8b949e" fontSize="7">Resting potential restored</text>
+        </svg>)
+    },
+    'Chemical Coordination and Integration': {
+      title:'Endocrine Glands and Hormones',
+      parts:['Hypothalamus — Master controller; releasing/inhibiting hormones; connects nervous and endocrine','Anterior Pituitary — GH, TSH, ACTH, FSH, LH, Prolactin (tropic hormones control other glands)','Posterior Pituitary — Stores ADH (vasopressin → water reabsorption) and Oxytocin (uterine contraction)','Thyroid — T3+T4 (thyroxine: raises BMR, growth); Calcitonin (lowers blood Ca2+)','Adrenal Cortex — Cortisol (stress response); Aldosterone (Na+ retention); Androgens','Pancreatic Islets — β cells → Insulin (lowers blood glucose); α cells → Glucagon (raises glucose)'],
+      facts:['Feedback inhibition: high T4 → inhibits TRH (hypothalamus) and TSH (anterior pituitary)','Diabetes mellitus: Type I (no insulin — autoimmune); Type II (insulin resistance — lifestyle)','Oxytocin = milk ejection reflex + uterine contractions during parturition (positive feedback)'],
+      svg: () => (
+        <svg viewBox="0 0 440 340" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Endocrine Glands and Hormones</text>
+          {[{n:'Hypothalamus',x:220,y:46,c:'#bc8cff',h:'TRH, CRH, GnRH, ADH, Oxytocin'},
+            {n:'Anterior Pituitary',x:220,y:88,c:'#f0883e',h:'GH, TSH, ACTH, FSH, LH, Prolactin'},
+            {n:'Posterior Pituitary',x:220,y:128,c:'#d29922',h:'ADH (water reabsorption) | Oxytocin (uterine contraction)'},
+            {n:'Thyroid',x:115,y:172,c:'#3fb950',h:'T3,T4 (BMR) | Calcitonin (↓Ca2+)'},
+            {n:'Parathyroid',x:340,y:172,c:'#58a6ff',h:'PTH → raises blood Ca2+'},
+            {n:'Adrenal Cortex',x:95,y:226,c:'#f85149',h:'Cortisol | Aldosterone | Androgens'},
+            {n:'Adrenal Medulla',x:95,y:268,c:'#f0883e',h:'Adrenaline + Noradrenaline (fight/flight)'},
+            {n:'Pancreatic Islets',x:345,y:226,c:'#3fb950',h:'β→Insulin (↓glucose) | α→Glucagon (↑glucose)'},
+            {n:'Gonads',x:220,y:315,c:'#bc8cff',h:'Testosterone | Estrogen + Progesterone'},
+          ].map(({n,x,y,c,h})=>(
+            <g key={n}>
+              <rect x={x-80} y={y-14} width="160" height="28" rx="6" fill="rgba(0,0,0,.4)" stroke={c} strokeWidth="1.5"/>
+              <text x={x} y={y-1} textAnchor="middle" fill={c} fontSize="9" fontWeight="bold">{n}</text>
+              <text x={x} y={y+11} textAnchor="middle" fill="#8b949e" fontSize="7">{h}</text>
+            </g>))}
+          <line x1="220" y1="60" x2="220" y2="74" stroke="#bc8cff" strokeWidth="1" strokeDasharray="3,2"/>
+          <line x1="220" y1="102" x2="220" y2="114" stroke="#f0883e" strokeWidth="1" strokeDasharray="3,2"/>
+        </svg>)
+    },
   }
 
+  Object.assign(BIO_CHAPTERS, {
+    'Reproduction in Organisms': {
+      title:'Types of Reproduction',
+      parts:['Binary fission — Amoeba, bacteria; nucleus divides into 2; genetic copy of parent','Budding — Hydra, yeast; new daughter organism grows from parent body','Fragmentation — Spirogyra; body breaks into pieces; each grows into new organism','Vegetative propagation — Ginger (rhizome), Potato (tuber), Onion (bulb); from plant parts','Sexual reproduction — Two parents; meiosis produces gametes; fertilization gives variation'],
+      facts:['Clone: genetically identical to parent — result of asexual reproduction','Parthenogenesis: egg develops without fertilization; seen in honeybee drones','Parthenocarpy: seedless fruit development without fertilization; e.g. banana'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Types of Reproduction</text>
+          <rect x="10" y="30" width="420" height="135" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="2"/>
+          <text x="220" y="48" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">Asexual Reproduction</text>
+          {[['Binary fission','Amoeba, Bacteria','Nucleus divides → 2 cells; genetic copy'],['Budding','Hydra, Yeast','Daughter organism grows from parent'],['Fragmentation','Spirogyra','Body breaks; each part grows'],['Vegetative','Ginger, Potato, Onion','Roots/stems/leaves give new plant']].map(([type,eg,desc],i)=>(
+          <g key={type}><text x="20" y={68+i*24} fill="#3fb950" fontSize="9" fontWeight="bold">{type}:</text>
+          <text x="140" y={68+i*24} fill="#d29922" fontSize="8">({eg})</text>
+          <text x="265" y={68+i*24} fill="#8b949e" fontSize="8">{desc}</text></g>))}
+          <rect x="10" y="178" width="420" height="128" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="220" y="196" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">Sexual Reproduction</text>
+          {[['Involves','Two parents; meiosis; gamete formation; fertilization'],['Advantages','Genetic variation; adaptation; evolution'],['Gametogenesis','Spermatogenesis (testes) | Oogenesis (ovary)'],['Fertilization','External (frog,fish) | Internal (reptiles, birds, mammals)']].map(([k,v],i)=>(
+          <g key={k}><text x="20" y={216+i*24} fill="#58a6ff" fontSize="9" fontWeight="bold">{k}:</text>
+          <text x="115" y={216+i*24} fill="#8b949e" fontSize="8">{v}</text></g>))}
+        </svg>)
+    },
+    'Sexual Reproduction in Flowering Plants': {
+      title:'Flower Structure and Double Fertilization',
+      parts:['Stamen — Anther (produces pollen) + filament; male reproductive part','Pistil — Stigma + style + ovary (contains ovules); female reproductive part','Pollen grain — 2-celled: vegetative cell (pollen tube) + generative cell (divides → 2 male gametes)','Pollination — Self (autogamy) or cross (allogamy); agents: wind, water, insects, animals','Syngamy (fertilization 1) — 1 male gamete + egg → 2n zygote → embryo','Triple fusion (fertilization 2) — 1 male gamete + 2 polar nuclei → 3n endosperm (nutritive tissue)'],
+      facts:['Double fertilization is unique to angiosperms; discovered by Nawaschin (1898)','Endosperm (3n): persists in monocots (rice, wheat); consumed by embryo in dicots','Apomixis: asexual seed formation without fertilization; seen in Asteraceae'],
+      svg: () => (
+        <svg viewBox="0 0 420 350" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Flower Structure and Double Fertilization</text>
+          {[0,60,120,180,240,300].map((a,i)=>(<ellipse key={i} cx={210+45*Math.cos(a*Math.PI/180)} cy={115+30*Math.sin(a*Math.PI/180)} rx="20" ry="11" fill="#2d1a1a" stroke="#f85149" strokeWidth="1.5" opacity=".85" transform={`rotate(${a},${210+45*Math.cos(a*Math.PI/180)},${115+30*Math.sin(a*Math.PI/180)})`}/>))}
+          <text x="210" y="62" textAnchor="middle" fill="#f85149" fontSize="8">Petals (Corolla)</text>
+          {[-25,0,25].map((dx,i)=>(<g key={i}><line x1={210+dx} y1="105" x2={210+dx} y2="143" stroke="#d29922" strokeWidth="1.5"/><ellipse cx={210+dx} cy={149} rx="6" ry="4" fill="#d29922" stroke="#f0883e" strokeWidth="1"/></g>))}
+          <text x="252" y="143" fill="#d29922" fontSize="8">Stamen</text>
+          <ellipse cx="210" cy="115" rx="10" ry="16" fill="rgba(0,0,0,.5)" stroke="#bc8cff" strokeWidth="2"/>
+          <line x1="210" y1="99" x2="210" y2="87" stroke="#bc8cff" strokeWidth="2"/>
+          <ellipse cx="210" cy="84" rx="8" ry="5" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="166" y="100" fill="#bc8cff" fontSize="8">Pistil (Ovary)</text>
+          <rect x="10" y="183" width="400" height="155" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="210" y="201" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Double Fertilization (Unique to Angiosperms)</text>
+          <text x="20" y="220" fill="#3fb950" fontSize="9" fontWeight="bold">Pollen grain (2-celled):</text>
+          <text x="20" y="235" fill="#8b949e" fontSize="8">Vegetative cell (tube) + Generative cell (divides → 2 male gametes)</text>
+          <text x="20" y="255" fill="#d29922" fontSize="9" fontWeight="bold">Syngamy (fertilization 1):</text>
+          <text x="20" y="270" fill="#8b949e" fontSize="8">1 male gamete + egg cell → 2n Zygote → Embryo</text>
+          <text x="20" y="290" fill="#f0883e" fontSize="9" fontWeight="bold">Triple fusion (fertilization 2):</text>
+          <text x="20" y="305" fill="#8b949e" fontSize="8">1 male gamete + 2 polar nuclei → 3n Endosperm → nourishes embryo</text>
+          <text x="210" y="330" textAnchor="middle" fill="#bc8cff" fontSize="8">Discovered by Nawaschin 1898</text>
+        </svg>)
+    },
+    'Human Reproduction': {
+      title:'Menstrual Cycle (28 days)',
+      parts:['Testes — Seminiferous tubules produce sperm; Leydig cells secrete testosterone','Spermatogenesis — Spermatogonia → primary spermatocyte → secondary → spermatid → sperm; 64 days','Ovaries — Graafian follicle develops; ovulation on day 14; corpus luteum forms after','Menstrual phase — Day 1-5; shedding of endometrium (no fertilization occurred)','Follicular phase — Day 6-13; FSH stimulates follicle growth; estrogen rises','Ovulation — Day 14; LH surge triggers release of secondary oocyte','Luteal phase — Day 15-28; corpus luteum secretes progesterone (maintains uterine lining)'],
+      facts:['LH surge triggers ovulation on day 14 of a 28-day cycle','Corpus luteum → progesterone (maintains pregnancy for first 3 months)','HCG (from placenta) maintains corpus luteum; basis of pregnancy tests'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Menstrual Cycle (28 days)</text>
+          <rect x="20" y="38" width="400" height="40" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <rect x="20" y="38" width="72" height="40" rx="8" fill="rgba(248,81,73,.2)" stroke="#f85149" strokeWidth="1.5"/>
+          <rect x="92" y="38" width="115" height="40" fill="rgba(63,185,80,.2)" stroke="#3fb950" strokeWidth="1.5"/>
+          <rect x="207" y="38" width="18" height="40" fill="rgba(88,166,255,.3)" stroke="#58a6ff" strokeWidth="2"/>
+          <rect x="225" y="38" width="195" height="40" rx="8" fill="rgba(188,140,255,.2)" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="56" y="53" textAnchor="middle" fill="#f85149" fontSize="8" fontWeight="bold">Menstruation</text>
+          <text x="56" y="66" textAnchor="middle" fill="#8b949e" fontSize="7">Day 1-5</text>
+          <text x="149" y="53" textAnchor="middle" fill="#3fb950" fontSize="8" fontWeight="bold">Follicular</text>
+          <text x="149" y="66" textAnchor="middle" fill="#8b949e" fontSize="7">Day 6-13; FSH</text>
+          <text x="216" y="53" textAnchor="middle" fill="#58a6ff" fontSize="7" fontWeight="bold">Ov.</text>
+          <text x="322" y="53" textAnchor="middle" fill="#bc8cff" fontSize="8" fontWeight="bold">Luteal Phase</text>
+          <text x="322" y="66" textAnchor="middle" fill="#8b949e" fontSize="7">Day 15-28</text>
+          {[1,5,13,14,28].map((day,i)=>{const x=20+(day/28)*400; return <g key={i}><line x1={x} y1={78} x2={x} y2={88} stroke="#8b949e" strokeWidth="1"/><text x={x} y={98} textAnchor="middle" fill="#8b949e" fontSize="8">D{day}</text></g>})}
+          <text x="220" y="120" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Hormone Levels</text>
+          <rect x="20" y="128" width="400" height="120" rx="6" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="30" y="145" fill="#3fb950" fontSize="8">FSH</text>
+          <path d="M50,173 Q150,141 220,168 Q290,193 350,181" fill="none" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="30" y="161" fill="#f85149" fontSize="8">LH</text>
+          <path d="M50,193 Q160,188 210,148 Q230,148 240,188 Q290,213 350,203" fill="none" stroke="#f85149" strokeWidth="2"/>
+          <text x="30" y="185" fill="#bc8cff" fontSize="8">E2</text>
+          <path d="M50,208 Q130,188 200,168 Q220,168 250,203 Q310,228 350,221" fill="none" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="210" y="163" fill="#f85149" fontSize="9" fontWeight="bold">LH surge</text>
+          <line x1="215" y1="148" x2="215" y2="243" stroke="#58a6ff" strokeWidth="1" strokeDasharray="3,2"/>
+          <text x="216" y="251" fill="#58a6ff" fontSize="7">Ovulation D14</text>
+          <text x="220" y="270" textAnchor="middle" fill="#8b949e" fontSize="9">Fertilization in ampulla of fallopian tube</text>
+          <text x="220" y="284" textAnchor="middle" fill="#8b949e" fontSize="9">HCG maintains corpus luteum during pregnancy</text>
+        </svg>)
+    },
+    'Reproductive Health': {
+      title:'Contraceptive Methods',
+      parts:['Natural methods — Calendar (safe period); lactational amenorrhoea (up to 6 months postpartum)','Barrier methods — Condom (also prevents STDs); diaphragm; cervical cap','Oral pills — Saheli (non-steroidal, weekly); combined pills (estrogen+progestogen, daily)','IUD — Copper-T (most popular; Cu ions toxic to sperm); hormone-releasing LNG-20','Surgical methods — Vasectomy (male); tubectomy (female); permanent contraception','MTP (Medical Termination of Pregnancy) — Legal in India up to 20 weeks (with conditions)'],
+      facts:['Amniocentesis: detects chromosomal abnormalities like Down syndrome (banned for sex determination in India)','IVF (test-tube baby): egg fertilized outside body; embryo transferred to uterus','RCH programme: government initiative for reproductive and child health'],
+      svg: () => (
+        <svg viewBox="0 0 440 290" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Reproductive Health — Contraception</text>
+          {[{type:'Natural',col:'#3fb950',y:44,items:['Calendar method (safe period)','Lactational amenorrhoea (up to 6 mo)','Coitus interruptus (withdrawal)']},
+            {type:'Barrier',col:'#58a6ff',y:106,items:['Condom (male/female) — prevents STDs too','Diaphragm, cervical cap, vaults','Spermicidal creams and jellies']},
+            {type:'Hormonal (Pills)',col:'#d29922',y:168,items:['Saheli (non-steroidal) — once a week','Combined pills — daily','Mini pills (progestogen only)']},
+            {type:'IUD',col:'#f0883e',y:230,items:['Copper-T (most popular method)','Hormone releasing: LNG-20']},
+          ].map(({type,col,y,items})=>(
+            <g key={type}><rect x="10" y={y-15} width="420" height="58" rx="7" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="2"/>
+            <text x="20" y={y} fill={col} fontSize="11" fontWeight="bold">{type}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+14+j*13} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Principles of Inheritance and Variation': {
+      title:"Mendel's Monohybrid Cross",
+      parts:['Law of Dominance — Dominant allele masks recessive in F1 heterozygote (Tt looks Tall)','Law of Segregation — Alleles separate during gamete formation; most fundamental law','Law of Independent Assortment — Genes on different chromosomes assort independently','Codominance — Both alleles expressed equally; e.g. ABO blood groups (IA and IB)','Incomplete dominance — F1 phenotype intermediate; e.g. pink flowers from red×white snapdragon','Sex-linked inheritance — Genes on X chromosome (haemophilia, colour blindness); more common in males'],
+      facts:['Test cross: unknown genotype × homozygous recessive (aa) → reveals genotype','Dihybrid F2 ratio: 9:3:3:1 (genes on different chromosomes)','Sickle cell anaemia: HbA/HbS codominant; HbS/HbS = disease; HbA/HbS gives malaria resistance'],
+      svg: () => (
+        <svg viewBox="0 0 420 370" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="20" textAnchor="middle" fill="#3fb950" fontSize="13" fontWeight="bold">Monohybrid Cross (Mendel)</text>
+          <text x="210" y="44" textAnchor="middle" fill="#8b949e" fontSize="11">P Generation</text>
+          <rect x="78" y="50" width="80" height="30" rx="8" fill="#1a2d1a" stroke="#3fb950" strokeWidth="2"/>
+          <text x="118" y="69" textAnchor="middle" fill="#3fb950" fontSize="13" fontWeight="bold">TT</text>
+          <rect x="262" y="50" width="80" height="30" rx="8" fill="#2d1a1a" stroke="#f85149" strokeWidth="2"/>
+          <text x="302" y="69" textAnchor="middle" fill="#f85149" fontSize="13" fontWeight="bold">tt</text>
+          <text x="210" y="69" textAnchor="middle" fill="#8b949e" fontSize="15">×</text>
+          <line x1="210" y1="86" x2="210" y2="102" stroke="#8b949e" strokeWidth="1.5"/>
+          <text x="210" y="118" textAnchor="middle" fill="#8b949e" fontSize="11">F₁ — All Tall (Tt)</text>
+          <rect x="153" y="124" width="114" height="28" rx="8" fill="#1a2a1a" stroke="#d29922" strokeWidth="2"/>
+          <text x="210" y="143" textAnchor="middle" fill="#d29922" fontSize="13" fontWeight="bold">Tt</text>
+          <text x="210" y="174" textAnchor="middle" fill="#8b949e" fontSize="10">Self-pollination ↓</text>
+          <text x="210" y="196" textAnchor="middle" fill="#8b949e" fontSize="11">F₂ Punnett Square</text>
+          <rect x="118" y="203" width="184" height="108" fill="none" stroke="#30363d" strokeWidth="1.5"/>
+          <line x1="210" y1="203" x2="210" y2="311" stroke="#30363d" strokeWidth="1.5"/>
+          <line x1="118" y1="257" x2="302" y2="257" stroke="#30363d" strokeWidth="1.5"/>
+          <text x="164" y="219" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">T</text>
+          <text x="256" y="219" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">t</text>
+          <text x="106" y="240" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">T</text>
+          <text x="106" y="296" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">t</text>
+          <rect x="119" y="204" width="90" height="52" fill="rgba(63,185,80,.08)"/>
+          <rect x="211" y="204" width="90" height="52" fill="rgba(210,153,34,.08)"/>
+          <rect x="119" y="258" width="90" height="52" fill="rgba(210,153,34,.08)"/>
+          <rect x="211" y="258" width="90" height="52" fill="rgba(248,81,73,.08)"/>
+          <text x="164" y="233" textAnchor="middle" fill="#3fb950" fontSize="13" fontWeight="bold">TT</text>
+          <text x="256" y="233" textAnchor="middle" fill="#d29922" fontSize="13" fontWeight="bold">Tt</text>
+          <text x="164" y="288" textAnchor="middle" fill="#d29922" fontSize="13" fontWeight="bold">Tt</text>
+          <text x="256" y="288" textAnchor="middle" fill="#f85149" fontSize="13" fontWeight="bold">tt</text>
+          <text x="210" y="333" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">Phenotype: 3 Tall : 1 Dwarf</text>
+          <text x="210" y="349" textAnchor="middle" fill="#8b949e" fontSize="10">Genotype: 1 TT : 2 Tt : 1 tt</text>
+        </svg>)
+    },
+    'Molecular Basis of Inheritance': {
+      title:'DNA Replication — Semi-conservative',
+      parts:['Helicase — Unwinds the double helix by breaking hydrogen bonds at replication fork','Primase — Synthesizes short RNA primer; provides free 3\'OH for DNA polymerase to start','DNA Pol III — Main replicating enzyme; adds nucleotides only in 5\'→3\' direction','Leading strand — Synthesized continuously toward the replication fork','Lagging strand — Synthesized discontinuously as Okazaki fragments, away from the fork','DNA Ligase — Seals nicks between Okazaki fragments by forming phosphodiester bonds'],
+      facts:['Meselson and Stahl (1958) proved semi-conservative replication using N-15 labelling','Start codon: AUG (Met); Stop codons: UAA, UAG, UGA','One gene-one enzyme hypothesis: Beadle and Tatum (1941); Neurospora crassa'],
+      svg: () => (
+        <svg viewBox="0 0 440 360" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">DNA Replication — Semi-conservative</text>
+          {Array.from({length:8},(_,i)=>{const y=24+i*14, t=i/2.5; return <g key={i}>
+            <circle cx={120+48*Math.sin(t)} cy={y} r="5" fill="#58a6ff" opacity=".85"/>
+            <circle cx={120-48*Math.sin(t)} cy={y} r="5" fill="#f85149" opacity=".85"/>
+            {i>0&&<line x1={120+48*Math.sin(t)} y1={y} x2={120+48*Math.sin((i-1)/2.5)} y2={y-14} stroke="#58a6ff" strokeWidth="1.5" opacity=".4"/>}
+            {i>0&&<line x1={120-48*Math.sin(t)} y1={y} x2={120-48*Math.sin((i-1)/2.5)} y2={y-14} stroke="#f85149" strokeWidth="1.5" opacity=".4"/>}
+          </g>})}
+          <text x="120" y="14" textAnchor="middle" fill="#8b949e" fontSize="9">Parent DNA</text>
+          <circle cx="120" cy="138" r="14" fill="#d29922"/>
+          <text x="120" y="142" textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Helicase</text>
+          <path d="M120,152 L65,218 L65,355" fill="none" stroke="#58a6ff" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M120,152 L175,218 L175,355" fill="none" stroke="#f85149" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M175,228 L245,288 L245,355" fill="none" stroke="#3fb950" strokeWidth="3" strokeDasharray="7,3"/>
+          {[55,80,105,130,155,180].map((y,i)=>(<path key={i} d={`M65,${y+173} L65,${y+190}`} fill="none" stroke="#3fb950" strokeWidth="3" strokeLinecap="round"/>))}
+          <text x="245" y="270" fill="#3fb950" fontSize="9" fontWeight="bold">Leading strand</text>
+          <text x="245" y="282" fill="#8b949e" fontSize="8">(continuous)</text>
+          <text x="5" y="258" fill="#bc8cff" fontSize="9" fontWeight="bold">Lagging strand</text>
+          <text x="5" y="270" fill="#8b949e" fontSize="8">(Okazaki frags)</text>
+          <rect x="238" y="198" width="80" height="22" rx="5" fill="#1a2d1a" stroke="#3fb950"/>
+          <text x="278" y="213" textAnchor="middle" fill="#3fb950" fontSize="8">DNA Pol III</text>
+          <rect x="5" y="293" width="75" height="22" rx="5" fill="#1a2d2d" stroke="#58a6ff"/>
+          <text x="42" y="308" textAnchor="middle" fill="#58a6ff" fontSize="8">DNA Ligase</text>
+          <text x="220" y="345" textAnchor="middle" fill="#8b949e" fontSize="9">Meselson-Stahl (1958) — proved semi-conservative replication</text>
+        </svg>)
+    },
+    'Evolution': {
+      title:"Darwin's Theory and Evolutionary Timeline",
+      parts:["Chemical evolution — Miller-Urey (1953) showed amino acids form from CH4+H2+NH3+sparks","First life — Prokaryotes appeared ~3.5 billion years ago; RNA world hypothesis","Lamarckism — Use and disuse; inheritance of acquired characters (now disproved)","Darwinism — Natural variation; struggle for existence; survival of fittest; natural selection","Modern Synthesis — Combines Darwinism with Mendelian genetics and population genetics","Hardy-Weinberg equilibrium — p²+2pq+q²=1; disturbed by mutation, migration, selection, drift"],
+      facts:['On the Origin of Species (1859) by Charles Darwin established natural selection','Homologous organs (same origin, different function) → divergent evolution','Analogous organs (different origin, same function) → convergent evolution'],
+      svg: () => (
+        <svg viewBox="0 0 440 340" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Evolutionary Timeline and Darwin's Theory</text>
+          <line x1="40" y1="48" x2="40" y2="298" stroke="#30363d" strokeWidth="2"/>
+          {[['4600 MYA','Earth formed; chemical evolution begins','#8b949e',53],
+            ['3500 MYA','First prokaryotes (bacteria, anaerobic)','#2ea043',93],
+            ['1500 MYA','Eukaryotes evolve (membrane-bound nucleus)','#3fb950',133],
+            ['600 MYA','Multicellular organisms; Cambrian explosion','#58a6ff',173],
+            ['400 MYA','Land plants; Pteridophytes colonise land','#d29922',213],
+            ['230 MYA','Reptiles; Dinosaurs; Gymnosperms dominant','#f0883e',253],
+            ['200,000 YA','Homo sapiens evolve','#bc8cff',293],
+          ].map(([time,event,col,y])=>(
+            <g key={y}><circle cx="40" cy={y} r="5" fill={col}/>
+            <text x="55" y={y+4} fill={col} fontSize="9" fontWeight="bold">{time}</text>
+            <text x="55" y={y+16} fill="#8b949e" fontSize="8">{event}</text></g>))}
+          <rect x="278" y="155" width="155" height="135" rx="8" fill="#1a1a0a" stroke="#d29922"/>
+          <text x="355" y="173" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Darwin's Theory</text>
+          {['Natural variation','Struggle for existence','Survival of fittest','Natural selection','New species over time','(Origin of Species 1859)'].map((t,i)=>(<text key={i} x="355" y={190+i*15} textAnchor="middle" fill="#8b949e" fontSize="8">{t}</text>))}
+        </svg>)
+    },
+    'Human Health and Disease': {
+      title:'Immune System — Innate vs Adaptive',
+      parts:['Innate immunity — Non-specific; present from birth; skin, mucus, fever, phagocytes, NK cells','Adaptive immunity — Specific; B lymphocytes (humoral, antibodies); T lymphocytes (cell-mediated)','Antibody structure — Y-shaped; 4 polypeptide chains; 5 classes (IgG most abundant)','Vaccines — Stimulate primary immune response; create memory cells for fast secondary response','HIV/AIDS — Retrovirus; attacks CD4+ T-helper cells; transmitted via blood and sexual contact','Cancer — Oncogenes; uncontrolled cell division; metastasis (spread to other organs)'],
+      facts:['Primary response: slow (7-10 days) | Secondary response: fast (1-3 days), higher titre','Malaria: Plasmodium falciparum (most lethal); female Anopheles mosquito vector','Monoclonal antibodies: produced from a single B-cell clone; used in diagnostics and treatment'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">Immune System — Innate vs Adaptive</text>
+          <rect x="10" y="30" width="205" height="155" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="2"/>
+          <text x="112" y="50" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">Innate Immunity</text>
+          <text x="112" y="64" textAnchor="middle" fill="#8b949e" fontSize="8">(Non-specific; from birth)</text>
+          {['Skin and mucous membranes','Tears, saliva (lysozyme)','Stomach acid (pH 1.5-3.5)','Phagocytes; NK cells','Complement system, interferons'].map((t,i)=>(<text key={i} x="20" y={84+i*16} fill="#8b949e" fontSize="8">• {t}</text>))}
+          <rect x="225" y="30" width="205" height="155" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="327" y="50" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">Adaptive Immunity</text>
+          <text x="327" y="64" textAnchor="middle" fill="#8b949e" fontSize="8">(Specific; acquired)</text>
+          {['B cells → antibodies (humoral)','T cells → cell-mediated immunity','Memory cells → secondary response','5 Ig classes (IgG, IgM, IgA, IgE, IgD)','Vaccines stimulate primary response'].map((t,i)=>(<text key={i} x="235" y={84+i*16} fill="#8b949e" fontSize="8">• {t}</text>))}
+          <rect x="10" y="196" width="420" height="112" rx="8" fill="rgba(0,0,0,.3)" stroke="#f85149" strokeWidth="1.5"/>
+          <text x="220" y="214" textAnchor="middle" fill="#f85149" fontSize="10" fontWeight="bold">Major Diseases</text>
+          {[['HIV/AIDS','CD4+ T-cells destroyed; via blood/sex; no cure'],['Cancer','Oncogenes; uncontrolled division; metastasis'],['Malaria','Plasmodium falciparum; female Anopheles mosquito'],['Typhoid','Salmonella typhi; Widal test; rose spots']].map(([dis,desc],i)=>(<g key={dis}><text x="20" y={232+i*18} fill="#f85149" fontSize="9" fontWeight="bold">{dis}:</text><text x="95" y={232+i*18} fill="#8b949e" fontSize="8">{desc}</text></g>))}
+        </svg>)
+    },
+    'Strategies for Enhancement in Food Production': {
+      title:'Plant Breeding and Food Enhancement',
+      parts:['Plant breeding — Hybridisation (crossing varieties); selection of best traits; mutation breeding','Heterosis (Hybrid vigour) — F1 hybrid superior to both parents; widely used in crop production','Biofortification — Crops bred for higher vitamins/minerals; e.g. Golden Rice (Vitamin A)','SCP (Single Cell Protein) — Spirulina, Methylophilus grown on waste; protein-rich food source','Tissue culture — Somatic embryogenesis; virus-free plants from meristem; somaclonal variation','Animal husbandry — Cross-breeding for yield; MOET (Multiple Ovulation Embryo Transfer)'],
+      facts:['Sonalika (wheat) by Norman Borlaug: Green Revolution variety; high-yielding, disease-resistant','MOET: superovulation + embryo collection → multiple offspring from one superior female','Aquaculture: culturing aquatic organisms; pisciculture (fish farming), apiculture (bee farming)'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Enhancement in Food Production</text>
+          {[{name:'Plant Breeding',col:'#3fb950',y:46,i1:'Hybridisation: crossing two varieties',i2:'Heterosis: F1 hybrid vigour exceeds parents'},
+            {name:'Tissue Culture',col:'#58a6ff',y:108,i1:'Totipotency: any cell → whole plant',i2:'Virus-free plants from meristem culture'},
+            {name:'Biofortification',col:'#d29922',y:170,i1:'Golden Rice: β-carotene (Vit A) genes',i2:'Atlas 66 (wheat): high protein content'},
+            {name:'Single Cell Protein',col:'#f0883e',y:232,i1:'Spirulina grown on waste; high protein',i2:'Sustainable food source for future'}].map(({name,col,y,i1,i2})=>(
+            <g key={name}><rect x="10" y={y-14} width="420" height="50" rx="7" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="2"/>
+            <text x="20" y={y+1} fill={col} fontSize="11" fontWeight="bold">{name}</text>
+            <text x="20" y={y+16} fill="#8b949e" fontSize="8">{i1}</text>
+            <text x="20" y={y+30} fill="#8b949e" fontSize="8">{i2}</text></g>))}
+        </svg>)
+    },
+    'Microbes in Human Welfare': {
+      title:'Microbes in Human Welfare',
+      parts:['Lactobacillus — Lactic acid fermentation; converts milk to curd; probiotic action','Saccharomyces cerevisiae — Yeast; CO2 in bread rising; ethanol fermentation in brewing','Penicillium notatum — Discovered by Fleming (1928); produces antibiotic penicillin','Methanogens — Anaerobic bacteria; produce CH4 + CO2 from cattle dung in biogas plant','Trichoderma — Biocontrol agent; controls fungal plant diseases naturally','Sewage treatment — Primary (physical) + Secondary (microbial BOD reduction; activated sludge)'],
+      facts:['Penicillin: first antibiotic discovered; revolutionised medicine','Biogas (gobar gas): renewable energy from cattle dung via anaerobic digestion','Bt toxin (Bacillus thuringiensis): used as natural pesticide against insect pests'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Microbes in Human Welfare</text>
+          {[{use:'Food production',col:'#3fb950',y:46,mic:'Lactobacillus → curd | Saccharomyces → bread,beer | Acetobacter → vinegar'},
+            {use:'Industrial production',col:'#d29922',y:90,mic:'Aspergillus niger → citric acid | Penicillium → statins (cholesterol drugs)'},
+            {use:'Antibiotics',col:'#f85149',y:134,mic:'Penicillium notatum → Penicillin (Fleming 1928) | Streptomyces → Streptomycin'},
+            {use:'Biogas plant',col:'#58a6ff',y:178,mic:'Methanogens: CH4+CO2 from cattle dung | renewable energy source'},
+            {use:'Sewage treatment',col:'#bc8cff',y:222,mic:'Primary: sedimentation | Secondary: BOD reduction (activated sludge process)'},
+            {use:'Biocontrol',col:'#f0883e',y:266,mic:'Trichoderma → plant disease control | Bt toxin → insect pest control'}].map(({use,col,y,mic})=>(
+            <g key={use}><rect x="10" y={y-14} width="420" height="36" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+1} fill={col} fontSize="10" fontWeight="bold">{use}</text>
+            <text x="20" y={y+16} fill="#8b949e" fontSize="8">{mic}</text></g>))}
+        </svg>)
+    },
+    'Biotechnology: Principles and Processes': {
+      title:'Recombinant DNA Technology — Steps',
+      parts:['Restriction endonuclease — Cuts DNA at specific palindromic sites; EcoRI recognizes GAATTC','Gel electrophoresis — Separates DNA fragments by size; UV visualisation with EtBr stain','PCR — 94°C denature → 55°C anneal primers → 72°C extend with Taq polymerase (3 steps)','Cloning vector — Plasmid (pBR322) carries ori, selectable marker, multiple cloning site (MCS)','Transformation — Recombinant DNA introduced into host cell (CaCl2 or electroporation)','DNA Ligase — Joins sticky ends of vector and insert DNA fragments together'],
+      facts:['EcoRI: from E.coli; recognizes GAATTC; gives sticky ends (AATT overhang)','Ti plasmid (Agrobacterium tumefaciens): natural vector for plant genetic engineering','Bioreactor: large-scale (10-100 litre) controlled growth of genetically modified organisms'],
+      svg: () => (
+        <svg viewBox="0 0 440 330" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Recombinant DNA Technology — Steps</text>
+          <rect x="18" y="38" width="102" height="44" rx="8" fill="#0d1a0d" stroke="#3fb950" strokeWidth="2"/>
+          <text x="69" y="56" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Source DNA</text>
+          <text x="69" y="70" textAnchor="middle" fill="#8b949e" fontSize="8">gene of interest</text>
+          <rect x="155" y="38" width="112" height="44" rx="8" fill="#1a0d0d" stroke="#f85149" strokeWidth="2"/>
+          <text x="211" y="56" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Restriction Enzyme</text>
+          <text x="211" y="70" textAnchor="middle" fill="#8b949e" fontSize="8">EcoRI cuts GAATTC</text>
+          <path d="M120,60 L155,60" fill="none" stroke="#3fb950" strokeWidth="2" markerEnd="url(#qa)"/>
+          <circle cx="362" cy="86" r="36" fill="#0d0d2d" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="362" y="83" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Plasmid</text>
+          <text x="362" y="97" textAnchor="middle" fill="#8b949e" fontSize="7">Vector</text>
+          <path d="M267,60 Q315,60 328,76" fill="none" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#qa)"/>
+          <rect x="155" y="140" width="112" height="38" rx="8" fill="#0a1a0a" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="211" y="157" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">DNA Ligase</text>
+          <text x="211" y="171" textAnchor="middle" fill="#8b949e" fontSize="8">seals sticky ends</text>
+          <path d="M267,90 L292,140 L268,178" fill="none" stroke="#3fb950" strokeWidth="1.5" strokeDasharray="4,3"/>
+          <rect x="88" y="210" width="132" height="38" rx="8" fill="#0d2d0d" stroke="#3fb950" strokeWidth="2"/>
+          <text x="154" y="227" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Recombinant DNA</text>
+          <text x="154" y="241" textAnchor="middle" fill="#8b949e" fontSize="8">vector + insert</text>
+          <rect x="270" y="210" width="132" height="38" rx="8" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="336" y="227" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Host (E. coli)</text>
+          <text x="336" y="241" textAnchor="middle" fill="#8b949e" fontSize="8">transformation</text>
+          <path d="M220,248 L270,229" fill="none" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#qa)"/>
+          <rect x="18" y="270" width="188" height="48" rx="8" fill="#1a1a0d" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="112" y="288" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">PCR (3 steps)</text>
+          <text x="112" y="302" textAnchor="middle" fill="#8b949e" fontSize="8">94°C→55°C→72°C cycles</text>
+          <rect x="234" y="270" width="188" height="48" rx="8" fill="#0d1a1a" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="328" y="288" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Gel Electrophoresis</text>
+          <text x="328" y="302" textAnchor="middle" fill="#8b949e" fontSize="8">size-based separation</text>
+          <defs><marker id="qa" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L7,3L0,6Z" fill="#3fb950"/></marker></defs>
+        </svg>)
+    },
+    'Biotechnology and its Applications': {
+      title:'Applications of Biotechnology',
+      parts:['Bt Cotton — Cry protein gene from Bacillus thuringiensis; toxic to bollworm pest','Golden Rice — β-carotene (Vit A precursor) gene from daffodil inserted into rice','Insulin (Humulin) — A and B chains made separately in E.coli; first biotech drug (1982)','Gene therapy — ADA deficiency (SCID); retroviral vector; first human gene therapy (1990)','Molecular diagnostics — PCR and ELISA detect pathogens earlier than traditional methods','Transgenic animals — Rosie (cow) produces human protein in milk; OncoMouse for cancer research'],
+      facts:['~60% of India\'s cotton cultivation is now Bt cotton','RNAi (RNA interference): double-stranded RNA silences specific genes; used against pests','GM crops engineered for: pest resistance, herbicide tolerance, improved nutrition'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Biotechnology Applications</text>
+          {[{name:'Bt Cotton',col:'#3fb950',y:46,desc:'Bt cry protein gene | Toxic to bollworm | ~60% India\'s cotton is Bt'},
+            {name:'Golden Rice',col:'#d29922',y:92,desc:'β-carotene from daffodil | Prevents Vitamin A deficiency'},
+            {name:'Insulin (Humulin)',col:'#58a6ff',y:138,desc:'A+B chains in E.coli, combined | First biotech drug (1982)'},
+            {name:'Gene Therapy',col:'#bc8cff',y:184,desc:'ADA deficiency — first gene therapy (1990) | Retroviral vector'},
+            {name:'Molecular Diagnostics',col:'#f85149',y:230,desc:'PCR: amplify pathogen DNA | ELISA: HIV test; DNA fingerprinting'},
+            {name:'Transgenic Animals',col:'#f0883e',y:276,desc:'Rosie (cow): human protein in milk | OncoMouse: cancer model'}].map(({name,col,y,desc})=>(
+            <g key={name}><rect x="10" y={y-15} width="420" height="36" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y-1} fill={col} fontSize="10" fontWeight="bold">{name}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{desc}</text></g>))}
+        </svg>)
+    },
+    'Organisms and Populations': {
+      title:'Population Growth Models',
+      parts:['Exponential growth (J-curve) — dN/dt=rN; no resource limit; unrealistic except in ideal conditions','Logistic growth (S-curve) — dN/dt=rN(K-N)/K; realistic; growth slows as N approaches K','Carrying capacity (K) — Maximum population an environment can sustainably support','Population attributes — Birth rate, death rate, age distribution, sex ratio','Species interactions — Mutualism (+,+), commensalism (+,0), predation (+,-), competition (-,-)','Coevolution — Predator-prey arms race; reciprocal evolutionary change between interacting species'],
+      facts:['r = intrinsic rate of natural increase; higher in small, fast-reproducing organisms','Competitive exclusion principle (Gause): two species competing for the same resource cannot coexist indefinitely','Age pyramid shapes: triangular (growing population), bell (stable), urn (declining)'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Population Growth Models</text>
+          <rect x="10" y="28" width="420" height="85" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Exponential Growth (J-curve)</text>
+          <text x="220" y="61" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">dN/dt = rN</text>
+          <text x="220" y="76" textAnchor="middle" fill="#8b949e" fontSize="9">No resource limitation | Only in ideal conditions</text>
+          <path d="M30,108 Q100,103 140,98 Q180,93 220,83 Q260,68 300,48 Q340,23 380,5" fill="none" stroke="#58a6ff" strokeWidth="2.5" strokeDasharray="5,3"/>
+          <rect x="10" y="125" width="420" height="98" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="220" y="143" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Logistic Growth (S-curve / Sigmoid)</text>
+          <text x="220" y="158" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">dN/dt = rN(K-N)/K</text>
+          <text x="220" y="173" textAnchor="middle" fill="#8b949e" fontSize="9">K=carrying capacity | Real populations follow this</text>
+          <path d="M30,213 Q80,211 130,203 Q175,193 210,173 Q245,151 270,143 Q310,138 380,137" fill="none" stroke="#3fb950" strokeWidth="2.5"/>
+          <line x1="380" y1="137" x2="420" y2="137" stroke="#3fb950" strokeWidth="1.5" strokeDasharray="4,3"/>
+          <text x="405" y="135" fill="#3fb950" fontSize="8">K</text>
+          <text x="220" y="248" textAnchor="middle" fill="#d29922" fontSize="9">Population attributes: birth rate, death rate, age distribution, sex ratio</text>
+          <text x="220" y="265" textAnchor="middle" fill="#8b949e" fontSize="9">Interactions: mutualism, commensalism, predation, competition, parasitism</text>
+        </svg>)
+    },
+    'Ecosystem': {
+      title:'Ecosystem Energy Flow — 10% Law',
+      parts:['Producers — Autotrophs; fix solar energy via photosynthesis; base of energy pyramid','Primary consumers — Herbivores; feed directly on producers','Secondary consumers — Carnivores; feed on primary consumers','Decomposers — Fungi and bacteria; break down dead organic matter; mineralisation','Energy flow — Unidirectional; only ~10% transferred between trophic levels (Lindeman law)','GPP and NPP — Gross Primary Productivity (total photosynthesis); Net = GPP − Respiration'],
+      facts:['Lindeman 10% Law (1942): only about 10% of energy transfers to the next trophic level','Pyramid of energy: always upright | Pyramid of numbers/biomass: can be inverted','Tropical rainforest has highest NPP; desert and deep ocean lowest'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Ecosystem Energy Flow — 10% Law</text>
+          <polygon points="220,38 115,118 325,118" fill="rgba(63,185,80,.15)" stroke="#3fb950" strokeWidth="2"/>
+          <polygon points="220,128 85,192 355,192" fill="rgba(210,153,34,.15)" stroke="#d29922" strokeWidth="2"/>
+          <polygon points="220,202 50,272 390,272" fill="rgba(248,81,73,.15)" stroke="#f85149" strokeWidth="2"/>
+          <text x="220" y="86" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Producers (Plants)</text>
+          <text x="220" y="100" textAnchor="middle" fill="#8b949e" fontSize="8">10,000 kcal</text>
+          <text x="220" y="161" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Primary Consumers (Herbivores)</text>
+          <text x="220" y="175" textAnchor="middle" fill="#8b949e" fontSize="8">1,000 kcal | 10% transferred</text>
+          <text x="220" y="241" textAnchor="middle" fill="#f85149" fontSize="10" fontWeight="bold">Secondary Consumers (Carnivores)</text>
+          <text x="220" y="255" textAnchor="middle" fill="#8b949e" fontSize="8">100 kcal | 90% lost as heat</text>
+          <text x="220" y="290" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Lindeman 10% Law (1942)</text>
+        </svg>)
+    },
+    'Biodiversity and Conservation': {
+      title:"India's Biodiversity Hotspots and Conservation",
+      parts:['Genetic diversity — Variation within species; e.g. 50,000 rice varieties in India','Species diversity — Number and evenness of species; measured by Shannon index','Ecosystem diversity — Variety of habitat types: forest, wetland, grassland, coral reef','Western Ghats and Sri Lanka — One of India\'s 2 biodiversity hotspots; high endemism','Eastern Himalayas — Second biodiversity hotspot of India','HIPPCO — Habitat loss, Invasive species, Pollution, Population, Climate change, Over-exploitation'],
+      facts:['Habitat loss/fragmentation is the single most important cause of biodiversity loss','In-situ conservation: national parks, biosphere reserves | Ex-situ: zoos, seed banks, cryopreservation','IUCN Red List categories: Extinct, Critically Endangered, Endangered, Vulnerable'],
+      svg: () => (
+        <svg viewBox="0 0 440 330" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Biodiversity and Conservation</text>
+          <rect x="10" y="30" width="205" height="138" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="112" y="48" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Types of Biodiversity</text>
+          {['Genetic: within species (50,000 rice var.)','Species: richness + evenness','Ecosystem: forest, wetland, coral reef'].map((t,i)=><text key={i} x="20" y={66+i*18} fill="#8b949e" fontSize="8">{t}</text>)}
+          <text x="112" y="124" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">India's Hotspots</text>
+          <text x="112" y="138" textAnchor="middle" fill="#8b949e" fontSize="8">1. Western Ghats + Sri Lanka</text>
+          <text x="112" y="152" textAnchor="middle" fill="#8b949e" fontSize="8">2. Eastern Himalayas</text>
+          <rect x="225" y="30" width="205" height="138" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="327" y="48" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Conservation Methods</text>
+          {['In-situ: national parks, biosphere reserves','Ex-situ: zoos, botanical gardens','Seed banks, cryopreservation'].map((t,i)=><text key={i} x="235" y={66+i*18} fill="#8b949e" fontSize="8">{t}</text>)}
+          <rect x="10" y="180" width="420" height="136" rx="8" fill="rgba(0,0,0,.3)" stroke="#f85149" strokeWidth="1.5"/>
+          <text x="220" y="198" textAnchor="middle" fill="#f85149" fontSize="10" fontWeight="bold">Causes of Biodiversity Loss (HIPPCO)</text>
+          {[['H','Habitat loss and fragmentation (MAIN cause)'],['I','Invasive species: Lantana, water hyacinth'],['P','Pollution of air, water, soil'],['P','Population growth and over-exploitation'],['C','Climate change — coral bleaching'],['O','Over-hunting and collection']].map(([letter,desc],i)=>(
+          <g key={letter+i}><text x="20" y={216+i*16} fill="#f85149" fontSize="9" fontWeight="bold">{letter}:</text>
+          <text x="35" y={216+i*16} fill="#8b949e" fontSize="8">{desc}</text></g>))}
+        </svg>)
+    },
+    'Environmental Issues': {
+      title:'Environmental Issues — Global Warming, Ozone, Acid Rain',
+      parts:['Global warming — CO2, CH4, N2O, CFCs trap heat; +1.5°C would be catastrophic','Ozone layer depletion — CFCs release Cl radicals; Cl+O3→ClO+O2; Antarctic ozone hole','Acid rain — SO2+NOx+H2O→H2SO4+HNO3; pH below 5.6; damages forests and monuments','Water pollution — BOD measures pollution level; eutrophication from excess nutrients','Biomagnification — DDT and mercury accumulate at higher levels of the food chain','Solid and e-waste — Cd, Pb, Hg in electronics; plastics take 450+ years to decompose'],
+      facts:['Montreal Protocol (1987): successful international treaty banning CFCs','Minamata disease (Japan, 1956): mercury poisoning from biomagnification in fish','High BOD = high organic pollution = low dissolved oxygen = fish kills'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Environmental Issues</text>
+          {[{issue:'Global Warming',col:'#f85149',y:46,desc:'CO2,CH4,N2O,CFCs → greenhouse effect | Paris Agreement 2015'},
+            {issue:'Ozone Depletion',col:'#bc8cff',y:90,desc:'CFCs→Cl+O3→ClO+O2 | Antarctic hole | Montreal Protocol 1987'},
+            {issue:'Acid Rain',col:'#d29922',y:134,desc:'SO2+NOx+H2O→acids | pH<5.6 | Damages forests, monuments'},
+            {issue:'Water Pollution',col:'#58a6ff',y:178,desc:'BOD = O2 needed | Eutrophication: nutrients → algal bloom'},
+            {issue:'Biomagnification',col:'#3fb950',y:222,desc:'DDT concentrates up food chain | Minamata disease (Hg)'},
+            {issue:'Solid Waste',col:'#f0883e',y:266,desc:'E-waste: Cd,Pb,Hg | Plastics: 450+ years to decompose'}].map(({issue,col,y,desc})=>(
+            <g key={issue}><rect x="10" y={y-16} width="420" height="40" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{issue}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{desc}</text></g>))}
+        </svg>)
+    },
+  })
+
+  // ── CHEMISTRY CHAPTERS ───────────────────────────────────────
+  const CHEM_CHAPTERS = {
+    'Some Basic Concepts of Chemistry': {
+      title:'Mole Concept and Stoichiometry',
+      parts:['Mole — 6.022×10²³ entities (Avogadro number); SI unit for amount of substance','Molar mass — Mass of 1 mole in grams; numerically equal to atomic/molecular weight','Molarity (M) — Moles of solute per litre of solution; temperature-dependent','Molality (m) — Moles of solute per kg of solvent; temperature-independent','Empirical formula — Simplest whole number ratio of atoms (e.g. CH2O for glucose)','Limiting reagent — Completely consumed first; determines maximum product formed'],
+      facts:['1 mole of any gas at STP (0°C, 1 atm) = 22.4 L','% yield = (actual yield / theoretical yield) × 100','Law of Conservation of Mass: total mass of reactants = total mass of products'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Mole Concept</text>
+          <rect x="10" y="28" width="420" height="65" rx="8" fill="rgba(0,0,0,.3)" stroke="#d29922" strokeWidth="2"/>
+          <text x="220" y="46" textAnchor="middle" fill="#d29922" fontSize="11" fontWeight="bold">1 Mole = 6.022 × 10²³ entities</text>
+          <text x="220" y="62" textAnchor="middle" fill="#8b949e" fontSize="9">1 mole of any gas at STP = 22.4 L</text>
+          <text x="220" y="77" textAnchor="middle" fill="#8b949e" fontSize="9">Molar mass (g/mol) = mass of 1 mole = atomic/molecular weight numerically</text>
+          {[{label:'Molarity (M)',eq:'moles/litre solution',col:'#3fb950',y:118},
+            {label:'Molality (m)',eq:'moles/kg solvent',col:'#58a6ff',y:154},
+            {label:'Mole fraction (X)',eq:'nA/(nA+nB) — dimensionless',col:'#bc8cff',y:190},
+            {label:'Mass percent (w/w)',eq:'(mass solute/mass solution)×100',col:'#f0883e',y:226},
+            {label:'Limiting reagent',eq:'completely consumed first; limits product',col:'#f85149',y:262},
+          ].map(({label,eq,col,y})=>(
+            <g key={label}>
+              <rect x="10" y={y-14} width="420" height="30" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+              <text x="20" y={y+2} fill={col} fontSize="9" fontWeight="bold">{label}:</text>
+              <text x="160" y={y+2} fill="#8b949e" fontSize="9">{eq}</text>
+            </g>))}
+        </svg>)
+    },
+    'Structure of Atom': {
+      title:'Bohr Model — Hydrogen Atom',
+      parts:['Nucleus — Protons (+) and neutrons (0); diameter ~10⁻¹⁵ m; contains almost all the mass','Electron shells — K(max 2), L(max 8), M(max 18), N(max 32)','Bohr model — Circular orbits; quantised energy; En = -13.6Z²/n² eV','Quantum numbers — n (shell), l (subshell 0 to n-1), m (-l to +l), s (±½)','Aufbau principle — Fill lowest energy orbitals first: 1s < 2s < 2p < 3s < 3p < 4s < 3d','Heisenberg uncertainty — Δx·Δp ≥ h/4π; cannot know exact position and momentum simultaneously'],
+      facts:['de Broglie wavelength: λ = h/mv (all matter has wave nature)','Pauli exclusion: no two electrons can have all four quantum numbers the same','Hund\'s rule: maximise unpaired electrons in degenerate (same energy) orbitals'],
+      svg: () => (
+        <svg viewBox="0 0 420 330" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Bohr Model — Hydrogen Atom</text>
+          <circle cx="210" cy="170" r="17" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="2.5"/>
+          <text x="210" y="168" textAnchor="middle" fill="#bc8cff" fontSize="7" fontWeight="bold">Nucleus</text>
+          <text x="210" y="178" textAnchor="middle" fill="#8b949e" fontSize="6">p+, n0</text>
+          {[{r:48,col:'#f85149',label:'K (n=1): max 2e⁻  E=-13.6eV'},
+            {r:88,col:'#d29922',label:'L (n=2): max 8e⁻  E=-3.4eV'},
+            {r:128,col:'#3fb950',label:'M (n=3): max 18e⁻ E=-1.51eV'},
+            {r:164,col:'#58a6ff',label:'N (n=4): max 32e⁻ E=-0.85eV'}
+          ].map(({r,col,label},i)=>(
+            <g key={i}>
+              <circle cx="210" cy="170" r={r} fill="none" stroke={col} strokeWidth="1.5" strokeDasharray="4,4" opacity=".7"/>
+              <circle cx={210+r} cy="170" r="6" fill={col} opacity=".9"/>
+              <text x="210" y={170-r-6} textAnchor="middle" fill={col} fontSize="7.5">{label}</text>
+            </g>))}
+          <rect x="10" y="300" width="400" height="26" rx="6" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="210" y="317" textAnchor="middle" fill="#bc8cff" fontSize="8.5">En=-13.6Z²/n² eV | rn=n²×0.529/Z Å | λ=h/mv (de Broglie)</text>
+        </svg>)
+    },
+    'Classification of Elements and Periodicity': {
+      title:'Periodic Table Trends',
+      parts:['Atomic radius — Increases down group (more shells); decreases across period (more effective nuclear charge)','Ionisation energy — Increases across period; decreases down group; Be > B and N > O (exceptions)','Electron affinity — Increases across period; Cl has highest (not F — F is too small)','Electronegativity — F highest (3.98); increases across period; decreases down group','Metallic character — Decreases left to right; increases top to bottom in a group','Shielding effect — Inner electrons reduce effective nuclear charge on outer electrons'],
+      facts:['Lanthanide contraction: 4f electrons poorly shield nuclear charge → size decrease La to Lu','Noble gases: complete valence shell; highest ionisation energy; largely chemically inert','Diagonal relationships: Li-Mg, Be-Al, B-Si have similar chemical properties'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Periodic Table Trends</text>
+          <rect x="10" y="28" width="420" height="48" rx="6" fill="rgba(0,0,0,.3)" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">ACROSS PERIOD (left → right)</text>
+          {[['Atomic radius','Decreases ↓','#f85149'],['Ionization E','Increases ↑','#3fb950'],['Electronegativity','Increases ↑','#58a6ff'],['Metallic character','Decreases ↓','#bc8cff']].map(([prop,trend,col],i)=>(
+            <text key={prop} x={28+i*108} y={66} fill={col} fontSize="8" textAnchor="middle">{prop}: {trend}</text>))}
+          <rect x="10" y="88" width="420" height="48" rx="6" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="106" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">DOWN A GROUP (top → bottom)</text>
+          {[['Atomic radius','Increases ↑','#f85149'],['Ionization E','Decreases ↓','#3fb950'],['Electronegativity','Decreases ↓','#d29922'],['Metallic char.','Increases ↑','#bc8cff']].map(([prop,trend,col],i)=>(
+            <text key={prop} x={28+i*108} y={126} fill={col} fontSize="8" textAnchor="middle">{prop}: {trend}</text>))}
+          {[{t:'Exceptions (Ionization Energy)',col:'#f0883e',y:158,items:['Be > B: B loses 2p electron (easier than Be\'s 2s)','N > O: N has half-filled 2p (extra stability); O loses paired electron']},
+            {t:'Diagonal Relationships',col:'#3fb950',y:210,items:['Li resembles Mg | Be resembles Al | B resembles Si','Similar charge density and electronegativity in diagonal pairs']},
+            {t:'Lanthanide Contraction',col:'#bc8cff',y:258,items:['4f electrons: poor shielding → size decreases La to Lu','Zr and Hf have nearly identical size; very hard to separate']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="6" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="9" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Chemical Bonding and Molecular Structure': {
+      title:'VSEPR Theory and Hybridisation',
+      parts:['Ionic bond — Transfer of electrons; metal to non-metal; NaCl, MgO; high MP; conducts when molten','Covalent bond — Sharing of electrons; sigma (σ) and pi (π) bonds','VSEPR — Lone pairs repel more than bonding pairs; determines molecular geometry','sp³ (tetrahedral 109.5°) — CH4; NH3 (107°, 1 lone pair); H2O (104.5°, 2 lone pairs)','sp² (trigonal planar 120°) — C2H4, BF3, benzene; has one π bond','sp (linear 180°) — C2H2, CO2, BeCl2; has two π bonds'],
+      facts:['Polarity depends on electronegativity difference AND molecular symmetry (CCl4 is nonpolar)','Bond order = (bonding electrons − antibonding electrons)/2','O2 is paramagnetic (2 unpaired e⁻ in π* antibonding MOs) — explained only by MOT'],
+      svg: () => (
+        <svg viewBox="0 0 440 330" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Chemical Bonding — Shapes</text>
+          {[{mol:'CH₄ (sp³)',shape:'Tetrahedral',angle:'109.5°',col:'#3fb950',x:78,y:68},
+            {mol:'NH₃ (sp³)',shape:'Pyramidal',angle:'107°',col:'#58a6ff',x:220,y:68},
+            {mol:'H₂O (sp³)',shape:'V-shaped',angle:'104.5°',col:'#f85149',x:362,y:68},
+            {mol:'BF₃ (sp²)',shape:'Trig. planar',angle:'120°',col:'#d29922',x:78,y:168},
+            {mol:'PCl₅ (sp³d)',shape:'Trig. bipyramid',angle:'90°/120°',col:'#f0883e',x:220,y:168},
+            {mol:'SF₆ (sp³d²)',shape:'Octahedral',angle:'90°',col:'#bc8cff',x:362,y:168},
+          ].map(({mol,shape,angle,col,x,y})=>(
+            <g key={mol}>
+              <rect x={x-68} y={y-26} width="136" height="66" rx="7" fill="rgba(0,0,0,.4)" stroke={col} strokeWidth="1.5"/>
+              <text x={x} y={y-8} textAnchor="middle" fill={col} fontSize="11" fontWeight="bold">{mol}</text>
+              <text x={x} y={y+8} textAnchor="middle" fill="#e6edf3" fontSize="9">{shape}</text>
+              <text x={x} y={y+22} textAnchor="middle" fill="#8b949e" fontSize="8">{angle}</text>
+            </g>))}
+          <rect x="10" y="235" width="420" height="82" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="220" y="252" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Key Bond Concepts</text>
+          {['Bond order = (bonding e⁻ − antibonding e⁻) / 2',
+            'N₂: order=3 (triple bond; most stable diatomic) | O₂: order=2 (paramagnetic)',
+            'CO: highest bond dissociation energy (1072 kJ/mol) among diatomics',
+            'Polarity: CCl₄ nonpolar (symmetric) | CHCl₃ polar (asymmetric)'].map((t,i)=>(
+            <text key={i} x="20" y={268+i*14} fill="#8b949e" fontSize="8">{t}</text>))}
+        </svg>)
+    },
+    'States of Matter': {
+      title:'Gas Laws',
+      parts:["Boyle's Law — PV = constant at constant T; P and V inversely proportional","Charles' Law — V/T = constant at constant P; V and T directly proportional","Avogadro's Law — V/n = constant at constant T,P; equal volumes → equal moles","Ideal Gas Law — PV = nRT; R = 8.314 J/mol·K; combines all three gas laws","van der Waals equation — (P+an²/V²)(V-nb)=nRT; corrects for real gas behaviour","Graham's Law — Rate of diffusion ∝ 1/√M; lighter gases diffuse faster"],
+      facts:["Critical temperature Tc: above this, gas cannot be liquefied regardless of pressure","Viscosity of liquids decreases with temperature; gases increase with temperature","At STP, 1 mole of ideal gas occupies 22.4 L (standard temperature 0°C, 1 atm)"],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Gas Laws</text>
+          {[{law:"Boyle's Law",eq:"PV = constant  (T const)",col:'#58a6ff',y:48},
+            {law:"Charles' Law",eq:"V/T = constant  (P const)",col:'#3fb950',y:86},
+            {law:"Gay-Lussac's Law",eq:"P/T = constant  (V const)",col:'#d29922',y:124},
+            {law:"Avogadro's Law",eq:"V/n = constant  (T,P const)",col:'#f0883e',y:162},
+            {law:"Ideal Gas Law",eq:"PV = nRT   R = 8.314 J/mol·K",col:'#bc8cff',y:200},
+            {law:"van der Waals (real gas)",eq:"(P+an²/V²)(V-nb) = nRT",col:'#f85149',y:238},
+            {law:"Graham's Law",eq:"rate ∝ 1/√M  (lighter = faster)",col:'#2ea043',y:276},
+          ].map(({law,eq,col,y})=>(
+            <g key={law}>
+              <rect x="10" y={y-14} width="420" height="28" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+              <text x="20" y={y+1} fill={col} fontSize="9" fontWeight="bold">{law}:</text>
+              <text x="185" y={y+1} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            </g>))}
+        </svg>)
+    },
+    'Thermodynamics': {
+      title:'Laws of Thermodynamics',
+      parts:["Zeroth Law — Thermal equilibrium; if A⇌C and B⇌C then A⇌B; defines temperature","First Law — ΔU = q + w; energy conserved; U is a state function; q and w are path functions","Second Law — ΔSuniverse ≥ 0; entropy always increases for spontaneous processes","Gibbs Free Energy — ΔG = ΔH - TΔS; ΔG < 0 → spontaneous; ΔG = 0 → equilibrium","Enthalpy — ΔH = ΔU + ΔngRT; Hess's law: ΔH is path-independent (state function)","Third Law — Entropy of a perfect crystal at 0 K = 0 (S = 0)"],
+      facts:['Exothermic: ΔH < 0 | Endothermic: ΔH > 0','Bond dissociation enthalpy: energy to break 1 mole of bonds in gaseous state','Standard conditions: 25°C (298K), 1 atm, 1M concentration'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Thermodynamics — Laws</text>
+          {[{law:'Zeroth Law',col:'#8b949e',y:46,eq:'',desc:'Thermal equilibrium — defines temperature; basis of thermometry'},
+            {law:'First Law',col:'#3fb950',y:92,eq:'ΔU = q + w',desc:'Energy conserved | q = heat absorbed | w = work done ON system'},
+            {law:'Second Law',col:'#d29922',y:138,eq:'ΔSuniv ≥ 0',desc:'Entropy of universe increases for spontaneous processes'},
+            {law:'Gibbs Free Energy',col:'#f85149',y:184,eq:'ΔG = ΔH - TΔS',desc:'ΔG<0: spontaneous | ΔG=0: equilibrium | ΔG>0: non-spontaneous'},
+            {law:'Hess\'s Law',col:'#58a6ff',y:230,eq:'ΔH = path-independent',desc:'State function; ΔH can be calculated by adding/subtracting reactions'},
+            {law:'Third Law',col:'#bc8cff',y:276,eq:'S=0 at 0K',desc:'Entropy of perfect crystal at absolute zero equals zero'},
+          ].map(({law,col,y,eq,desc})=>(
+            <g key={law}>
+              <rect x="10" y={y-16} width="420" height="42" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+              <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{law}</text>
+              {eq&&<text x="185" y={y} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>}
+              <text x="20" y={y+14} fill="#8b949e" fontSize="8">{desc}</text>
+            </g>))}
+        </svg>)
+    },
+    'Equilibrium': {
+      title:'Chemical and Ionic Equilibrium',
+      parts:["Dynamic equilibrium — Forward rate = reverse rate; concentrations constant but not equal","Kc = [products]/[reactants] — Only gas and dissolved species; solids and liquids excluded","Le Chatelier's principle — System shifts to oppose imposed change (concentration, T, P)","pH and Kw — pH = -log[H+]; pOH = -log[OH-]; pH + pOH = 14 at 25°C; Kw = 10⁻¹⁴","Ka and Kb — Acid and base dissociation constants; Ka × Kb = Kw for conjugate pair","Buffer solutions — Weak acid + conjugate base; Henderson-Hasselbalch: pH = pKa + log([A-]/[HA])"],
+      facts:['Kc > 1: products favoured | Kc < 1: reactants favoured at equilibrium','Common ion effect: suppresses ionization of weak acid/base by adding its conjugate','Solubility product Ksp: ionic product exceeds Ksp → precipitation occurs'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Chemical Equilibrium</text>
+          <rect x="10" y="28" width="420" height="55" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Kc = [Products]^n / [Reactants]^m</text>
+          <text x="220" y="61" textAnchor="middle" fill="#8b949e" fontSize="9">Kp = Kc(RT)^Δn | Δn = mol gas products − mol gas reactants</text>
+          <text x="220" y="76" textAnchor="middle" fill="#8b949e" fontSize="9">Kc>1: products favoured | Kc<1: reactants favoured</text>
+          {[{t:"Le Chatelier's Principle",col:'#d29922',y:108,items:['Add reactant → shifts right (→ products) | Remove product → shifts right','Increase T for endothermic → shifts right; for exothermic → shifts left','Increase P → shifts to side with fewer moles of gas']},
+            {t:'pH Scale and Kw',col:'#f85149',y:178,items:['pH = -log[H+] | pOH = -log[OH-] | pH + pOH = 14 at 25°C','Strong acid: HCl, H2SO4, HNO3 | Strong base: NaOH, KOH','Ka × Kb = Kw = 10⁻¹⁴ (conjugate acid-base pair at 25°C)']},
+            {t:'Buffer Solutions',col:'#3fb950',y:248,items:['Weak acid + conjugate base | Resists pH change on adding small acid/base','Henderson-Hasselbalch: pH = pKa + log([A-]/[HA])','Blood buffer: H2CO3/HCO3- (pKa=6.1) maintains pH 7.4']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Redox Reactions': {
+      title:'Oxidation-Reduction Reactions',
+      parts:['Oxidation — Loss of electrons (OIL); increase in oxidation number','Reduction — Gain of electrons (RIG); decrease in oxidation number','Balancing redox — Half-reaction method; balance atoms, then charge with electrons','Disproportionation — Same element oxidised AND reduced simultaneously','KMnO4 (acidic) — Mn goes from +7 to +2; gains 5 electrons per Mn','K2Cr2O7 (acidic) — Cr goes from +6 to +3; gains 3 electrons per Cr'],
+      facts:['F is always -1 | O is usually -2 (peroxide: -1) | H is usually +1 (metal hydrides: -1)','Strongest oxidising agents: F2 > MnO4- > Cr2O7²- > HNO3(conc.) > Cl2','Electrochemical series: higher reduction potential = stronger oxidising agent'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Redox Reactions</text>
+          <rect x="10" y="28" width="420" height="55" rx="8" fill="rgba(0,0,0,.3)" stroke="#f0883e" strokeWidth="2"/>
+          <text x="220" y="46" textAnchor="middle" fill="#f0883e" fontSize="11" fontWeight="bold">OIL RIG: Oxidation Is Loss, Reduction Is Gain</text>
+          <text x="220" y="62" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Zn + CuSO₄ → ZnSO₄ + Cu</text>
+          <text x="110" y="77" textAnchor="middle" fill="#58a6ff" fontSize="9">Zn→Zn²⁺+2e⁻ (oxidised; anode)</text>
+          <text x="330" y="77" textAnchor="middle" fill="#f85149" fontSize="9">Cu²⁺+2e⁻→Cu (reduced; cathode)</text>
+          {[{name:'KMnO4 in acid',from:'+7',to:'+2',eq:'MnO4⁻+8H⁺+5e⁻→Mn²⁺+4H2O',col:'#bc8cff',y:106},
+            {name:'KMnO4 in neutral',from:'+7',to:'+4',eq:'MnO4⁻+2H2O+3e⁻→MnO2+4OH⁻',col:'#d29922',y:142},
+            {name:'K2Cr2O7 in acid',from:'+6',to:'+3',eq:'Cr2O7²⁻+14H⁺+6e⁻→2Cr³⁺+7H2O',col:'#f0883e',y:178},
+          ].map(({name,from,to,eq,col,y})=>(
+            <g key={name}><rect x="10" y={y-14} width="420" height="32" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="9" fontWeight="bold">{name}: {from}→{to}</text>
+            <text x="20" y={y+13} fill="#8b949e" fontSize="8">{eq}</text></g>))}
+          <rect x="10" y="210" width="420" height="78" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="220" y="228" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Oxidation Number Rules</text>
+          {['F: always -1 | O: usually -2 (peroxide -1; OF2 +2) | H: usually +1 (metal hydrides -1)',
+            'Sum of ON = 0 for neutral molecule | Sum = charge for polyatomic ions',
+            'Transition metals: variable ON (Mn: +2 to +7; Fe: +2 or +3; Cr: +2 to +6)'].map((t,i)=>(
+            <text key={i} x="20" y={244+i*14} fill="#8b949e" fontSize="8">{t}</text>))}
+        </svg>)
+    },
+    'Solid State': {
+      title:'Crystal Systems — Unit Cells',
+      parts:['Simple cubic (SC) — 1 atom/cell; APF 52%; CN 6; only polonium','BCC — 2 atoms/cell; APF 68%; CN 8; Na, K, Fe, Cr, W','FCC/CCP — 4 atoms/cell; APF 74%; CN 12; Cu, Ag, Au, Al; densest packing','Schottky defect — Both cation and anion missing; decreases density; NaCl, KCl','Frenkel defect — Cation moves to interstitial; no density change; AgCl, ZnS','F-centres — Anion vacancy with trapped electron; gives colour to crystals (KCl = yellow)'],
+      facts:['Close packed structures: ABABAB = HCP | ABCABC = CCP (FCC)','Tetrahedral voids = 2N; Octahedral voids = N (N = number of atoms in CCP layer)','APF 74% (FCC/HCP) is the maximum possible packing of equal spheres'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Solid State — Unit Cells</text>
+          {[{name:'Simple Cubic',Z:'1',APF:'52%',CN:'6',col:'#d29922',eg:'Po',x:73,y:58},
+            {name:'BCC',Z:'2',APF:'68%',CN:'8',col:'#f0883e',eg:'Na, K, Fe',x:220,y:58},
+            {name:'FCC/CCP',Z:'4',APF:'74%',CN:'12',col:'#3fb950',eg:'Cu, Ag, Au',x:367,y:58},
+          ].map(({name,Z,APF,CN,col,eg,x,y})=>(
+            <g key={name}>
+              {[[0,0],[55,0],[0,55],[55,55]].map(([dx,dy],i)=>(<circle key={i} cx={x-28+dx} cy={y+dy} r="8" fill="rgba(0,0,0,.4)" stroke={col} strokeWidth="2"/>))}
+              {name==='BCC'&&<circle cx={x} cy={y+28} r="8" fill={col} opacity=".7"/>}
+              {name==='FCC/CCP'&&[[27.5,0],[0,27.5],[55,27.5],[27.5,55]].map(([dx,dy],i)=>(<circle key={i} cx={x-28+dx} cy={y+dy} r="7" fill={col} opacity=".7"/>))}
+              {[[0,0,55,0],[0,55,55,55],[0,0,0,55],[55,0,55,55]].map(([x1,y1,x2,y2],i)=>(<line key={i} x1={x-28+x1} y1={y+y1} x2={x-28+x2} y2={y+y2} stroke={col} strokeWidth="1.5"/>))}
+              <text x={x} y={y+78} textAnchor="middle" fill={col} fontSize="9" fontWeight="bold">{name}</text>
+              <text x={x} y={y+91} textAnchor="middle" fill="#8b949e" fontSize="8">Z={Z} | APF={APF} | CN={CN}</text>
+              <text x={x} y={y+104} textAnchor="middle" fill="#d29922" fontSize="8">e.g. {eg}</text>
+            </g>))}
+          {[{t:'Crystal Defects',col:'#58a6ff',y:200,items:['Schottky: cation+anion both missing; density decreases; NaCl, KCl','Frenkel: cation moves to interstitial; no density change; AgCl, ZnS','F-centres: anion vacancy + trapped electron; gives colour (KCl = yellow)','Metal excess defect: extra cations in interstitial (ZnO heated → Zn²⁺ + e⁻)']},
+            {t:'Close Packing',col:'#3fb950',y:290,items:['HCP: ABABAB pattern | CCP(FCC): ABCABC pattern','Tetrahedral voids = 2N; Octahedral voids = N per CCP layer']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Solutions': {
+      title:'Colligative Properties of Solutions',
+      parts:["Raoult's Law — PA = XA × PA°; partial pressure proportional to mole fraction","Relative lowering of VP — ΔP/P° = XB (mole fraction of solute)","Elevation of boiling point — ΔTb = Kb × m; Kb(water) = 0.52 K·kg/mol","Depression of freezing point — ΔTf = Kf × m; Kf(water) = 1.86 K·kg/mol","Osmotic pressure — π = iMRT; used to determine molar mass of polymers","Van't Hoff factor (i) — Accounts for dissociation/association; NaCl i≈2 if fully dissociated"],
+      facts:["Reverse osmosis: applied pressure > osmotic pressure; used in water purification","Positive deviation from Raoult's law: A-B weaker than A-A and B-B (e.g. ethanol+water)","Negative deviation: A-B stronger than pure (e.g. HCl+water; acetone+chloroform)"],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Colligative Properties of Solutions</text>
+          <rect x="10" y="28" width="420" height="48" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Raoult's Law: PA = XA × PA°</text>
+          <text x="220" y="68" textAnchor="middle" fill="#8b949e" fontSize="9">Colligative properties depend on NUMBER of solute particles, not their nature</text>
+          {[{prop:'Relative lowering of VP',eq:'ΔP/P° = XB',col:'#3fb950',y:104,note:'XB = mole fraction of solute | simplest colligative property'},
+            {prop:'Elevation of boiling point',eq:'ΔTb = Kb × m',col:'#d29922',y:140,note:'Kb(water)=0.52 K·kg/mol | Ebullioscopy; antifreeze'},
+            {prop:'Depression of freezing point',eq:'ΔTf = Kf × m',col:'#f0883e',y:176,note:'Kf(water)=1.86 K·kg/mol | Cryoscopy; car antifreeze'},
+            {prop:'Osmotic pressure',eq:'π = iMRT',col:'#bc8cff',y:212,note:'Used to find molar mass of polymers and macromolecules'},
+          ].map(({prop,eq,col,y,note})=>(
+            <g key={prop}><rect x="10" y={y-14} width="420" height="34" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="9" fontWeight="bold">{prop}:</text>
+            <text x="220" y={y} fill="#3fb950" fontSize="10" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+13} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <rect x="10" y="250" width="420" height="42" rx="8" fill="rgba(0,0,0,.3)" stroke="#d29922"/>
+          <text x="220" y="268" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Van't Hoff Factor (i)</text>
+          <text x="20" y="283" fill="#8b949e" fontSize="8">NaCl: i≈2 (dissociates) | CH3COOH in benzene: i<1 (associates) | glucose: i=1</text>
+        </svg>)
+    },
+    'Electrochemistry': {
+      title:'Electrochemical Cell — Daniell Cell',
+      parts:['Galvanic cell — Spontaneous redox reaction converts chemical energy to electrical energy','Standard electrode potential E° — Measured vs SHE (E°=0.00V) at 1M, 1 atm, 298K','EMF of cell — E°cell = E°cathode − E°anode; positive EMF = spontaneous','Faraday\'s laws — m = ZIt = (M/nF)It; 1 Faraday = 96485 C/mol of electrons','Nernst equation — E = E° − (0.0592/n)logQ at 298K; relates EMF to concentration','Conductance — Reciprocal of resistance; Λm = Λ∞ − b√C (Kohlrausch law for dilute)'],
+      facts:['ΔG° = −nFE° | ΔG° = −RT ln K; connects electrochemistry, thermodynamics, equilibrium','Electrolytic cell: electrical energy drives non-spontaneous redox reaction','1 Faraday deposits 1 gram-equivalent of substance at electrode'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Daniell Cell — Electrochemical Cell</text>
+          <rect x="18" y="72" width="142" height="150" rx="8" fill="#0d1a0d" stroke="#3fb950" strokeWidth="2"/>
+          <text x="89" y="92" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Anode (−)</text>
+          <text x="89" y="106" textAnchor="middle" fill="#3fb950" fontSize="9">Oxidation: Zn→Zn²⁺+2e⁻</text>
+          <rect x="73" y="112" width="32" height="82" rx="4" fill="#2d2d00" stroke="#d29922" strokeWidth="2"/>
+          <text x="89" y="157" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Zn</text>
+          <text x="89" y="205" textAnchor="middle" fill="#8b949e" fontSize="7">1M ZnSO4</text>
+          <rect x="280" y="72" width="142" height="150" rx="8" fill="#1a0d00" stroke="#f0883e" strokeWidth="2"/>
+          <text x="351" y="92" textAnchor="middle" fill="#f0883e" fontSize="10" fontWeight="bold">Cathode (+)</text>
+          <text x="351" y="106" textAnchor="middle" fill="#f0883e" fontSize="9">Reduction: Cu²⁺+2e⁻→Cu</text>
+          <rect x="335" y="112" width="32" height="82" rx="4" fill="#2d1a00" stroke="#f0883e" strokeWidth="2"/>
+          <text x="351" y="157" textAnchor="middle" fill="#f0883e" fontSize="9" fontWeight="bold">Cu</text>
+          <text x="351" y="205" textAnchor="middle" fill="#8b949e" fontSize="7">1M CuSO4</text>
+          <rect x="153" y="46" width="134" height="22" rx="10" fill="#1a1a2d" stroke="#bc8cff" strokeWidth="2"/>
+          <text x="220" y="61" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Salt Bridge (KCl)</text>
+          <line x1="89" y1="72" x2="89" y2="42" stroke="#3fb950" strokeWidth="2"/>
+          <line x1="89" y1="42" x2="351" y2="42" stroke="#58a6ff" strokeWidth="2"/>
+          <line x1="351" y1="42" x2="351" y2="72" stroke="#f0883e" strokeWidth="2"/>
+          <text x="220" y="38" textAnchor="middle" fill="#58a6ff" fontSize="9">e⁻ flow: Anode → Cathode</text>
+          <rect x="185" y="18" width="70" height="22" rx="5" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="33" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">1.10V</text>
+          <rect x="10" y="238" width="420" height="72" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="220" y="256" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Key Equations</text>
+          <text x="20" y="272" fill="#3fb950" fontSize="8">E°cell = E°cathode − E°anode = +0.34−(−0.76) = +1.10 V</text>
+          <text x="20" y="286" fill="#58a6ff" fontSize="8">Nernst: E = E° − (0.0592/n) log Q at 298K</text>
+          <text x="20" y="300" fill="#bc8cff" fontSize="8">Faraday: m = (M/nF)It | ΔG° = −nFE° = −RT ln K</text>
+        </svg>)
+    },
+    'Chemical Kinetics': {
+      title:'Rate Laws and Arrhenius Equation',
+      parts:['Rate law — rate = k[A]^m[B]^n; m, n determined experimentally (not from stoichiometry)','Zero order — rate = k; [A]t = [A]0 - kt; t½ = [A]0/2k; unit of k: mol L⁻¹ s⁻¹','First order — rate = k[A]; [A]t = [A]0e⁻ᵏᵗ; t½ = 0.693/k (constant!); unit: s⁻¹','Second order — rate = k[A]²; 1/[A]t = 1/[A]0 + kt; unit: L mol⁻¹ s⁻¹','Arrhenius equation — k = Ae⁻ᴱᵃ/ᴿᵀ; Ea = activation energy; A = frequency factor','Catalyst — Lowers Ea; provides alternate pathway; not consumed; increases reaction rate'],
+      facts:['Half-life of first order is CONSTANT (independent of initial concentration)','ln k vs 1/T graph: slope = -Ea/R; used to calculate activation energy experimentally','Rate = rate constant k × concentration product (rate changes with conc; k changes only with T)'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Chemical Kinetics</text>
+          <rect x="10" y="28" width="420" height="100" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Integrated Rate Laws and Half-lives</text>
+          {[['Order','Rate Law','t½','Unit of k'],
+            ['Zero','rate=k','[A]₀/2k','mol L⁻¹ s⁻¹'],
+            ['First','rate=k[A]','0.693/k','s⁻¹'],
+            ['Second','rate=k[A]²','1/k[A]₀','L mol⁻¹ s⁻¹'],
+          ].map((row,i)=>(
+            <g key={i}>{row.map((cell,j)=>(
+              <text key={j} x={20+j*104} y={65+i*18} fill={i===0?'#d29922':'#8b949e'} fontSize={i===0?8.5:8} fontWeight={i===0?'bold':'normal'}>{cell}</text>))}
+            </g>))}
+          {[{t:'Arrhenius Equation',col:'#3fb950',y:158,items:['k = A e^(-Ea/RT) | A = frequency factor; Ea = activation energy','ln k = ln A − Ea/RT | Slope of ln k vs 1/T = −Ea/R','Temperature increase → k increases exponentially (not linearly)']},
+            {t:'Effect of Catalyst',col:'#d29922',y:228,items:['Lowers activation energy (Ea) → more molecules have Ea','Provides alternate reaction pathway | Not consumed in reaction','Heterogeneous: different phase (Ni, Pt, V2O5) | Homogeneous: same phase']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'd and f Block Elements': {
+      title:'Transition Metals (d-Block)',
+      parts:['Variable oxidation states — Due to (n-1)d and ns electrons; Mn has +2 to +7 (most)','Coloured compounds — d-d transition absorbs visible light; colour = complementary colour seen','Magnetic properties — Paramagnetic if unpaired d electrons; Fe, Co, Ni are ferromagnetic','Catalytic activity — Variable oxidation state; surface adsorption; V2O5 (Contact), Fe (Haber)','KMnO4 — Purple; strong oxidising agent; Mn +7→+2 (acid), +4 (neutral), +6 (alkaline)','K2Cr2O7 — Orange dichromate; Cr +6→+3 in acidic medium; used in volumetric analysis'],
+      facts:['Tungsten (W): highest melting point (3422°C) among all metals','Mn has most oxidation states (+2 to +7); Cr is +2 to +6','Transition metals form complexes due to available empty d orbitals accepting lone pairs'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Transition Metals (d-Block)</text>
+          <rect x="10" y="28" width="420" height="65" rx="8" fill="rgba(0,0,0,.3)" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">Properties of d-Block Elements</text>
+          {['Variable oxidation states: (n-1)d + ns electrons available','High MP/BP (W:3422°C highest) | Hard metals | Good conductors',
+            'Coloured compounds: d-d electron transition absorbs visible light',
+            'Paramagnetic: unpaired d electrons | Ferromagnetic: Fe, Co, Ni (domain alignment)'].map((t,i)=>(<text key={i} x="20" y={63+i*11} fill="#8b949e" fontSize="7.5">{t}</text>))}
+          {[{t:'KMnO4 — Reactions',col:'#bc8cff',y:122,items:['Acid medium: MnO4⁻+8H⁺+5e⁻→Mn²⁺+4H2O (pink→colourless)','Neutral medium: MnO4⁻+2H2O+3e⁻→MnO2+4OH⁻ (brown ppt)','Alkaline medium: MnO4⁻+e⁻→MnO4²⁻ (green; uncommon)']},
+            {t:'K2Cr2O7 — Reactions',col:'#f0883e',y:192,items:['Acidic medium: Cr2O7²⁻+14H⁺+6e⁻→2Cr³⁺+7H2O (orange→green)','Oxidises: Fe²⁺, I⁻, H2S, FeSO4, ethanol, oxalic acid','Cr2O7²⁻ (orange,pH<4) ⇌ 2CrO4²⁻ (yellow,pH>6)']},
+            {t:'Important Oxidation States',col:'#3fb950',y:262,items:['Fe: +2(FeSO4) and +3(Fe2O3) | Cu: +1(Cu2O) and +2(CuSO4)','Mn: +2,+4,+6,+7 | Cr: +2,+3,+6 (most common)']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Coordination Compounds': {
+      title:'Coordination Chemistry',
+      parts:['Central metal ion — Lewis acid; accepts lone pairs from ligands','Ligands — Lewis bases; monodentate (NH3, Cl-), bidentate (en, oxalate), hexadentate (EDTA)','Coordination number — Number of donor atoms directly bonded to the central metal','IUPAC naming — Ligands before metal (alphabetically); oxidation state in Roman numerals','Crystal Field Theory — d-orbitals split in ligand field; explains colour and magnetism','Isomerism — Ionisation (different counter ions), linkage, optical, geometrical isomers'],
+      facts:['EDTA: hexadentate; forms very stable chelate complexes (chelate effect)','Spectrochemical series: I⁻ < Br⁻ < Cl⁻ < F⁻ < OH⁻ < H2O < NH3 < en < CO < CN⁻','cis-platin [Pt(NH3)2Cl2]: anticancer drug; only cis isomer is active'],
+      svg: () => (
+        <svg viewBox="0 0 440 330" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Coordination Compounds</text>
+          <circle cx="220" cy="110" r="24" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="2.5"/>
+          <text x="220" y="114" textAnchor="middle" fill="#bc8cff" fontSize="9">Co³⁺</text>
+          {[[-60,0],[60,0],[0,-50],[0,50],[-42,-42],[42,42]].map(([dx,dy],i)=>(
+            <g key={i}>
+              <line x1={220+dx*0.38} y1={110+dy*0.38} x2={220+dx*0.65} y2={110+dy*0.65} stroke="#3fb950" strokeWidth="2"/>
+              <circle cx={220+dx} cy={110+dy} r="10" fill="#1a2d1a" stroke="#3fb950" strokeWidth="1.5"/>
+              <text x={220+dx} y={113+dy} textAnchor="middle" fill="#3fb950" fontSize="7">NH3</text>
+            </g>))}
+          <text x="220" y="178" textAnchor="middle" fill="#8b949e" fontSize="9">[Co(NH3)6]³⁺ — Hexaamminecobalt(III) — octahedral</text>
+          {[{t:'IUPAC Naming Rules',col:'#bc8cff',y:205,items:['Name ligands first (alphabetically), then metal + oxidation state','Anionic ligands end in -o: Cl⁻=chlorido, CN⁻=cyano, OH⁻=hydroxido','[CoCl3(NH3)3] = triamminetrichloridocobalt(III)']},
+            {t:'Crystal Field Theory',col:'#d29922',y:270,items:['Octahedral field: d-orbitals split into t2g (lower) and eg (higher)','Large Δoct (strong field: CN⁻, CO) → low spin | Small Δoct (weak field: Cl⁻) → high spin','Spectrochemical: I⁻<Cl⁻<F⁻<OH⁻<H2O<NH3<en<CN⁻ (increasing field strength)']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Haloalkanes and Haloarenes': {
+      title:'SN1 and SN2 Mechanisms',
+      parts:['SN1 — Unimolecular; rate = k[RX]; forms carbocation intermediate; racemisation; 3° favoured','SN2 — Bimolecular; rate = k[RX][Nu]; backside attack; Walden inversion; 1° favoured','SN1 conditions — Tertiary substrate; polar protic solvent (water, alcohol); weak nucleophile','SN2 conditions — Primary substrate; polar aprotic solvent (acetone, DMSO); strong nucleophile','Grignard reagent (RMgX) — In dry ether; very reactive; used in organic synthesis','Nucleophilic aromatic substitution — Requires electron-withdrawing groups on ring'],
+      facts:['Reactivity order with nucleophile: RI > RBr > RCl > RF (C-I bond weakest)','Walden inversion in SN2: complete inversion of configuration at chiral centre','Freon (CCl2F2): refrigerant; depletes ozone layer; being phased out (Montreal Protocol)'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Haloalkanes — SN1 vs SN2</text>
+          <rect x="10" y="30" width="205" height="115" rx="8" fill="rgba(0,0,0,.3)" stroke="#f0883e" strokeWidth="2"/>
+          <text x="112" y="50" textAnchor="middle" fill="#f0883e" fontSize="10" fontWeight="bold">SN1 Mechanism</text>
+          <text x="112" y="66" textAnchor="middle" fill="#8b949e" fontSize="8">Rate = k[RX] (unimolecular)</text>
+          <text x="112" y="80" textAnchor="middle" fill="#8b949e" fontSize="8">Step 1: RX → R⁺ + X⁻ (slow)</text>
+          <text x="112" y="94" textAnchor="middle" fill="#8b949e" fontSize="8">Step 2: R⁺ + Nu → RNu (fast)</text>
+          <text x="112" y="108" textAnchor="middle" fill="#8b949e" fontSize="8">Racemisation (flat carbocation)</text>
+          <text x="112" y="122" textAnchor="middle" fill="#d29922" fontSize="8">Favoured: 3°RX, polar protic</text>
+          <rect x="225" y="30" width="205" height="115" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="327" y="50" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">SN2 Mechanism</text>
+          <text x="327" y="66" textAnchor="middle" fill="#8b949e" fontSize="8">Rate = k[RX][Nu] (bimolecular)</text>
+          <text x="327" y="80" textAnchor="middle" fill="#8b949e" fontSize="8">Single step: backside attack</text>
+          <text x="327" y="94" textAnchor="middle" fill="#8b949e" fontSize="8">Walden inversion (180° flip)</text>
+          <text x="327" y="108" textAnchor="middle" fill="#8b949e" fontSize="8">Complete inversion of config.</text>
+          <text x="327" y="122" textAnchor="middle" fill="#d29922" fontSize="8">Favoured: 1°RX, polar aprotic</text>
+          {[{t:'Reactivity Order',col:'#3fb950',y:174,items:['With Nu: 1°>2°>3° (SN2) | 3°>2°>1° (SN1)','C-X bond strength: C-F>C-Cl>C-Br>C-I (strongest to weakest)','Reactivity (rate): RI>RBr>RCl>RF (weakest bond breaks first)']},
+            {t:'Key Named Reactions',col:'#bc8cff',y:244,items:['Grignard (RMgX): dry ether; reacts with carbonyls, CO2, epoxides','Wurtz: 2RX+2Na→R-R+2NaX (new C-C bond)','Finkelstein: RCl+NaI(acetone)→RI+NaCl']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Polymers': {
+      title:'Classification of Polymers',
+      parts:['Addition polymer — Monomers add with no byproduct; polyethylene, PVC, Teflon, polystyrene','Condensation polymer — Monomers join with elimination of H2O or HCl; Nylon, Dacron, Bakelite','Nylon-6,6 — Hexamethylenediamine + adipic acid; polyamide; synthetic fibre','Bakelite — Phenol + formaldehyde; thermosetting; permanent cross-linked 3D network','Natural rubber — cis-polyisoprene; vulcanisation with 3-5% S improves elasticity and strength','Biodegradable polymers — PHBV, nylon-2-nylon-6; break down naturally in environment'],
+      facts:['PET (Dacron): polyester from ethylene glycol + terephthalic acid; bottles and fibres','Thermoplastic: can be remoulded (polyethylene, PVC) | Thermosetting: cannot be remoulded (Bakelite)','Degree of polymerisation n: number of monomer units in one polymer chain'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Polymers — Classification</text>
+          <rect x="10" y="28" width="205" height="120" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="112" y="46" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Addition Polymers</text>
+          {[['Polyethylene (LDPE/HDPE)','CH2=CH2'],['PVC','CH2=CHCl'],['Teflon (PTFE)','CF2=CF2'],['Polystyrene','C6H5CH=CH2'],['Natural rubber','isoprene (cis)']].map(([name,m],i)=>(
+            <g key={name}><text x="20" y={64+i*18} fill="#3fb950" fontSize="8" fontWeight="bold">{name}</text>
+            <text x="20" y={75+i*18} fill="#8b949e" fontSize="7">{m}</text></g>))}
+          <rect x="225" y="28" width="205" height="120" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="327" y="46" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">Condensation Polymers</text>
+          {[['Nylon-6,6','hexamethylenediamine+adipic acid'],['Nylon-6','caprolactam (ring opening)'],['Dacron/PET','ethylene glycol+terephthalic acid'],['Bakelite','phenol+formaldehyde (thermo)'],['Glyptal','ethylene glycol+phthalic acid']].map(([name,m],i)=>(
+            <g key={name}><text x="235" y={64+i*18} fill="#58a6ff" fontSize="8" fontWeight="bold">{name}</text>
+            <text x="235" y={75+i*18} fill="#8b949e" fontSize="7">{m}</text></g>))}
+          {[{t:'Classification by properties',col:'#d29922',y:180,items:['Thermoplastic: remoulded on heating (PE, PVC, polystyrene, nylon)','Thermosetting: permanent 3D network (Bakelite, melamine formaldehyde)','Elastomer: high elasticity (natural rubber, Neoprene, Buna-S, Buna-N)','Fibre: high tensile strength (nylon, Dacron, silk, cotton, wool)']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+  }
+
+  // ── PHYSICS CHAPTERS ─────────────────────────────────────────
+  const PHYS_CHAPTERS = {
+    'Physical World': {
+      title:'Fundamental Forces in Nature',
+      parts:['Gravitational — Weakest; always attractive; infinite range; F=Gm1m2/r²; holds planets in orbit','Electromagnetic — 10⁴² times gravity; infinite range; responsible for chemistry and light','Weak nuclear — Short range (~10⁻¹⁸m); responsible for β-decay and radioactivity','Strong nuclear — Strongest (10³⁸×gravity); holds protons+neutrons in nucleus; range 10⁻¹⁵m','Standard Model — Describes quarks, leptons; unified EM+weak (electroweak); excludes gravity'],
+      facts:['All forces except gravity explained by exchange of virtual particles','Graviton: hypothetical particle mediating gravity; not yet experimentally detected','String theory attempts to unify all 4 fundamental forces including gravity'],
+      svg: () => (
+        <svg viewBox="0 0 440 280" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Fundamental Forces in Nature</text>
+          {[{force:'Gravitational',rel:'1 (weakest)',range:'Infinite',col:'#d29922',y:48,desc:'Always attractive; holds planets; F=Gm1m2/r²; Newton + Einstein'},
+            {force:'Electromagnetic',rel:'10⁴²',range:'Infinite',col:'#58a6ff',y:96,desc:'Repulsive+attractive; responsible for chemistry, light, electricity'},
+            {force:'Weak Nuclear',rel:'10²⁵',range:'10⁻¹⁸ m',col:'#f0883e',y:144,desc:'Causes β-decay; radioactivity; W±, Z bosons as mediators'},
+            {force:'Strong Nuclear',rel:'10³⁸ (strongest)',range:'10⁻¹⁵ m',col:'#f85149',y:192,desc:'Holds nucleus together; gluons mediate; quarks held by colour force'},
+          ].map(({force,rel,range,col,y,desc})=>(
+            <g key={force}>
+              <rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+              <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{force}</text>
+              <text x="195" y={y} fill="#d29922" fontSize="8">Relative: {rel}</text>
+              <text x="20" y={y+14} fill="#8b949e" fontSize="8">{desc} | Range: {range}</text>
+            </g>))}
+          <rect x="10" y="228" width="420" height="42" rx="6" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="220" y="246" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Standard Model</text>
+          <text x="220" y="261" textAnchor="middle" fill="#8b949e" fontSize="8">Unifies EM + Weak + Strong | Quarks + Leptons + Gauge bosons | Gravity NOT included yet</text>
+        </svg>)
+    },
+    'Units and Measurements': {
+      title:'SI Units, Dimensions and Errors',
+      parts:['SI base units — metre (m), kilogram (kg), second (s), ampere (A), kelvin (K), mole (mol), candela (cd)','Dimensional formula — [Force]=[MLT⁻²]; [Energy]=[ML²T⁻²]; [Power]=[ML²T⁻³]','Significant figures — Non-zero digits; zeros between; trailing zeros after decimal; all are significant','Absolute error — |measured - true|; Mean absolute error = Σ|Δai|/n','Relative error — Δa/a; Percentage error = (Δa/a)×100%','Random error — Reduced by taking more readings; Systematic error — corrected by calibration'],
+      facts:['Planck constant h: [ML²T⁻¹] (same dimensions as angular momentum)','Light year: distance light travels in 1 year = 9.46×10¹⁵ m (used for astronomical distances)','Parallax method: distance = baseline/parallax angle; used to measure distances to stars'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Units, Dimensions and Measurement</text>
+          <rect x="10" y="28" width="420" height="78" rx="8" fill="rgba(0,0,0,.3)" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#d29922" fontSize="10" fontWeight="bold">SI Base Units (7)</text>
+          {[['Length','metre (m)','Mass','kilogram (kg)'],
+            ['Time','second (s)','Current','ampere (A)'],
+            ['Temperature','kelvin (K)','Amount','mole (mol)'],
+            ['Luminosity','candela (cd)','','']].map((row,i)=>(
+            <g key={i}>{row.filter(Boolean).map((item,j)=>(
+              <text key={j} x={20+j%4*108} y={62+i*16} fill={j%2===0?'#d29922':'#8b949e'} fontSize="8">{item}</text>))}</g>))}
+          {[{t:'Dimensional Formulas',col:'#3fb950',y:138,items:['[Force] = [MLT⁻²] | [Energy] = [ML²T⁻²] | [Power] = [ML²T⁻³]','[Pressure] = [ML⁻¹T⁻²] | [Planck h] = [ML²T⁻¹]','Dimensionless: strain, refractive index, all ratios']},
+            {t:'Error Analysis',col:'#58a6ff',y:204,items:['Absolute error = |measured − true| | Mean = Σ|Δai|/n','Relative error = Δa/a | Percentage = (Δa/a)×100','Addition/subtraction: add absolute errors | Multiplication: add relative errors']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Motion in a Straight Line': {
+      title:'Kinematics — 1D Motion',
+      parts:['Displacement — Vector; change in position; can be negative','Velocity — v = ds/dt (instantaneous); average v = Δs/Δt; vector quantity','Acceleration — a = dv/dt; uniform or variable; positive/negative/zero','Equations of motion — v=u+at; s=ut+½at²; v²=u²+2as; sn=u+a(2n-1)/2','Free fall — a = g = 9.8 m/s² downward; initial velocity = 0 for dropped object','Relative velocity — VAB = VA − VB; velocity of A with respect to B'],
+      facts:['Area under v-t graph = displacement | Slope of v-t graph = acceleration','Slope of x-t graph = velocity | Area under a-t graph = change in velocity','At maximum height in vertical throw: v = 0; time = u/g; height = u²/2g'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Kinematics — Equations of Motion</text>
+          <rect x="10" y="28" width="420" height="78" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#3fb950" fontSize="10" fontWeight="bold">Equations of Motion (uniform acceleration)</text>
+          {[['v = u + at','1st equation (velocity-time)'],
+            ['s = ut + ½at²','2nd equation (displacement-time)'],
+            ['v² = u² + 2as','3rd equation (velocity-displacement)'],
+            ['sn = u + a(2n-1)/2','displacement in nth second']].map(([eq,name],i)=>(
+            <g key={eq}><text x="20" y={63+i*16} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            <text x="210" y={63+i*16} fill="#8b949e" fontSize="8">{name}</text></g>))}
+          <rect x="10" y="118" width="205" height="110" rx="6" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="112" y="136" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">x-t graph</text>
+          <line x1="30" y1="218" x2="205" y2="218" stroke="#30363d" strokeWidth="1"/>
+          <line x1="30" y1="148" x2="30" y2="222" stroke="#30363d" strokeWidth="1"/>
+          <path d="M30,210 L100,190 L185,185" fill="none" stroke="#3fb950" strokeWidth="2"/>
+          <path d="M30,210 L100,175 L185,155" fill="none" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="112" y="228" textAnchor="middle" fill="#8b949e" fontSize="7">slope = velocity</text>
+          <rect x="225" y="118" width="205" height="110" rx="6" fill="rgba(0,0,0,.3)" stroke="#f0883e" strokeWidth="1.5"/>
+          <text x="327" y="136" textAnchor="middle" fill="#f0883e" fontSize="9" fontWeight="bold">v-t graph</text>
+          <line x1="245" y1="218" x2="420" y2="218" stroke="#30363d" strokeWidth="1"/>
+          <line x1="245" y1="148" x2="245" y2="222" stroke="#30363d" strokeWidth="1"/>
+          <path d="M245,205 L420,165" fill="none" stroke="#f0883e" strokeWidth="2"/>
+          <text x="327" y="228" textAnchor="middle" fill="#8b949e" fontSize="7">slope=accel; area=displacement</text>
+          <text x="220" y="258" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Free fall: a = g = 9.8 m/s² | Relative velocity: VAB = VA − VB</text>
+        </svg>)
+    },
+    'Motion in a Plane': {
+      title:'Projectile Motion',
+      parts:['Horizontal motion — Uniform velocity: x = (ucosθ)t; vx = ucosθ (constant throughout)','Vertical motion — Free fall: y = (usinθ)t − ½gt²; vy = usinθ − gt','Range — R = u²sin2θ/g; maximum at θ = 45°; same for complementary angles (30° and 60°)','Time of flight — T = 2usinθ/g','Maximum height — H = u²sin²θ/2g; independent of horizontal velocity','Circular motion — Centripetal acceleration = v²/r = ω²r; always toward centre'],
+      facts:['At maximum height: vy = 0; vx = ucosθ (unchanged); speed is minimum','Centripetal force: not a new force; provided by tension, gravity, friction etc.','Banking angle: tanθ = v²/rg without friction'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Projectile Motion</text>
+          <rect x="10" y="28" width="420" height="148" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <line x1="30" y1="168" x2="415" y2="168" stroke="#30363d" strokeWidth="1.5"/>
+          <line x1="30" y1="168" x2="30" y2="38" stroke="#30363d" strokeWidth="1.5"/>
+          <path d="M30,168 Q222,36 415,168" fill="none" stroke="#58a6ff" strokeWidth="2.5"/>
+          <line x1="30" y1="168" x2="88" y2="108" stroke="#3fb950" strokeWidth="2" markerEnd="url(#pa2)"/>
+          <text x="45" y="130" fill="#3fb950" fontSize="8" fontWeight="bold">u</text>
+          <text x="55" y="108" fill="#3fb950" fontSize="8">ucosθ→</text>
+          <line x1="222" y1="36" x2="222" y2="168" stroke="#d29922" strokeWidth="1" strokeDasharray="4,3"/>
+          <text x="225" y="102" fill="#d29922" fontSize="8">H=u²sin²θ/2g</text>
+          <text x="222" y="182" textAnchor="middle" fill="#f0883e" fontSize="8">R = u²sin2θ/g (maximum at θ=45°)</text>
+          <defs><marker id="pa2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L7,3L0,6Z" fill="#3fb950"/></marker></defs>
+          {[{t:'Key Formulas',col:'#3fb950',y:220,items:['Time of flight T = 2usinθ/g | Max height H = u²sin²θ/2g','Range R = u²sin2θ/g | R is max at θ=45°','Complementary angles give same range: R(30°)=R(60°)']},
+            {t:'Circular Motion',col:'#d29922',y:278,items:['Centripetal acceleration ac = v²/r = ω²r (toward centre)','Centripetal force = mv²/r; provided by existing forces (not extra)']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Laws of Motion': {
+      title:"Newton's Three Laws",
+      parts:['First Law (Inertia) — A body continues in its state unless acted upon by external net force','Second Law — F = ma = dp/dt; net force causes acceleration proportional to it','Third Law — Every action has equal and opposite reaction; on different bodies','Impulse — J = FΔt = Δp; area under F-t graph = change in momentum','Static friction — fs ≤ μsN; prevents relative motion; maximum just before sliding','Kinetic friction — fk = μkN; always less than maximum static friction'],
+      facts:['Inertia: resistance to change in state; measured by mass (not weight)','Pseudo force in non-inertial frame = −ma (opposite to frame acceleration)','Normal force ≠ weight for accelerating systems or inclined planes'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f0883e" fontSize="12" fontWeight="bold">Newton's Laws of Motion</text>
+          {[{law:'First Law (Inertia)',col:'#3fb950',y:52,desc:"A body at rest stays at rest; a body in motion continues at constant velocity — unless acted on by external force. Defines inertia (mass = measure of inertia)."},
+            {law:'Second Law: F = ma',col:'#58a6ff',y:104,desc:'Net force = rate of change of momentum: F = dp/dt = ma (constant mass). Impulse J = FΔt = Δp. Area under F-t graph = change in momentum.'},
+            {law:'Third Law: Action-Reaction',col:'#f0883e',y:156,desc:'Every action has an equal and opposite reaction — on DIFFERENT bodies. Example: rocket exhaust down → rocket goes up.'},
+            {law:'Friction',col:'#d29922',y:208,desc:'Static: fs ≤ μsN | Kinetic: fk = μkN (μk < μs always). Rolling < sliding < static (maximum). Friction can be in direction of motion.'},
+          ].map(({law,col,y,desc})=>(
+            <g key={law}><rect x="10" y={y-20} width="420" height="48" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y-4} fill={col} fontSize="10" fontWeight="bold">{law}</text>
+            <text x="20" y={y+10} fill="#8b949e" fontSize="8">{desc.slice(0,80)}</text>
+            <text x="20" y={y+22} fill="#8b949e" fontSize="8">{desc.slice(80)}</text></g>))}
+          <rect x="10" y="250" width="420" height="42" rx="6" fill="rgba(0,0,0,.3)" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="220" y="268" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Impulse-Momentum Theorem</text>
+          <text x="220" y="284" textAnchor="middle" fill="#8b949e" fontSize="8">J = FΔt = Δp = m(v−u) | Conservation of momentum: when net external force = 0</text>
+        </svg>)
+    },
+    'Work, Energy and Power': {
+      title:'Work, Energy and Power',
+      parts:['Work — W = F·d·cosθ; scalar; zero when F⊥d; unit: joule (J)','Kinetic energy — KE = ½mv²; depends on speed; always positive','Potential energy — Gravitational: mgh; Elastic: ½kx²; depends on configuration','Work-energy theorem — Net work done = change in KE; Wnet = ΔKE','Conservation of mechanical energy — KE + PE = constant (no friction/dissipation)','Power — P = W/t = F·v; unit: watt (1W = 1J/s); 1 hp = 746 W'],
+      facts:['Elastic collision: both momentum and KE conserved','Perfectly inelastic collision: momentum conserved; KE minimum; objects stick together','Coefficient of restitution e = speed of separation/speed of approach; 0 to 1'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Work, Energy and Power</text>
+          {[{q:'Work',eq:'W = F·d·cosθ',col:'#3fb950',y:48,note:'Zero when F⊥d (normal force on flat surface). Negative when F opposite to d.'},
+            {q:'Kinetic Energy',eq:'KE = ½mv²',col:'#58a6ff',y:90,note:'Increases when work done on object. Work-energy theorem: Wnet = ΔKE.'},
+            {q:'Potential Energy',eq:'PE = mgh  or  ½kx²',col:'#d29922',y:132,note:'Gravitational: mgh | Spring: ½kx² | Stored due to position or configuration.'},
+            {q:'Conservation',eq:'KE + PE = constant',col:'#bc8cff',y:174,note:'Only when no friction/dissipation. Non-conservative forces (friction) dissipate energy as heat.'},
+            {q:'Power',eq:'P = W/t = Fv',col:'#f0883e',y:216,note:'1 watt = 1 J/s | 1 hp = 746 W | 1 kWh = 3.6×10⁶ J (unit of electrical energy)'},
+          ].map(({q,eq,col,y,note})=>(
+            <g key={q}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{q}:</text>
+            <text x="165" y={y} fill="#3fb950" fontSize="10" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <rect x="10" y="255" width="420" height="38" rx="6" fill="rgba(0,0,0,.3)" stroke="#f85149" strokeWidth="1.5"/>
+          <text x="220" y="272" textAnchor="middle" fill="#f85149" fontSize="9" fontWeight="bold">Collisions</text>
+          <text x="220" y="286" textAnchor="middle" fill="#8b949e" fontSize="8">Elastic: momentum+KE conserved | Inelastic: momentum only | e=1 elastic; e=0 perfectly inelastic</text>
+        </svg>)
+    },
+    'Gravitation': {
+      title:'Gravitation — Newton and Kepler',
+      parts:["Newton's law — F = Gm1m2/r²; G = 6.67×10⁻¹¹ N m² kg⁻²; universal attractive force",'Gravitational field — g = GM/r²; near Earth surface g = 9.8 m/s²; decreases with altitude','Gravitational PE — U = -GMm/r; negative means bound state; increases (less negative) with r','Orbital velocity — vo = √(GM/r) ≈ 7.9 km/s (near Earth); satellites must have this speed','Escape velocity — ve = √(2GM/R) = √(2gR) ≈ 11.2 km/s; independent of mass of projectile',"Kepler's laws — 1: Ellipse; 2: Equal areas (conservation of angular momentum); 3: T² ∝ a³"],
+      facts:['Geostationary orbit: T=24h; height≈36000km; appears stationary relative to Earth','g decreases both above Earth surface (inverse square) and below surface (linear)','Black hole: escape velocity > c; Schwarzschild radius Rs = 2GM/c²'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Gravitation</text>
+          {[{q:"Newton's Law",eq:'F = Gm₁m₂/r²',col:'#d29922',y:48,note:'G=6.67×10⁻¹¹ N m² kg⁻² | Universal; always attractive; inverse square law'},
+            {q:'Orbital Velocity',eq:'vo = √(GM/r) ≈ 7.9 km/s',col:'#3fb950',y:92,note:'For near-Earth orbit | Satellite must have this speed to remain in orbit'},
+            {q:'Escape Velocity',eq:'ve = √(2gR) ≈ 11.2 km/s',col:'#f85149',y:136,note:'Minimum speed to escape Earth gravity | Independent of mass of object'},
+            {q:"Kepler's 3rd Law",eq:'T² ∝ a³',col:'#58a6ff',y:180,note:'T²/a³ = constant = 4π²/GM | Longer orbit → longer period'},
+          ].map(({q,eq,col,y,note})=>(
+            <g key={q}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{q}:</text>
+            <text x="175" y={y} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <rect x="10" y="224" width="420" height="76" rx="8" fill="rgba(0,0,0,.3)" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="220" y="242" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">Variation of g</text>
+          <text x="20" y="258" fill="#8b949e" fontSize="8">Above surface: g=GM/(R+h)² → decreases with altitude (inverse square)</text>
+          <text x="20" y="272" fill="#8b949e" fontSize="8">Below surface: g=g0(1-d/R) → decreases linearly with depth d</text>
+          <text x="20" y="286" fill="#8b949e" fontSize="8">At centre: g=0 | On poles: g slightly higher than equator (Earth is oblate)</text>
+        </svg>)
+    },
+    'Oscillations': {
+      title:'Simple Harmonic Motion (SHM)',
+      parts:['SHM definition — F = -kx; restoring force ∝ displacement; acceleration always toward equilibrium','Displacement — x = A sin(ωt + φ); A = amplitude; ω = angular frequency; φ = initial phase','Velocity — v = ω√(A² - x²); maximum at x=0 (equilibrium); zero at x=±A (extremes)','Acceleration — a = -ω²x; maximum at x=±A; zero at x=0','Simple pendulum — T = 2π√(L/g); valid for small angles (θ<15°); independent of mass','Spring-mass — T = 2π√(m/k); independent of amplitude; springs in parallel: k=k1+k2'],
+      facts:['At equilibrium: v=max, a=0, KE=max, PE=0','At extremes x=±A: v=0, a=max, KE=0, PE=max=½kA²','Resonance: driving frequency = natural frequency → maximum amplitude (potentially destructive)'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Simple Harmonic Motion</text>
+          <rect x="10" y="28" width="420" height="90" rx="8" fill="rgba(0,0,0,.3)" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#bc8cff" fontSize="10" fontWeight="bold">SHM Equations</text>
+          {[['x = A sin(ωt + φ)','displacement equation'],
+            ['v = ω√(A²-x²)','velocity (max at x=0)'],
+            ['a = -ω²x','acceleration (max at x=A)'],
+            ['T = 2π/ω = 2π√(m/k)','time period'],
+          ].map(([eq,desc],i)=>(
+            <g key={eq}><text x="20" y={63+i*16} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            <text x="240" y={63+i*16} fill="#8b949e" fontSize="8">{desc}</text></g>))}
+          <rect x="10" y="130" width="200" height="90" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="110" y="148" textAnchor="middle" fill="#58a6ff" fontSize="9" fontWeight="bold">Simple Pendulum</text>
+          <line x1="110" y1="152" x2="110" y2="205" stroke="#d29922" strokeWidth="2"/>
+          <circle cx="110" cy="210" r="10" fill="#2d2d00" stroke="#d29922" strokeWidth="2"/>
+          <text x="110" y="214" textAnchor="middle" fill="#d29922" fontSize="7">m</text>
+          <text x="110" y="213" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold" x="130" y="205">T=2π√(L/g)</text>
+          <text x="110" y="210" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">T=2π√(L/g)</text>
+          <rect x="230" y="130" width="200" height="90" rx="8" fill="rgba(0,0,0,.3)" stroke="#f0883e" strokeWidth="1.5"/>
+          <text x="330" y="148" textAnchor="middle" fill="#f0883e" fontSize="9" fontWeight="bold">Spring-Mass System</text>
+          <rect x="295" y="155" width="70" height="18" rx="4" fill="#2d1a00" stroke="#f0883e" strokeWidth="2"/>
+          <text x="330" y="168" textAnchor="middle" fill="#f0883e" fontSize="8">k (spring)</text>
+          <rect x="312" y="178" width="36" height="24" rx="4" fill="#1a1a2d" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="330" y="194" textAnchor="middle" fill="#58a6ff" fontSize="8">mass m</text>
+          <text x="330" y="215" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">T=2π√(m/k)</text>
+          <rect x="10" y="232" width="420" height="68" rx="8" fill="rgba(0,0,0,.3)" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="220" y="250" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">Energy in SHM</text>
+          <text x="20" y="266" fill="#8b949e" fontSize="8">At equilibrium (x=0): KE=max=½kA², PE=0, speed=max=Aω</text>
+          <text x="20" y="280" fill="#8b949e" fontSize="8">At extremes (x=±A): KE=0, PE=max=½kA², speed=0</text>
+          <text x="20" y="294" fill="#3fb950" fontSize="8">Total energy = ½kA² = constant throughout SHM</text>
+        </svg>)
+    },
+    'Waves': {
+      title:"Wave Motion and Young's Double Slit",
+      parts:['Transverse wave — Displacement perpendicular to propagation; light, string vibration','Longitudinal wave — Displacement parallel to propagation; sound, spring compression','Wave equation — y = A sin(kx − ωt); k = 2π/λ (wave number); ω = 2πf; v = fλ','Speed of sound — √(γP/ρ) ≈ 332 m/s at 0°C; increases with temperature','Standing waves — Nodes (zero displacement) and antinodes (maximum displacement)','Beats — Two waves of slightly different frequencies; fbeat = f1 − f2'],
+      facts:["Doppler effect: f_observed = f_source × (v±v_observer)/(v∓v_source)",'Open pipe: all harmonics present | Closed pipe: only odd harmonics','Ultrasound (>20kHz) used in medical imaging (sonography)'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Wave Motion</text>
+          <rect x="10" y="28" width="420" height="65" rx="8" fill="rgba(0,0,0,.3)" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="220" y="46" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">y = A sin(kx − ωt)</text>
+          <text x="20" y="62" fill="#8b949e" fontSize="8">k = 2π/λ (wave number) | ω = 2πf | v = fλ = ω/k</text>
+          <text x="20" y="76" fill="#8b949e" fontSize="8">Speed of sound ≈ 332 m/s at 0°C | Increases with temperature by 0.61 m/s per °C</text>
+          <rect x="10" y="105" width="420" height="70" rx="8" fill="rgba(0,0,0,.3)" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="220" y="123" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">Standing Waves</text>
+          <path d="M25,158 Q110,125 220,158 Q330,191 415,158" fill="none" stroke="#3fb950" strokeWidth="2"/>
+          <path d="M25,158 Q110,191 220,158 Q330,125 415,158" fill="none" stroke="#3fb950" strokeWidth="1.5" opacity=".5"/>
+          {[25,220,415].map(x=>(<circle key={x} cx={x} cy={158} r="4" fill="#f85149"/>))}
+          {[122.5,317.5].map(x=>(<circle key={x} cx={x} cy={158} r="4" fill="#58a6ff"/>))}
+          <text x="220" y="186" textAnchor="middle" fill="#8b949e" fontSize="8">Nodes (red,zero displacement) | Antinodes (blue,max displacement)</text>
+          {[{t:'Beats',col:'#d29922',y:212,items:['fbeat = |f1 − f2| (difference of frequencies)','Beat period = 1/fbeat | Maximum amplitude when superimposed']},
+            {t:'Doppler Effect',col:'#f0883e',y:258,items:["f' = f × (v+vo)/(v−vs) (source and observer approaching)","f' = f × (v−vo)/(v+vs) (both moving away)"]},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Electric Charges and Fields': {
+      title:'Electric Charges and Coulomb\'s Law',
+      parts:["Coulomb's law — F = kq1q2/r²; k = 9×10⁹ N m² C⁻²; vector form with unit vector",'Electric field — E = F/q0; unit N/C or V/m; superposition principle applies','Field lines — Start at positive; end at negative; tangent gives direction; density = magnitude','Gauss\'s law — Φ = Q_enclosed/ε0; useful for symmetric charge distributions','Electric dipole — Two equal and opposite charges; p = qd; torque τ = p×E in external field','Continuous charge — Linear (λ), surface (σ), volume (ρ) charge distributions'],
+      facts:['E inside a conductor = 0; all charge resides on the outer surface','E due to infinite line charge: E = λ/2πε0r','E due to infinite plane sheet: E = σ/2ε0 (uniform; independent of distance)'],
+      svg: () => (
+        <svg viewBox="0 0 420 320" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Electric Field Lines</text>
+          <circle cx="135" cy="165" r="26" fill="#1a0a0a" stroke="#f85149" strokeWidth="2.5"/>
+          <text x="135" y="169" textAnchor="middle" fill="#f85149" fontSize="18" fontWeight="bold">+</text>
+          <circle cx="285" cy="165" r="26" fill="#0a0a1a" stroke="#58a6ff" strokeWidth="2.5"/>
+          <text x="285" y="171" textAnchor="middle" fill="#58a6ff" fontSize="22" fontWeight="bold">−</text>
+          {[-70,-48,-24,0,24,48,70].map((dy,i)=>{
+            if(Math.abs(dy)<10) return <path key={i} d="M161,165 L259,165" fill="none" stroke="#f0883e" strokeWidth="1.5" opacity=".9"/>
+            return <path key={i} d={`M${161+Math.abs(dy)*0.08},${165+dy*0.38} Q${210},${165+dy} ${259-Math.abs(dy)*0.08},${165+dy*0.38}`} fill="none" stroke="#f0883e" strokeWidth="1.5" opacity={0.9-Math.abs(dy)/200}/>})}
+          {[44,80].map(r=>(<g key={r}>
+            <circle cx="135" cy="165" r={r} fill="none" stroke="#bc8cff" strokeWidth="1" strokeDasharray="4,4" opacity=".5"/>
+            <circle cx="285" cy="165" r={r} fill="none" stroke="#bc8cff" strokeWidth="1" strokeDasharray="4,4" opacity=".5"/>
+          </g>))}
+          <rect x="88" y="30" width="234" height="42" rx="8" fill="#0d1020" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="205" y="48" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">Coulomb's Law</text>
+          <text x="205" y="64" textAnchor="middle" fill="#3fb950" fontSize="11" fontWeight="bold">F = kq₁q₂/r²</text>
+          <rect x="88" y="278" width="234" height="34" rx="8" fill="#0d1020" stroke="#f0883e" strokeWidth="1.5"/>
+          <text x="205" y="294" textAnchor="middle" fill="#f0883e" fontSize="10" fontWeight="bold">E = F/q = kQ/r²</text>
+          <text x="135" y="208" textAnchor="middle" fill="#f85149" fontSize="9">+q (source)</text>
+          <text x="285" y="208" textAnchor="middle" fill="#58a6ff" fontSize="9">−q (sink)</text>
+          <text x="50" y="108" fill="#f0883e" fontSize="9">Field lines</text>
+          <text x="50" y="120" fill="#8b949e" fontSize="8">(+ to −)</text>
+          <text x="330" y="108" fill="#bc8cff" fontSize="9">Equipotential</text>
+          <text x="330" y="120" fill="#bc8cff" fontSize="9">surfaces</text>
+        </svg>)
+    },
+    'Current Electricity': {
+      title:'Electric Circuits — Ohm\'s Law and Kirchhoff',
+      parts:["Ohm's law — V = IR; resistance R = ρL/A; resistivity ρ depends on material and temperature","Kirchhoff's Current Law (KCL) — Sum of currents at any node = 0; conservation of charge","Kirchhoff's Voltage Law (KVL) — Sum of voltages around any closed loop = 0; conservation of energy","Wheatstone bridge — P/Q = R/S when balanced; no current through galvanometer; null method","Potentiometer — No current drawn from cell; compares EMFs accurately; measures internal resistance","Drift velocity — vd = I/nAe; n = electron density; very slow (~mm/s) despite fast signals"],
+      facts:['Resistivities: metals ~10⁻⁸ Ω·m; semiconductors 10⁻³ to 10³; insulators >10⁶ Ω·m','For metals: resistivity increases with temperature (positive temperature coefficient)','Power P = IV = I²R = V²/R; 1 kWh = 3.6×10⁶ J (domestic unit of electrical energy)'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Electric Circuits</text>
+          {[{q:"Ohm's Law",eq:'V = IR',col:'#58a6ff',y:48,note:'R=ρL/A | Resistivity ρ increases with T (metals); decreases with T (semiconductors)'},
+            {q:'KCL (Junction Rule)',eq:'ΣI = 0',col:'#3fb950',y:92,note:'Sum of currents at node = 0 | Consequence of conservation of electric charge'},
+            {q:'KVL (Loop Rule)',eq:'ΣV = 0',col:'#d29922',y:136,note:'Sum of EMF = sum of voltage drops in any closed loop | Conservation of energy'},
+            {q:'Wheatstone Bridge',eq:'P/Q = R/S',col:'#f0883e',y:180,note:'Balanced: no current through galvanometer | Null method; very accurate'},
+            {q:'Power',eq:'P = IV = I²R = V²/R',col:'#bc8cff',y:224,note:'Joule heating: H = I²Rt | 1 kWh = 3.6×10⁶ J | Domestic electricity unit'},
+          ].map(({q,eq,col,y,note})=>(
+            <g key={q}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{q}:</text>
+            <text x="192" y={y} fill="#3fb950" fontSize="10" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <text x="220" y="275" textAnchor="middle" fill="#8b949e" fontSize="8">Series: R=R1+R2 | Parallel: 1/R=1/R1+1/R2 | Internal resistance r: V=EMF−Ir</text>
+        </svg>)
+    },
+    'Moving Charges and Magnetism': {
+      title:'Magnetic Force and Biot-Savart Law',
+      parts:['Magnetic force — F = qv×B = qvBsinθ; zero when v∥B; maximum when v⊥B','Biot-Savart law — dB = μ0/4π × Idl×r̂/r²; analogous to Coulomb\'s law','Field at centre of circular loop — B = μ0I/2R; proportional to I, inversely to R','Ampere\'s law — ∮B·dl = μ0I_enclosed; for symmetric magnetic field distributions','Solenoid — B = μ0nI (inside); uniform field; n = turns per unit length','Cyclotron — Radius r = mv/qB; time period T = 2πm/qB (independent of speed)'],
+      facts:['Lorentz force: F = q(E + v×B); combined electric and magnetic force on charge','Galvanometer → ammeter: connect low resistance (shunt) in parallel','Galvanometer → voltmeter: connect high resistance in series'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Moving Charges and Magnetism</text>
+          {[{q:'Magnetic Force',eq:'F = qvBsinθ',col:'#58a6ff',y:48,note:'Direction: F = qv×B | Zero when v∥B | Maximum when v⊥B'},
+            {q:'Biot-Savart Law',eq:'dB = μ₀Idl×r̂/4πr²',col:'#3fb950',y:92,note:'Field due to current element | Analogous to Coulomb\'s law for charges'},
+            {q:'Circular Loop (centre)',eq:'B = μ₀I/2R',col:'#d29922',y:136,note:'Field at centre of loop | Proportional to I; inversely to radius R'},
+            {q:"Ampere's Law",eq:'∮B·dl = μ₀I',col:'#f0883e',y:180,note:'Useful for solenoids, toroids | Analogous to Gauss\'s law for E field'},
+            {q:'Solenoid (inside)',eq:'B = μ₀nI',col:'#bc8cff',y:224,note:'n = turns per metre | Uniform field inside | Zero outside ideal solenoid'},
+          ].map(({q,eq,col,y,note})=>(
+            <g key={q}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{q}:</text>
+            <text x="190" y={y} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <text x="220" y="275" textAnchor="middle" fill="#8b949e" fontSize="8">Cyclotron: r=mv/qB | T=2πm/qB (independent of speed) | Used to accelerate charged particles</text>
+        </svg>)
+    },
+    'Electromagnetic Induction': {
+      title:'Faraday\'s Laws and Electromagnetic Induction',
+      parts:["Faraday's law — EMF = -NdΦ/dt; magnetic flux Φ = B·A·cosθ; rate of change = EMF","Lenz's law — Induced current opposes the change causing it; consequence of energy conservation","Motional EMF — ε = BLv; conductor of length L moving at velocity v in field B","Self-inductance — L = NΦ/I; EMF = -LdI/dt; unit: henry (H); opposes change in current","Mutual inductance — M; EMF in coil 2 = -MdI1/dt; transformer principle","AC generator — Rotating coil in uniform B; ε = NBAωsin(ωt) = ε0sin(ωt)"],
+      facts:['Eddy currents: induced in solid conductors in changing B field; reduced by lamination','Ideal transformer: Vs/Vp = Ns/Np = Ip/Is; power input = power output','Back EMF in DC motor limits current; efficiency = back-EMF/applied-EMF'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Electromagnetic Induction</text>
+          {[{q:"Faraday's Law",eq:'EMF = −NdΦ/dt',col:'#d29922',y:48,note:'Φ = B·A·cosθ | Rate of change of flux induces EMF | N = number of turns'},
+            {q:"Lenz's Law",eq:'Opposes change',col:'#f0883e',y:92,note:'Induced current creates field opposing the change | Energy conservation'},
+            {q:'Motional EMF',eq:'ε = BLv',col:'#3fb950',y:136,note:'Conductor length L moving at v in field B | Force on charges → EMF'},
+            {q:'Self Inductance',eq:'L = NΦ/I; EMF=-LdI/dt',col:'#58a6ff',y:180,note:'L in henry (H) | Opposes change in current | Choke coil uses this'},
+            {q:'Transformer (ideal)',eq:'Vs/Vp = Ns/Np',col:'#bc8cff',y:224,note:'Step-up: Ns>Np | Step-down: Ns<Np | Power conserved: VsIs = VpIp'},
+          ].map(({q,eq,col,y,note})=>(
+            <g key={q}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{q}:</text>
+            <text x="185" y={y} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <text x="220" y="275" textAnchor="middle" fill="#8b949e" fontSize="8">Eddy currents: heating (induction cooker) | Reduced by lamination (transformer cores)</text>
+        </svg>)
+    },
+    'Alternating Current': {
+      title:'AC Circuits — LCR and Resonance',
+      parts:['AC voltage — v = Vm sinωt; Vrms = Vm/√2 = 0.707Vm; frequency f = ω/2π','Resistive circuit — I in phase with V; P = Vrms × Irms (maximum power factor = 1)','Inductive circuit — I lags V by 90°; XL = ωL; no power dissipated (wattless current)','Capacitive circuit — I leads V by 90°; XC = 1/ωC; no power dissipated','Series LCR — Z = √(R²+(XL-XC)²); phase φ = tan⁻¹((XL-XC)/R)','Resonance — XL = XC; Z = R (minimum); I = maximum; f0 = 1/2π√(LC)'],
+      facts:['Power factor cosφ = R/Z; average power P = Vrms Irms cosφ = I²R','Q factor = ω0L/R = 1/ω0CR; measures sharpness of resonance','Choke coil: high inductance, low resistance; limits AC current without much power loss'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Alternating Current — LCR Circuit</text>
+          {[{comp:'Resistor (R)',phase:'I in phase with V',X:'XR=R',col:'#3fb950',y:48,note:'Power dissipated: P = I²R = Vrms·Irms | Power factor = 1'},
+            {comp:'Inductor (L)',phase:'I lags V by 90°',X:'XL=ωL',col:'#58a6ff',y:95,note:'No power dissipated (wattless) | Induces back EMF opposing current change'},
+            {comp:'Capacitor (C)',phase:'I leads V by 90°',X:'XC=1/ωC',col:'#f0883e',y:142,note:'No power dissipated | Blocks DC; allows AC (lower XC at higher f)'},
+            {comp:'Series LCR',phase:'Depends on XL vs XC',X:'Z=√(R²+(XL-XC)²)',col:'#d29922',y:189,note:'Phase: tanφ=(XL-XC)/R | At resonance: XL=XC, Z=R, I=max'},
+          ].map(({comp,phase,X,col,y,note})=>(
+            <g key={comp}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="9" fontWeight="bold">{comp}: {phase}</text>
+            <text x="330" y={y} fill="#3fb950" fontSize="8" fontWeight="bold">{X}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <rect x="10" y="232" width="420" height="68" rx="8" fill="rgba(0,0,0,.3)" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="220" y="250" textAnchor="middle" fill="#bc8cff" fontSize="10" fontWeight="bold">Resonance in Series LCR</text>
+          <text x="20" y="266" fill="#3fb950" fontSize="9" fontWeight="bold">Resonant frequency: f₀ = 1/(2π√LC)</text>
+          <text x="20" y="281" fill="#8b949e" fontSize="8">At resonance: XL=XC; Z=R (minimum); I=Vrms/R (maximum)</text>
+          <text x="20" y="294" fill="#8b949e" fontSize="8">Q factor = ω₀L/R; Power factor cosφ=R/Z; Avg power P=Vrms·Irms·cosφ</text>
+        </svg>)
+    },
+    'Ray Optics and Optical Instruments': {
+      title:'Ray Optics — Mirrors and Lenses',
+      parts:['Mirror formula — 1/v + 1/u = 1/f; f = R/2; sign convention: distances from pole','Magnification (mirror) — m = -v/u = h\'/h; negative m means inverted image','Snell\'s law — n1 sinθ1 = n2 sinθ2; n = c/v (refractive index)','Lens formula — 1/v − 1/u = 1/f; power P = 1/f (dioptre); converging lens P > 0','Total internal reflection — Light from denser to rarer medium; angle > critical angle θc = sin⁻¹(1/n)','Lens maker equation — 1/f = (n−1)(1/R1 − 1/R2); determines focal length from geometry'],
+      facts:['Critical angle θc = sin⁻¹(n2/n1); at TIR: reflected light, no refraction','Optical fibre uses TIR principle; used in internet and medical endoscopes','Compound microscope magnification: m = −L/fo × D/fe'],
+      svg: () => (
+        <svg viewBox="0 0 440 310" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Ray Optics — Mirrors and Lenses</text>
+          {[{q:'Mirror Formula',eq:'1/v + 1/u = 1/f',col:'#3fb950',y:48,note:'f=R/2 | Concave mirror: f<0 | Convex mirror: f>0 (New Cartesian sign)'},
+            {q:"Snell's Law",eq:'n₁sinθ₁ = n₂sinθ₂',col:'#58a6ff',y:92,note:'n = c/v | Denser medium: higher n, smaller angle of refraction'},
+            {q:'Lens Formula',eq:'1/v − 1/u = 1/f',col:'#d29922',y:136,note:'Power P=1/f in dioptre | Converging: f>0,P>0 | Diverging: f<0,P<0'},
+            {q:'Lens Maker Eq.',eq:'1/f=(n−1)(1/R₁−1/R₂)',col:'#f0883e',y:180,note:'n = refractive index of lens | R1, R2 = radii of curvature of surfaces'},
+            {q:'Total Internal Reflection',eq:'θ > θc = sin⁻¹(1/n)',col:'#f85149',y:224,note:'Denser to rarer medium | Optical fibre, prism, mirage all use TIR'},
+          ].map(({q,eq,col,y,note})=>(
+            <g key={q}><rect x="10" y={y-16} width="420" height="44" rx="6" fill="rgba(0,0,0,.35)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y} fill={col} fontSize="10" fontWeight="bold">{q}:</text>
+            <text x="192" y={y} fill="#3fb950" fontSize="9" fontWeight="bold">{eq}</text>
+            <text x="20" y={y+14} fill="#8b949e" fontSize="8">{note}</text></g>))}
+          <text x="220" y="278" textAnchor="middle" fill="#8b949e" fontSize="8">Apparent depth = real depth/n | Magnification = image size/object size = v/u</text>
+        </svg>)
+    },
+    'Wave Optics': {
+      title:"Young's Double Slit Experiment",
+      parts:['Huygens principle — Every point on a wavefront acts as a source of secondary wavelets','Interference — Constructive: path difference = nλ (bright); Destructive: (2n-1)λ/2 (dark)','Fringe width — β = λD/d; increases with λ and D; decreases with d (slit separation)','Coherent sources — Must have constant phase difference; essential for stable interference','Single slit diffraction — Central maximum width = 2λD/a; minima at a sinθ = mλ','Polarisation — Transverse nature of light; Malus law: I = I0 cos²θ; Brewster: tanθp = n'],
+      facts:['Fringe width: β = λD/d; substituting monochromatic light gives coloured fringes','Thin film interference: soap bubble colours; anti-reflection coating (AR) on lenses','Angular resolution limit: 1.22λ/D (Rayleigh criterion) for circular aperture'],
+      svg: () => (
+        <svg viewBox="0 0 480 320" style={{width:'100%',height:'auto'}}>
+          <text x="240" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Young's Double Slit Experiment</text>
+          <rect x="152" y="35" width="12" height="82" rx="2" fill="#484f58" stroke="#8b949e" strokeWidth="1.5"/>
+          <rect x="152" y="137" width="12" height="28" rx="2" fill="#484f58" stroke="#8b949e" strokeWidth="1.5"/>
+          <rect x="152" y="185" width="12" height="82" rx="2" fill="#484f58" stroke="#8b949e" strokeWidth="1.5"/>
+          <text x="150" y="133" textAnchor="end" fill="#d29922" fontSize="9" fontWeight="bold">S₁</text>
+          <text x="150" y="192" textAnchor="end" fill="#d29922" fontSize="9" fontWeight="bold">S₂</text>
+          {[0,1,2,3].map(i=>(<line key={i} x1={18+i*32} y1="35" x2={18+i*32} y2="307" stroke="#58a6ff" strokeWidth="1.5" opacity=".5"/>))}
+          {[155,183].map((sy,si)=>([32,60,90,118].map(r=>(<path key={si+'-'+r} d={`M164,${sy} A${r},${r} 0 0 1 ${164+r},${sy}`} fill="none" stroke={si===0?'#58a6ff':'#f0883e'} strokeWidth="1.5" opacity={1.1-r/130}/>))))}
+          <rect x="366" y="35" width="10" height="272" fill="#1a2235" stroke="#58a6ff" strokeWidth="1.5"/>
+          {[0,1,2,3,4,5,6,7,8].map(i=>{const y=75+i*24,b=Math.abs(4-i),op=b===0?1:b===1?.7:b===2?.35:.1; return <rect key={i} x="376" y={y-10} width="18" height="20" fill="#58a6ff" opacity={op}/>})}
+          <text x="400" y="155" fill="#58a6ff" fontSize="8" fontWeight="bold">n=0 (bright)</text>
+          <text x="400" y="133" fill="#58a6ff" fontSize="8">n=±1</text>
+          <text x="400" y="178" fill="#58a6ff" fontSize="8">n=±1</text>
+          <rect x="18" y="272" width="120" height="44" rx="6" fill="#0d1a2d" stroke="#58a6ff" strokeWidth="1.5"/>
+          <text x="78" y="291" textAnchor="middle" fill="#58a6ff" fontSize="11" fontWeight="bold">β = λD/d</text>
+          <text x="78" y="308" textAnchor="middle" fill="#8b949e" fontSize="8">fringe width</text>
+        </svg>)
+    },
+    'Dual Nature of Radiation and Matter': {
+      title:'Photoelectric Effect and de Broglie',
+      parts:['Photoelectric effect — Light ejects electrons from metal surface; proved quantum nature','Einstein equation — KE_max = hf − φ (work function); threshold frequency f0 = φ/h','Key observations — Instantaneous; depends on frequency not intensity; no emission below f0','Stopping potential — eVs = KE_max = hf − φ; Vs is independent of intensity','de Broglie wavelength — λ = h/mv = h/p; all matter has wave nature','Davisson-Germer (1927) — Electron diffraction from Ni crystal; proved wave nature of electrons'],
+      facts:['Work function φ: Cs (1.9eV) < Na (2.3eV) < Al (4.1eV) < Cu (4.5eV) < W (4.5eV)','Heisenberg uncertainty: ΔxΔp ≥ h/4π; fundamental limit, NOT measurement error','Electron microscope uses de Broglie wavelength; much smaller than light → higher resolution'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#d29922" fontSize="12" fontWeight="bold">Dual Nature — Photoelectric Effect</text>
+          <rect x="10" y="28" width="420" height="78" rx="8" fill="rgba(0,0,0,.3)" stroke="#d29922" strokeWidth="2"/>
+          <text x="220" y="46" textAnchor="middle" fill="#d29922" fontSize="11" fontWeight="bold">Einstein's Photoelectric Equation</text>
+          <text x="220" y="63" textAnchor="middle" fill="#3fb950" fontSize="13" fontWeight="bold">KE_max = hf − φ</text>
+          <text x="220" y="79" textAnchor="middle" fill="#8b949e" fontSize="9">φ = work function (minimum energy to eject electron)</text>
+          <text x="220" y="95" textAnchor="middle" fill="#8b949e" fontSize="9">h = 6.626×10⁻³⁴ J·s (Planck constant)</text>
+          {[{t:'Key Observations',col:'#58a6ff',y:126,items:['Emission is instantaneous (no time delay regardless of intensity)','Depends on FREQUENCY not intensity of light','No emission below threshold frequency f0 = φ/h, however high intensity']},
+            {t:'de Broglie Wavelength',col:'#bc8cff',y:196,items:['λ = h/mv = h/p (all matter has wave nature)','Large mass → very small λ (undetectable for macroscopic objects)','Electron at 100V: λ ≈ 0.12 nm (X-ray range) → diffraction possible']},
+          ].map(({t,col,y,items})=>(
+            <g key={t}><rect x="10" y={y-14} width="420" height={items.length*14+20} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{t}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+    'Atoms': {
+      title:'Atomic Models — Bohr Model',
+      parts:["Thomson model — Plum pudding; electrons embedded in positive sphere; failed Rutherford's test","Rutherford model — Nuclear model from α-scattering (1911); most mass in tiny nucleus; unstable classically","Bohr model — Quantised orbits; En = -13.6Z²/n² eV; rn = n²×0.529/Z Å",'Energy levels — H: -13.6, -3.4, -1.51, -0.85 eV for n=1,2,3,4 respectively','Spectral series — Lyman (UV, n→1); Balmer (visible, n→2); Paschen (IR, n→3)','Rydberg formula — 1/λ = R(1/n1² − 1/n2²); R = 1.097×10⁷ m⁻¹'],
+      facts:['Lyman series: transitions to n=1 (UV region)','Balmer series: transitions to n=2 (visible light; only 4 lines observable)','Bohr model works only for hydrogen-like atoms (one electron systems)'],
+      svg: () => (
+        <svg viewBox="0 0 420 330" style={{width:'100%',height:'auto'}}>
+          <text x="210" y="16" textAnchor="middle" fill="#bc8cff" fontSize="12" fontWeight="bold">Bohr Model and Spectral Series</text>
+          <circle cx="210" cy="170" r="17" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="2.5"/>
+          <text x="210" y="168" textAnchor="middle" fill="#bc8cff" fontSize="7" fontWeight="bold">Nucleus</text>
+          <text x="210" y="178" textAnchor="middle" fill="#8b949e" fontSize="6">Z protons</text>
+          {[{r:45,col:'#f85149',n:1,E:'-13.6eV'},
+            {r:82,col:'#f0883e',n:2,E:'-3.4eV'},
+            {r:118,col:'#d29922',n:3,E:'-1.51eV'},
+            {r:152,col:'#3fb950',n:4,E:'-0.85eV'}
+          ].map(({r,col,n,E})=>(
+            <g key={n}>
+              <circle cx="210" cy="170" r={r} fill="none" stroke={col} strokeWidth="1.5" strokeDasharray="4,4" opacity=".7"/>
+              <circle cx={210+r} cy="170" r="6" fill={col} opacity=".9"/>
+              <text x="210" y={170-r-6} textAnchor="middle" fill={col} fontSize="7.5">n={n} | E={E}</text>
+            </g>))}
+          {/* Emission lines */}
+          <line x1="272" y1="125" x2="295" y2="100" stroke="#f85149" strokeWidth="2" strokeDasharray="3,2"/>
+          <text x="298" y="98" fill="#f85149" fontSize="8">Lyman (UV)</text>
+          <line x1="288" y1="156" x2="318" y2="152" stroke="#d29922" strokeWidth="2" strokeDasharray="3,2"/>
+          <text x="320" y="150" fill="#d29922" fontSize="8">Balmer (visible)</text>
+          <line x1="326" y1="165" x2="360" y2="168" stroke="#58a6ff" strokeWidth="2" strokeDasharray="3,2"/>
+          <text x="362" y="166" fill="#58a6ff" fontSize="8">Paschen (IR)</text>
+          <rect x="10" y="298" width="400" height="26" rx="6" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="210" y="315" textAnchor="middle" fill="#bc8cff" fontSize="8.5">1/λ = R(1/n₁² − 1/n₂²) | R = 1.097×10⁷ m⁻¹ | rn = n²×0.529/Z Å</text>
+        </svg>)
+    },
+    'Nuclei': {
+      title:'Nuclear Physics and Radioactive Decay',
+      parts:['Nucleus size — R = R0A^(1/3); R0 = 1.2 fm; nuclear density constant ≈ 2.3×10¹⁷ kg/m³','Binding energy — BE = Δm×c²; mass defect Δm = total nucleon masses − actual nucleus mass','Alpha decay — Emits ⁴He; A→A-4, Z→Z-2; stopped by paper; range few cm in air','Beta decay — Neutron→proton + electron + antineutrino; Z→Z+1; A unchanged; stopped by Al','Gamma decay — High energy photon; Z and A unchanged; most penetrating; stopped by Pb','Radioactive decay law — N = N0e⁻λt; t½ = 0.693/λ; Activity A = λN'],
+      facts:['BE per nucleon: maximum for Fe-56 (8.8 MeV) → most stable nucleus in nature','Nuclear fission: U-235 + n → Ba + Kr + 3n + energy; chain reaction; reactor/bomb','Nuclear fusion: H + H → He + energy; Sun; needs T ~10⁷ K (thermonuclear)'],
+      svg: () => (
+        <svg viewBox="0 0 440 320" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">Radioactive Decay — Types</text>
+          <circle cx="220" cy="120" r="42" fill="#1a0a0a" stroke="#f85149" strokeWidth="2.5"/>
+          {[[210,110],[230,110],[220,125],[208,128],[232,128],[220,100],[205,120],[235,120]].map(([x,y],i)=>(<circle key={i} cx={x} cy={y} r={i%2===0?6:5} fill={i%2===0?"#f85149":"#58a6ff"} opacity=".9"/>))}
+          <text x="220" y="175" textAnchor="middle" fill="#8b949e" fontSize="9">Parent Nucleus (Z, A)</text>
+          <path d="M178,103 L76,60" fill="none" stroke="#3fb950" strokeWidth="2.5"/>
+          <circle cx="62" cy="54" r="16" fill="#0a1a0a" stroke="#3fb950" strokeWidth="2"/>
+          <text x="62" y="58" textAnchor="middle" fill="#3fb950" fontSize="8" fontWeight="bold">⁴He</text>
+          <rect x="4" y="72" width="105" height="46" rx="6" fill="#0a1a0a" stroke="#3fb950" strokeWidth="1.5"/>
+          <text x="56" y="90" textAnchor="middle" fill="#3fb950" fontSize="9" fontWeight="bold">α-Decay</text>
+          <text x="56" y="103" textAnchor="middle" fill="#8b949e" fontSize="7">A-4, Z-2 | Paper stops</text>
+          <path d="M220,162 L220,226" fill="none" stroke="#d29922" strokeWidth="2.5"/>
+          <rect x="140" y="230" width="160" height="56" rx="6" fill="#1a1a0a" stroke="#d29922" strokeWidth="1.5"/>
+          <text x="220" y="248" textAnchor="middle" fill="#d29922" fontSize="9" fontWeight="bold">β-Decay</text>
+          <text x="220" y="262" textAnchor="middle" fill="#8b949e" fontSize="7">n→p+e⁻+ν̄; Z+1, A same</text>
+          <text x="220" y="276" textAnchor="middle" fill="#8b949e" fontSize="7">Al foil stops | +antineutrino</text>
+          <path d="M262,103 L360,60" fill="none" stroke="#bc8cff" strokeWidth="2.5"/>
+          <rect x="330" y="45" width="105" height="46" rx="6" fill="#1a0a2d" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="382" y="63" textAnchor="middle" fill="#bc8cff" fontSize="9" fontWeight="bold">γ-Decay</text>
+          <text x="382" y="77" textAnchor="middle" fill="#8b949e" fontSize="7">High energy photon</text>
+          <text x="382" y="87" textAnchor="middle" fill="#8b949e" fontSize="7">Z,A unchanged | Pb stops</text>
+          <rect x="10" y="302" width="420" height="14" rx="5" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="220" y="313" textAnchor="middle" fill="#58a6ff" fontSize="9">N=N₀e⁻λt | t½=0.693/λ | Activity A=λN | 1 Ci=3.7×10¹⁰ Bq</text>
+        </svg>)
+    },
+    'Semiconductor Electronics': {
+      title:'Semiconductor Devices',
+      parts:['Intrinsic semiconductor — Pure Si/Ge; equal electrons and holes; conductivity increases with T','p-type — Trivalent dopant (B, Al); majority carriers = holes; minority = electrons','n-type — Pentavalent dopant (P, As); majority carriers = electrons; minority = holes','p-n junction — Depletion region; built-in potential ~0.7V (Si); barrier prevents flow at rest','Forward bias — Applied voltage > barrier (0.7V for Si); conducts; depletion layer narrows','Logic gates — NOT, AND, OR, NAND, NOR; NAND and NOR are universal gates'],
+      facts:['Reverse bias: depletion region widens; reverse saturation current (~µA); breakdown at Zener V','BJT (transistor): PNP or NPN; current amplifier; IC = βIB (β = current gain 50-300)','IC (integrated circuit): millions of transistors on single silicon chip'],
+      svg: () => (
+        <svg viewBox="0 0 440 330" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">Semiconductor Electronics</text>
+          {[['Conductor',60,'#3fb950'],['Semiconductor',220,'#d29922'],['Insulator',380,'#f85149']].map(([type,cx,col],i)=>(
+            <g key={type}>
+              <text x={cx} y={52} textAnchor="middle" fill={col} fontSize="9" fontWeight="bold">{type}</text>
+              <rect x={cx-33} y={60} width="66" height="22" rx="3" fill={col} opacity=".7"/>
+              <text x={cx} y={75} textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Conduction</text>
+              {i===0&&<rect x={cx-33} y={80} width="66" height="22" rx="3" fill={col} opacity=".4"/>}
+              {i===1&&<rect x={cx-33} y={88} width="66" height="11" rx="2" fill="transparent" stroke={col} strokeWidth="1" strokeDasharray="3,2"/>}
+              {i===1&&<text x={cx} y={96} textAnchor="middle" fill={col} fontSize="6">~1eV gap</text>}
+              {i===2&&<rect x={cx-33} y={96} width="66" height="18" rx="2" fill="transparent" stroke={col} strokeWidth="1" strokeDasharray="3,2"/>}
+              {i===2&&<text x={cx} y={107} textAnchor="middle" fill={col} fontSize="6">&gt;3eV gap</text>}
+              <rect x={cx-33} y={i===0?80:i===1?108:130} width="66" height="22" rx="3" fill={col} opacity=".7"/>
+              <text x={cx} y={i===0?95:i===1?122:144} textAnchor="middle" fill="#000" fontSize="7" fontWeight="bold">Valence</text>
+            </g>))}
+          <rect x="18" y="172" width="404" height="148" rx="8" fill="rgba(0,0,0,.3)" stroke="#30363d"/>
+          <text x="220" y="190" textAnchor="middle" fill="#58a6ff" fontSize="10" fontWeight="bold">p-n Junction Diode</text>
+          <rect x="28" y="202" width="170" height="64" rx="4" fill="#2d0a0a" stroke="#f85149" strokeWidth="2"/>
+          <text x="113" y="232" textAnchor="middle" fill="#f85149" fontSize="12" fontWeight="bold">p-type</text>
+          <text x="113" y="248" textAnchor="middle" fill="#8b949e" fontSize="8">majority: holes</text>
+          <rect x="242" y="202" width="170" height="64" rx="4" fill="#0a0a2d" stroke="#58a6ff" strokeWidth="2"/>
+          <text x="327" y="232" textAnchor="middle" fill="#58a6ff" fontSize="12" fontWeight="bold">n-type</text>
+          <text x="327" y="248" textAnchor="middle" fill="#8b949e" fontSize="8">majority: electrons</text>
+          <rect x="200" y="202" width="42" height="64" fill="#1a1a1a" stroke="#bc8cff" strokeWidth="1.5"/>
+          <text x="221" y="234" textAnchor="middle" fill="#bc8cff" fontSize="7">Depletion</text>
+          <text x="221" y="245" textAnchor="middle" fill="#bc8cff" fontSize="7">region</text>
+          <text x="220" y="300" textAnchor="middle" fill="#3fb950" fontSize="8">Forward bias >0.7V (Si): conducts | Reverse: no conduction</text>
+          <text x="220" y="314" textAnchor="middle" fill="#8b949e" fontSize="8">NAND/NOR = universal gates | BJT: IC = βIB (β=50-300)</text>
+        </svg>)
+    },
+    'Communication Systems': {
+      title:'Communication Systems',
+      parts:['Modulation — AM (amplitude), FM (frequency), PM (phase); needed to transmit audio on carrier','AM bandwidth — 2fm; FM bandwidth = 2(Δf + fm); FM has better noise immunity','Ground wave — Along Earth surface; MF band (0.3-3 MHz); limited range by absorption','Sky wave — Reflects off ionosphere; HF (3-30 MHz); long distance communication','Space wave — Line of sight; VHF, UHF, microwave; satellite; needs repeaters','Optical fibre — TIR based; high bandwidth; low loss; no EM interference; secure data'],
+      facts:['Ionosphere layers: D (60-90km), E (100-130km), F1+F2 (160-400km) reflect HF','Range of TV transmission: d = √(2hR) where h = antenna height, R = Earth radius','Mobile network: hexagonal cells; frequency reuse; base station; handoff between cells'],
+      svg: () => (
+        <svg viewBox="0 0 440 300" style={{width:'100%',height:'auto'}}>
+          <text x="220" y="16" textAnchor="middle" fill="#3fb950" fontSize="12" fontWeight="bold">Communication Systems</text>
+          {[{type:'Modulation',col:'#3fb950',y:48,items:['AM: carrier amplitude varies with message | FM: carrier frequency varies','AM bandwidth = 2fm | FM: better noise immunity than AM','Modulation needed: audio (20Hz-20kHz) cannot travel as EM wave directly']},
+            {type:'Propagation Modes',col:'#58a6ff',y:118,items:['Ground wave: along Earth surface | MF band (0.3-3 MHz) | Limited by absorption','Sky wave: reflects off ionosphere | HF (3-30 MHz) | Long distance; day-night variation','Space wave: line of sight | VHF+ | Satellite; microwave links; TV broadcasting']},
+            {type:'Modern Communication',col:'#bc8cff',y:196,items:['Optical fibre: TIR; high bandwidth (THz); very low loss; no EM interference','Mobile: hexagonal cells; 4G (LTE); 5G (mmWave, 1 Gbps)','Satellite: geostationary (36000km,24h) for TV/GPS; LEO (500-2000km) for internet']},
+          ].map(({type,col,y,items})=>(
+            <g key={type}><rect x="10" y={y-14} width="420" height={items.length*14+22} rx="7" fill="rgba(0,0,0,.3)" stroke={col} strokeWidth="1.5"/>
+            <text x="20" y={y+2} fill={col} fontSize="10" fontWeight="bold">{type}</text>
+            {items.map((item,j)=><text key={j} x="20" y={y+16+j*14} fill="#8b949e" fontSize="8">• {item}</text>)}</g>))}
+        </svg>)
+    },
+  }
+
+  // ── UI RENDERING ─────────────────────────────────────────────
   const subjects = {
-    bio:  {label:'Biology',   icon:'🧬', color:'var(--bio)',  class11: SYLLABUS.biology[11],   class12: SYLLABUS.biology[12]},
-    chem: {label:'Chemistry', icon:'⚗️', color:'var(--chem)', class11: SYLLABUS.chemistry[11], class12: SYLLABUS.chemistry[12]},
-    phys: {label:'Physics',   icon:'⚛️', color:'var(--phys)', class11: SYLLABUS.physics[11],   class12: SYLLABUS.physics[12]},
+    bio:  {label:'Biology',   icon:'🧬', color:'var(--bio)',  chapters11: SYLLABUS.biology[11],   chapters12: SYLLABUS.biology[12],   map: BIO_CHAPTERS},
+    chem: {label:'Chemistry', icon:'⚗️', color:'var(--chem)', chapters11: SYLLABUS.chemistry[11], chapters12: SYLLABUS.chemistry[12], map: CHEM_CHAPTERS},
+    phys: {label:'Physics',   icon:'⚛️', color:'var(--phys)', chapters11: SYLLABUS.physics[11],   chapters12: SYLLABUS.physics[12],   map: PHYS_CHAPTERS},
   }
-  const subColor = subjects[activeSub].color
+  const sub = subjects[activeSub]
+  const subColor = sub.color
 
   return (
     <div className="page fade-in">
       <div style={{marginBottom:20}}>
         <h1 style={{fontFamily:'Space Grotesk,sans-serif',fontSize:22,fontWeight:700,marginBottom:4}}>3D Diagrams — Chapter Wise</h1>
-        <p style={{fontSize:13,color:'var(--text2)'}}>Every chapter has its own NCERT-based diagram with labeled parts and key NEET facts</p>
+        <p style={{fontSize:13,color:'var(--text2)'}}>Every NCERT chapter has its own unique diagram with labeled parts and key NEET facts</p>
       </div>
 
+      {/* Subject tabs */}
       <div className="tabs" style={{marginBottom:20}}>
         {[['bio','Biology'],['chem','Chemistry'],['phys','Physics']].map(([k,l])=>(
           <div key={k} className={"tab"+(activeSub===k?" active":"")}
@@ -3005,6 +3976,7 @@ const DiagramsPage = ({setPage, logActivity}) => {
         ))}
       </div>
 
+      {/* ── DIAGRAM DETAIL VIEW ── */}
       {activeItem ? (
         <div className="fade-in">
           <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center'}}>
@@ -3012,21 +3984,23 @@ const DiagramsPage = ({setPage, logActivity}) => {
             <span style={{fontSize:13,color:'var(--text3)'}}>{activeChapter}</span>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,alignItems:'start'}}>
-            <div className="card" style={{borderTop:"3px solid "+subColor}}>
+            <div className="card" style={{borderTop:`3px solid ${subColor}`}}>
               <div style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:16,marginBottom:4,color:subColor}}>{activeItem.title}</div>
               <div style={{fontSize:12,color:'var(--text3)',marginBottom:12}}>Chapter: {activeChapter}</div>
-              <activeItem.SvgC/>
+              <activeItem.svg/>
             </div>
             <div>
               <div className="card" style={{marginBottom:14}}>
                 <div style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:14,marginBottom:12}}>Labeled Parts</div>
                 {activeItem.parts.map((p,i)=>{
-                  const [name,...rest]=p.split(' - '); const desc=rest.join(' - ').trim()
+                  const dash = p.indexOf(' — ')
+                  const name = dash>-1 ? p.slice(0,dash) : p
+                  const desc = dash>-1 ? p.slice(dash+3) : ''
                   return (
                     <div key={i} style={{display:'flex',alignItems:'flex-start',gap:8,padding:'7px 0',borderBottom:i<activeItem.parts.length-1?'1px solid var(--border)':'none'}}>
                       <span style={{width:22,height:22,borderRadius:'50%',background:subColor,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,flexShrink:0,marginTop:1}}>{i+1}</span>
                       <div>
-                        <div style={{fontWeight:600,fontSize:13,color:subColor}}>{name.trim()}</div>
+                        <div style={{fontWeight:600,fontSize:13,color:subColor}}>{name}</div>
                         {desc&&<div style={{fontSize:12,color:'var(--text2)',marginTop:2,lineHeight:1.5}}>{desc}</div>}
                       </div>
                     </div>
@@ -3046,33 +4020,35 @@ const DiagramsPage = ({setPage, logActivity}) => {
           </div>
         </div>
 
+      /* ── CHAPTER DIAGRAM LIST ── */
       ) : activeChapter ? (
         <div className="fade-in">
           <button className="btn btn-ghost btn-sm" style={{marginBottom:16}} onClick={()=>setActiveChapter(null)}>← All Chapters</button>
           <h2 style={{fontFamily:'Space Grotesk,sans-serif',fontSize:18,fontWeight:700,color:subColor,marginBottom:4}}>{activeChapter}</h2>
-          <p style={{fontSize:13,color:'var(--text3)',marginBottom:20}}>Diagrams for this chapter</p>
-          <div className="grid-3">
-            {(CHAPTER_DIAGRAMS[activeChapter]||[]).map((d,i)=>(
-              <div key={i} className="card" style={{cursor:'pointer',borderLeft:"3px solid "+subColor}}
-                onClick={()=>{setActiveItem(d);if(logActivity)logActivity("Viewed Diagram: "+d.title,activeChapter)}}>
-                <div style={{padding:'12px 0',textAlign:'center'}}><d.SvgC/></div>
-                <div style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:14,color:subColor,marginBottom:4}}>{d.title}</div>
-                <div style={{fontSize:12,color:'var(--text3)',marginBottom:10}}>{d.parts.length} labeled parts • {d.facts.length} NEET facts</div>
+          <p style={{fontSize:13,color:'var(--text3)',marginBottom:20}}>Click to study the diagram</p>
+          {sub.map[activeChapter] ? (
+            <div className="grid-3">
+              <div className="card" style={{cursor:'pointer',borderLeft:`3px solid ${subColor}`}}
+                onClick={()=>{setActiveItem(sub.map[activeChapter]);if(logActivity)logActivity('Viewed Diagram: '+sub.map[activeChapter].title,activeChapter)}}>
+                <div style={{padding:'10px 0',textAlign:'center'}}><sub.map[activeChapter].svg/></div>
+                <div style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:14,color:subColor,marginBottom:4}}>{sub.map[activeChapter].title}</div>
+                <div style={{fontSize:12,color:'var(--text3)',marginBottom:10}}>{sub.map[activeChapter].parts.length} labeled parts • {sub.map[activeChapter].facts.length} NEET facts</div>
                 <button className="btn btn-primary btn-sm" style={{width:'100%'}}>Study Diagram →</button>
               </div>
-            ))}
-            {(!CHAPTER_DIAGRAMS[activeChapter]||CHAPTER_DIAGRAMS[activeChapter].length===0)&&(
-              <div className="card" style={{textAlign:'center',padding:40,color:'var(--text3)',gridColumn:'1/-1'}}>
-                <div style={{fontSize:40,marginBottom:12}}>🔬</div>
-                <div style={{fontWeight:600}}>Diagram coming soon</div>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="card" style={{textAlign:'center',padding:40,color:'var(--text3)'}}>
+              <div style={{fontSize:40,marginBottom:12}}>🔬</div>
+              <div style={{fontWeight:600,marginBottom:8}}>Diagram coming soon</div>
+              <div style={{fontSize:13}}>This chapter's diagram is being prepared</div>
+            </div>
+          )}
         </div>
 
+      /* ── CHAPTER GRID ── */
       ) : (
         <>
-          {[{label:'Class 11',chapters:subjects[activeSub].class11},{label:'Class 12',chapters:subjects[activeSub].class12}].map(({label,chapters})=>(
+          {[{label:'Class 11', chapters: sub.chapters11},{label:'Class 12', chapters: sub.chapters12}].map(({label,chapters})=>(
             <div key={label} style={{marginBottom:28}}>
               <div style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:15,color:subColor,marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
                 <span style={{width:28,height:28,borderRadius:6,background:subColor,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700}}>{label.split(' ')[1]}</span>
@@ -3080,15 +4056,17 @@ const DiagramsPage = ({setPage, logActivity}) => {
               </div>
               <div className="grid-3">
                 {chapters.map((ch,i)=>{
-                  const diags=CHAPTER_DIAGRAMS[ch]||[]
+                  const hasdiag = !!sub.map[ch]
                   return (
-                    <div key={i} className="card" style={{cursor:'pointer',borderLeft:"3px solid "+subColor}}
+                    <div key={i} className="card" style={{cursor:'pointer',borderLeft:`3px solid ${subColor}`,opacity:hasdiag?1:0.7}}
                       onClick={()=>setActiveChapter(ch)}>
                       <div style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:600,fontSize:13,color:subColor,marginBottom:6}}>{ch}</div>
                       <div style={{fontSize:12,color:'var(--text3)',marginBottom:10}}>
-                        {diags.length} diagram{diags.length!==1?'s':''} available
+                        {hasdiag ? `${sub.map[ch].parts.length} parts • ${sub.map[ch].facts.length} facts` : 'Diagram available'}
                       </div>
-                      <button className="btn btn-primary btn-sm" style={{width:'100%',fontSize:11}}>View Diagrams →</button>
+                      <button className="btn btn-primary btn-sm" style={{width:'100%',fontSize:11}}>
+                        {hasdiag ? 'View Diagram →' : 'Coming soon'}
+                      </button>
                     </div>
                   )
                 })}
@@ -3100,6 +4078,7 @@ const DiagramsPage = ({setPage, logActivity}) => {
     </div>
   )
 }
+
 
 
 
